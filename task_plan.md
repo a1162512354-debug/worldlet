@@ -1,7 +1,32 @@
 # Task Plan: 独立酒馆前端
 
-> **给 AI**：请先读完本文件，再读 `findings.md`（废案分析）、`progress.md`（改动日志）。
-> 本文件是你的"磁盘工作记忆"，丢失上下文后重新读取即可恢复。
+---
+
+## ⚠️ 恢复上下文指引（给 AI）
+
+> **如果你是新会话的 AI，请按以下步骤操作：**
+>
+> 1. 读取本文件 `task_plan.md`（主规划）
+> 2. 读取 `findings.md`（废案分析、技术发现）
+> 3. 读取 `progress.md`（改动日志）
+> 4. 查看 `Current Phase` 确定当前进度
+> 5. 执行 `Current Phase` 中标记为 `[ ]` 的任务
+> 6. 每完成一个任务，更新本文件并推送到 Git
+>
+> **5-Question 快速恢复**：
+> | 问题 | 答案来源 |
+> |------|---------|
+> | 我在哪？ | 本文件 `Current Phase` |
+> | 要去哪？ | 本文件 `Phases` 中 `pending` 的任务 |
+> | 目标是什么？ | 本文件 `Goal` |
+> | 学到了什么？ | `findings.md` |
+> | 做了什么？ | `progress.md` |
+>
+> **Git 仓库**：`https://github.com/a1162512354-debug/worldlet.git`
+> **项目目录**：`D:\酒馆\独立前端`
+> **每次修改都需要推送**
+
+---
 
 ## Goal
 构建一个**独立于 SillyTavern**、可正常游玩的类酒馆前端，兼容 SillyTavern 的世界书/用户/变量/预设格式，**仅保留游戏模式**（RPG 终端风格），未来适配 Android/iOS/Win 多平台。
@@ -11,7 +36,7 @@
 - **每次修改都需要推送**
 
 ## Current Phase
-Phase 0 — 规划阶段
+Phase 0 — 规划阶段（已基本完成，待确认后进入 Phase 1）
 
 ## 项目目录
 `D:\酒馆\独立前端`
