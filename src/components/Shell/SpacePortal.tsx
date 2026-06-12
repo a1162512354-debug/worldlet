@@ -7,7 +7,7 @@ import { VariablesModal } from '../SillyTavern/VariablesModal'
 import { Toast } from '../SillyTavern/Toast'
 import { useSillytavern } from '../../hooks/useSillytavern'
 
-type PortalPage = 'home' | 'sessions' | 'chat' | 'library' | 'settings'
+type PortalPage = 'home' | 'sessions' | 'chat' | 'workshop' | 'library' | 'settings'
 
 const CARDS: Array<{
   page: Exclude<PortalPage, 'home'>
@@ -34,17 +34,17 @@ const CARDS: Array<{
     ],
   },
   {
-    page: 'chat',
-    title: 'Terminal',
-    tag: 'RPG::02',
-    stream: 'LIVE // STORY_CHANNEL',
-    label: '对话终端',
-    desc: '剧情正文、选项点选、自由输入与变量快照。',
+    page: 'workshop',
+    title: 'Workshop',
+    tag: 'MOD::02',
+    stream: 'BUILD // SCENARIO_FORGE',
+    label: '创意工坊',
+    desc: '后续用于开局模板、变量结构和展示面板创作。',
     cut: 'cut-tl',
     rows: [
-      { label: 'Stream', value: 'READY', accent: true },
-      { label: 'XML', value: 'PARSED' },
-      { label: 'Vars', value: 'SYNC' },
+      { label: 'Scenario', value: 'NEXT', accent: true },
+      { label: 'Schema', value: 'PLAN' },
+      { label: 'Panel', value: 'FORGE' },
     ],
   },
   {
@@ -79,7 +79,7 @@ const CARDS: Array<{
 
 export function SpacePortal() {
   const st = useSillytavern()
-  const [page, setPage] = useState<PortalPage>(st.activeChat ? 'chat' : 'home')
+  const [page, setPage] = useState<PortalPage>('home')
   const [activeCard, setActiveCard] = useState<Exclude<PortalPage, 'home'>>('sessions')
   const [mouse, setMouse] = useState({ x: 0, y: 0, clientX: 0, clientY: 0 })
   const [clock, setClock] = useState(() => new Date().toTimeString().slice(0, 8))
@@ -239,6 +239,7 @@ export function SpacePortal() {
                 </div>
               )}
               {page === 'library' && <LibraryPage onOpenLorebooks={st.openLorebooks} onOpenPresets={st.openPresets} onOpenVariables={st.openVariables} />}
+              {page === 'workshop' && <WorkshopLanding />}
               {page === 'settings' && <SettingsLanding onOpenSettings={st.openSettings} />}
             </div>
           )}
@@ -344,6 +345,22 @@ function LibraryPage({ onOpenLorebooks, onOpenPresets, onOpenVariables }: { onOp
   )
 }
 
+function WorkshopLanding() {
+  return (
+    <div className="launcher-grid">
+      <div className="launcher-panel">
+        <h2>创意工坊</h2>
+        <p>这里将和后续 MOD 工坊阶段一起实现：开局模板、变量结构编辑器、自定义展示面板与导入导出。</p>
+        <button className="primary-command" disabled>等待 Phase 3 实现</button>
+      </div>
+      <div className="launcher-panel">
+        <h2>规划目标</h2>
+        <p>把废案中的 MOD 工坊重新定位为“可视化开局创作工具”，避免迁移旧 Agent 生成逻辑。</p>
+      </div>
+    </div>
+  )
+}
+
 function SettingsLanding({ onOpenSettings }: { onOpenSettings: () => void }) {
   return (
     <div className="launcher-grid">
@@ -379,6 +396,7 @@ function panelTitle(page: PortalPage) {
   if (page === 'sessions') return '会话'
   if (page === 'chat') return '对话终端'
   if (page === 'library') return '资料库'
+  if (page === 'workshop') return '创意工坊'
   if (page === 'settings') return '设置'
   return '核心'
 }
@@ -387,6 +405,7 @@ function panelSubtitle(page: PortalPage) {
   if (page === 'sessions') return 'SESSION SELECTOR'
   if (page === 'chat') return 'LIVE STORY CHANNEL'
   if (page === 'library') return 'LORE / PRESET / VARS'
+  if (page === 'workshop') return 'SCENARIO WORKSHOP'
   if (page === 'settings') return 'CONFIGURATION'
   return 'IDLE'
 }
