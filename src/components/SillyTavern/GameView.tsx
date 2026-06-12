@@ -4,12 +4,6 @@ import { useSillytavern } from '../../hooks/useSillytavern';
 import { ThinkingFold } from './ThinkingFold';
 import { MainTextPane } from './MainTextPane';
 import { OptionList } from './OptionList';
-import { HistoryDrawer } from './HistoryDrawer';
-
-function Badge({ count }: { count: number }) {
-  if (count <= 0) return null;
-  return <span className="space-badge">{count}</span>;
-}
 
 function MessageBubble({ message }: { message: ChatMessage }) {
   const isUser = message.role === 'user';
@@ -43,7 +37,6 @@ function MessageBubble({ message }: { message: ChatMessage }) {
 
 export function GameView() {
   const st = useSillytavern();
-  const [historyOpen, setHistoryOpen] = useState(false);
   const [draft, setDraft] = useState('');
   const endRef = useRef<HTMLDivElement | null>(null);
 
@@ -52,10 +45,6 @@ export function GameView() {
     () => [...messages].reverse().find(m => m.role === 'assistant'),
     [messages],
   );
-
-  const lorebookCount = st.settings?.activeLorebookIds?.length ?? 0;
-  const messageCount = messages.length;
-  const variableCount = Object.keys(st.activeChat?.variables ?? {}).length;
 
   const isStreaming = st.streamState.isStreaming;
   const display = isStreaming
@@ -80,22 +69,6 @@ export function GameView() {
 
   return (
     <div className="st-gameview">
-      <div className="chat-toolbar">
-        <button onClick={() => setHistoryOpen(true)}>
-          ☰ 历史<Badge count={messageCount} />
-        </button>
-        <button onClick={() => st.openSettings()}>⚙ 设置</button>
-        <button onClick={() => st.openLorebooks()}>
-          📖 世界书<Badge count={lorebookCount} />
-        </button>
-        <button onClick={() => st.openPresets()}>✦ 预设</button>
-        <button onClick={() => st.openVariables()}>
-          📊 变量<Badge count={variableCount} />
-        </button>
-        <button disabled={!lastAssistant || isStreaming} onClick={() => void st.regenerateLast()}>↻ 重 roll</button>
-        {isStreaming && <button onClick={st.abortStream}>停止</button>}
-      </div>
-
       <div className="st-message-list">
         {messages.map((message) => <MessageBubble key={message.id} message={message} />)}
         {isStreaming && (
@@ -141,13 +114,24 @@ export function GameView() {
           disabled={isStreaming}
         />
         <div className="space-chat-actions">
+          <button
+            className="space-input-action-button"
+            disabled={!lastAssistant || isStreaming}
+            onClick={() => void st.regenerateLast()}
+            title="重 roll"
+          >
+            ↻ 重 roll
+          </button>
+          {isStreaming && (
+            <button className="space-input-action-button" onClick={st.abortStream} title="停止">
+              停止
+            </button>
+          )}
           <button className="space-icon-button" disabled={isStreaming || !draft.trim()} onClick={sendDraft} title="发送">
             ➤
           </button>
         </div>
       </div>
-
-      {historyOpen && <HistoryDrawer onClose={() => setHistoryOpen(false)} />}
     </div>
   );
 }

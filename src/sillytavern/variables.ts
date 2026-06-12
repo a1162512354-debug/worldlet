@@ -35,6 +35,19 @@ export function formatVariablesForPrompt(variables: Record<string, string | numb
 
 export const USER_ROLE = 'user' as const;
 
+function cloneVariables<T extends Record<string, any>>(variables: T): T {
+  return JSON.parse(JSON.stringify(variables));
+}
+
+function variablesAtMessage(chat: ChatSession, index: number): Record<string, any> {
+  for (let i = index; i >= 0; i -= 1) {
+    const message = chat.messages[i];
+    if (message.variablesAfter) return cloneVariables(message.variablesAfter);
+    if (message.variables) return cloneVariables(message.variables);
+  }
+  return {};
+}
+
 /** Truncate chat at message index and restore variables from the last remaining message (or provided snapshot). */
 export function truncateChatAt(
   chat: ChatSession,
@@ -42,7 +55,7 @@ export function truncateChatAt(
   variables?: Record<string, string | number>
 ): ChatSession {
   const truncated = chat.messages.slice(0, index);
-  const restoredVars = variables ?? truncated[truncated.length - 1]?.variables ?? {};
+  const restoredVars = variables ? cloneVariables(variables) : variablesAtMessage(chat, index - 1);
   return { ...chat, messages: truncated, variables: restoredVars, updatedAt: Date.now() };
 }
 
@@ -65,7 +78,7 @@ export function branchChat(
     userName: source.userName,
     presetId: options.presetId,
     lorebookIds: [...options.lorebookIds],
-    variables: options.variables ?? source.messages[index].variables ?? {},
+    variables: options.variables ? cloneVariables(options.variables) : variablesAtMessage(source, index),
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };
@@ -103,11 +116,29 @@ export function aggregateEvents(events: ParserEvent[]): ParsedTags {
   return parsed;
 }
 
+export function buildImplicitVarsMessages(
+  storyText: string,
+  currentVariables: Record<string, any>,
+): Array<{ role: 'system' | 'user'; content: string }> {
+  return [
+    {
+      role: 'system',
+      content: '你是变量提取器。根据剧情正文推断当前变量变化，只输出 JSON 对象；没有明确变化则输出 {}。不要解释，不要 Markdown。',
+    },
+    {
+      role: 'user',
+      content: `当前变量：\n${JSON.stringify(currentVariables)}\n\n剧情正文：\n${storyText}`,
+    },
+  ];
+}
+
 export function applyParsedToChat(
   current: Record<string, any>,
   parsed: ParsedTags,
+  implicitUpdates: Record<string, any> = {},
 ): { nextVariables: Record<string, any>; snapshot: Record<string, any> } {
-  const next = applyVarsPatch(current, parsed.varsCommands);
+  const explicitNext = applyVarsPatch(current, parsed.varsCommands);
+  const next = applyVarsPatch(explicitNext, { merge: implicitUpdates });
   const snapshot = JSON.parse(JSON.stringify(next));
   return { nextVariables: next, snapshot };
 }

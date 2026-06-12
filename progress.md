@@ -86,3 +86,19 @@
 - `npm run build` ✅（仍有 `INEFFECTIVE_DYNAMIC_IMPORT` 提示，不阻塞构建）
 - `npm test` ✅：7 个测试文件 / 41 个测试
 - `npm run dev -- --host 127.0.0.1` ✅：5173 被占用时自动启动在 `http://127.0.0.1:5174/`
+
+### Phase 2 核心验证补强 - 2026-06-13
+
+#### 完成
+- 创建隔离 worktree：`D:\酒馆\独立前端\.claude\worktrees\phase2-core-validation`，分支 `worktree-phase2-core-validation`。
+- 基线验证通过：`npm install`、`npm run typecheck`、`npm run build`、`npm test`。
+- 变量快照 helper 补强：`truncateChatAt` / `branchChat` 优先使用 `variablesAfter` 快照，确保回档/分支恢复 AI 回复后的完整变量状态。
+- 预设管理补强：新增批量导入预设、预设重命名、预设导出 JSON；`PresetModal` 增加“导入 JSON / 重命名 / 导出”入口。
+- 消息分支入口补强：`useSillytavern` 新增 `branchFromMessage`，`HistoryDrawer` 增加“分支”按钮，创建分支后自动切换到新会话。
+- 隐式变量提取补强：dual API 且 secondary enabled 时，剧情回复完成后调用 `vars` 任务，要求 AI 只输出 JSON 对象，并在显式 `<vars>` 后合并隐式更新；失败时保留显式变量并提示。
+- 新增/扩展测试：`importer.test.ts` 覆盖批量预设导入/重命名；`variables.test.ts` 覆盖快照恢复、分支变量、显式+隐式变量合并、隐式提取提示词。
+
+#### 验证
+- `npm run typecheck` ✅
+- `npm run build` ✅（仍有 `INEFFECTIVE_DYNAMIC_IMPORT` 提示，不阻塞构建）
+- `npm test` ✅：7 个测试文件 / 47 个测试

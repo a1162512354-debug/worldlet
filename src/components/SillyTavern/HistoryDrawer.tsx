@@ -23,6 +23,7 @@ export function HistoryDrawer({ onClose }: { onClose: () => void }) {
                 <div className="history-floor-actions">
                   <button onClick={() => { void st.jumpToFloor(m.id); onClose(); }}>跳转</button>
                   <button onClick={() => { const t = prompt('编辑内容', m.content); if (t != null) void st.editMessage(m.id, t); }}>编辑</button>
+                  <button onClick={() => { void st.branchFromMessage(m.id); onClose(); }}>分支</button>
                   <button onClick={() => void st.rollbackTo(m.id)}>删后续</button>
                 </div>
               </li>

@@ -3,6 +3,7 @@ import type { ChatPreset } from '../../sillytavern/types';
 import { useSillytavern } from '../../hooks/useSillytavern';
 import { PromptOrderEditor, type PromptOrderItem } from './PromptOrderEditor';
 import { clampNumber } from '../../sillytavern/editor-utils';
+import { exportPreset, exportToJson, importMultiplePresets, renamePreset } from '../../sillytavern/importer';
 
 const TABS = ['sampling', 'prompts', 'custom', 'order'] as const;
 type Tab = typeof TABS[number];
@@ -135,6 +136,7 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
     updateSettings,
     updatePreset,
     deletePreset,
+    addPreset,
     addPresetFromDefault,
   } = useSillytavern();
 
@@ -205,6 +207,50 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
     setDraft(remaining[0] ?? null);
   };
 
+  const handleImportPresets = async (files: File[]) => {
+    if (files.length === 0) return;
+    try {
+      const inputs = await Promise.all(
+        files.map(async (file) => ({ fileName: file.name, json: JSON.parse(await file.text()) })),
+      );
+      const { successes, failures } = importMultiplePresets(inputs);
+      let lastImported: ChatPreset | null = null;
+      for (const item of successes) {
+        const preset: ChatPreset = {
+          ...item.preset,
+          id: crypto.randomUUID(),
+          createdAt: Date.now(),
+          updatedAt: Date.now(),
+        };
+        await addPreset(preset);
+        lastImported = preset;
+      }
+      if (lastImported) {
+        setSelectedId(lastImported.id);
+        setDraft(lastImported);
+      }
+      if (failures.length > 0) {
+        alert('导入失败：\n' + failures.map((f) => `${f.fileName}: ${f.error}`).join('\n'));
+      }
+    } catch (e) {
+      alert('导入失败: ' + (e as Error).message);
+    }
+  };
+
+  const handleRename = async () => {
+    if (!draft) return;
+    const nextName = prompt('新名称', draft.name);
+    if (!nextName || nextName === draft.name) return;
+    const renamed = renamePreset(draft, nextName);
+    await updatePreset(renamed);
+    setDraft(renamed);
+  };
+
+  const handleExport = () => {
+    if (!draft) return;
+    exportToJson(exportPreset(draft), `${draft.name || 'preset'}.json`);
+  };
+
   const handleAddCustomPrompt = () => {
     if (!draft) return;
     const current = (draft.settings.prompts ?? []) as CustomPromptItem[];
@@ -224,9 +270,24 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
       <div className="legacy-modal-shell wide" onClick={(e) => e.stopPropagation()}>
         <header className="legacy-modal-header">
           <strong>预设管理</strong>
+          <label style={{ cursor: 'pointer' }}>
+            <input
+              type="file"
+              multiple
+              accept=".json,application/json"
+              style={{ display: 'none' }}
+              onChange={(event) => {
+                void handleImportPresets(Array.from(event.target.files ?? []));
+                event.target.value = '';
+              }}
+            />
+            导入 JSON
+          </label>
           <button onClick={handleNewPreset}>+ 新建</button>
           {draft && (
             <>
+              <button onClick={handleRename}>重命名</button>
+              <button onClick={handleExport}>导出</button>
               <button onClick={handleActivate} disabled={settings?.activePresetId === draft.id}>
                 {settings?.activePresetId === draft.id ? '当前已激活' : '设为激活'}
               </button>

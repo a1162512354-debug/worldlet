@@ -4,6 +4,7 @@ import { SettingsModal } from '../SillyTavern/SettingsModal'
 import { LorebookModal } from '../SillyTavern/LorebookModal'
 import { PresetModal } from '../SillyTavern/PresetModal'
 import { VariablesModal } from '../SillyTavern/VariablesModal'
+import { HistoryDrawer } from '../SillyTavern/HistoryDrawer'
 import { Toast } from '../SillyTavern/Toast'
 import { useSillytavern } from '../../hooks/useSillytavern'
 
@@ -51,14 +52,14 @@ const CARDS: Array<{
     page: 'library',
     title: 'Library',
     tag: 'DAT::03',
-    stream: 'BOOK // PRESET // VARS',
+    stream: 'BOOK // PRESET',
     label: '资料库',
-    desc: '管理世界书、预设与当前对话变量。',
+    desc: '管理世界书与预设。会话变量请进入对应会话后编辑。',
     cut: 'cut-tr',
     rows: [
       { label: 'Lore', value: 'LOCAL' },
-      { label: 'Preset', value: 'OPENAI' },
-      { label: 'Panel', value: 'VARS', accent: true },
+      { label: 'Preset', value: 'OPENAI', accent: true },
+      { label: 'Vars', value: 'PER-SESSION' },
     ],
   },
   {
@@ -82,6 +83,7 @@ export function SpacePortal() {
   const [page, setPage] = useState<PortalPage>('home')
   const [activeCard, setActiveCard] = useState<Exclude<PortalPage, 'home'>>('sessions')
   const [mouse, setMouse] = useState({ x: 0, y: 0, clientX: 0, clientY: 0 })
+  const [historyOpen, setHistoryOpen] = useState(false)
   const [clock, setClock] = useState(() => new Date().toTimeString().slice(0, 8))
 
   useEffect(() => {
@@ -230,6 +232,7 @@ export function SpacePortal() {
                 <div className="embedded-chat-page">
                   <div className="chat-toolbar">
                     <button onClick={() => setPage('sessions')}>返回会话</button>
+                    <button onClick={() => setHistoryOpen(true)}>历史</button>
                     <button onClick={() => st.openVariables()}>变量</button>
                     <button onClick={() => st.openLorebooks()}>世界书</button>
                     <button onClick={() => st.openPresets()}>预设</button>
@@ -238,7 +241,7 @@ export function SpacePortal() {
                   {st.activeChat ? <GameView /> : <EmptyPanel title="未选择会话" text="请返回会话列表选择或新建一个冒险。" />}
                 </div>
               )}
-              {page === 'library' && <LibraryPage onOpenLorebooks={st.openLorebooks} onOpenPresets={st.openPresets} onOpenVariables={st.openVariables} />}
+              {page === 'library' && <LibraryPage onOpenLorebooks={st.openLorebooks} onOpenPresets={st.openPresets} />}
               {page === 'workshop' && <WorkshopLanding />}
               {page === 'settings' && <SettingsLanding onOpenSettings={st.openSettings} />}
             </div>
@@ -250,6 +253,7 @@ export function SpacePortal() {
       {st.showLorebooks && <LorebookModal onClose={() => st.setShowLorebooks(false)} />}
       {st.showPresets && <PresetModal onClose={() => st.setShowPresets(false)} />}
       {st.showVariables && <VariablesModal onClose={() => st.setShowVariables(false)} />}
+      {historyOpen && <HistoryDrawer onClose={() => setHistoryOpen(false)} />}
       <Toast message={st.toast} />
     </div>
   )
@@ -335,12 +339,16 @@ function SessionsPage({
   )
 }
 
-function LibraryPage({ onOpenLorebooks, onOpenPresets, onOpenVariables }: { onOpenLorebooks: () => void; onOpenPresets: () => void; onOpenVariables: () => void }) {
+function LibraryPage({ onOpenLorebooks, onOpenPresets }: { onOpenLorebooks: () => void; onOpenPresets: () => void }) {
   return (
     <div className="launcher-grid">
       <LauncherPanel title="世界书" text="导入、启用并编辑 SillyTavern 世界书。" action="打开世界书" onClick={onOpenLorebooks} />
       <LauncherPanel title="预设" text="管理提示词、采样参数与 prompt_order。" action="打开预设" onClick={onOpenPresets} />
-      <LauncherPanel title="变量" text="查看并编辑当前会话变量快照。" action="打开变量面板" onClick={onOpenVariables} />
+      <div className="launcher-panel">
+        <h2>变量</h2>
+        <p>变量是会话内状态快照，不属于全局资料库。请进入某个会话后，从对话终端工具栏或消息区打开变量面板。</p>
+        <button className="primary-command" disabled>进入会话后编辑</button>
+      </div>
     </div>
   )
 }

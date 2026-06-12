@@ -1,7 +1,7 @@
 import { createContext, createElement, useCallback, useContext, useEffect, useMemo, useState, type ReactNode } from 'react';
 import { useStreamParser } from './useStreamParser';
 import { useApiRouter } from './useApiRouter';
-import { applyParsedToChat, aggregateEvents } from '../sillytavern/variables';
+import { applyParsedToChat, branchChat, buildImplicitVarsMessages } from '../sillytavern/variables';
 import { assemblePrompt } from '../sillytavern/prompt-assembler';
 import {
   DEFAULT_TAGS,
@@ -29,6 +29,15 @@ import {
   deletePreset as deletePresetDb,
 } from '../sillytavern/database';
 import { createDefaultLorebook } from '../sillytavern/editor-utils';
+import { parseVarsBlock } from '../sillytavern/vars-merger';
+import type { ParserEvent } from '../sillytavern/stream-parser';
+
+function assistantContentFromEvents(events: ParserEvent[]): string {
+  return events
+    .filter((e) => e.type === 'tag-chunk' || e.type === 'raw')
+    .map((e) => e.chunk)
+    .join('');
+}
 import { createDefaultPreset } from '../sillytavern/types';
 
 const db = getDatabase();
@@ -353,18 +362,28 @@ function useSillytavernState() {
       }
 
       const { events, parsed } = parser.finish();
+      let implicitUpdates: Record<string, any> = {};
+      if (settings.apiMode === 'dual' && settings.api.secondary?.enabled) {
+        try {
+          const rawVars = await router.sendJson({
+            task: 'vars',
+            messages: buildImplicitVarsMessages(parsed.maintext || assistantContentFromEvents(events), updatedChat.variables ?? {}),
+          });
+          implicitUpdates = parseVarsBlock(rawVars).merge;
+        } catch {
+          showToast('隐式变量提取失败，已保留显式变量更新');
+        }
+      }
       const { nextVariables, snapshot } = applyParsedToChat(
         updatedChat.variables ?? {},
-        parsed
+        parsed,
+        implicitUpdates,
       );
 
       const assistantMsg: ChatMessage = {
         id: crypto.randomUUID(),
         role: 'assistant',
-        content: events
-          .filter((e) => e.type === 'tag-chunk' || e.type === 'raw')
-          .map((e: any) => e.chunk)
-          .join(''),
+        content: assistantContentFromEvents(events),
         timestamp: Date.now(),
         parsed,
         variablesAfter: snapshot,
@@ -399,6 +418,25 @@ function useSillytavernState() {
       setChats((prev) => prev.map((c) => (c.id === next.id ? next : c)));
     },
     [activeChat, restoreVariablesAtMessage]
+  );
+
+  const branchFromMessage = useCallback(
+    async (messageId: string, name?: string) => {
+      if (!activeChat) return;
+      const idx = activeChat.messages.findIndex((m) => m.id === messageId);
+      if (idx < 0) return;
+      const branchCount = chats.filter((c) => c.name.startsWith(`${activeChat.name} · 分支`)).length;
+      const next = branchChat(activeChat, idx, {
+        name: name ?? `${activeChat.name} · 分支 ${branchCount + 1}`,
+        presetId: activeChat.presetId ?? settings?.activePresetId ?? null,
+        lorebookIds: [...(activeChat.lorebookIds ?? settings?.activeLorebookIds ?? [])],
+      });
+      await db.chats.put(next);
+      setChats((prev) => [...prev, next]);
+      setActiveChatId(next.id);
+      showToast('已创建分支会话');
+    },
+    [activeChat, chats, settings, showToast]
   );
 
   const regenerateLast = useCallback(async () => {
@@ -472,6 +510,7 @@ function useSillytavernState() {
     // v3 game mode
     sendGameMessage,
     jumpToFloor,
+    branchFromMessage,
     regenerateLast,
     streamState: parser.state,
     abortStream: router.abort,

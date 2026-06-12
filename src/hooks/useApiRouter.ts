@@ -8,6 +8,11 @@ export interface SendStreamArgs {
   onChunk: (text: string) => void;
 }
 
+export interface SendJsonArgs {
+  task: Task;
+  messages: Array<{ role: string; content: string }>;
+}
+
 export function useApiRouter(api: ApiSettings) {
   const abortRef = useRef<AbortController | null>(null);
   const router: ApiRouter = useMemo(() => createApiRouter(api), [api]);
@@ -50,7 +55,17 @@ export function useApiRouter(api: ApiSettings) {
     }
   }, [router]);
 
+  const sendJson = useCallback(async (args: SendJsonArgs): Promise<string> => {
+    abortRef.current?.abort();
+    const controller = new AbortController();
+    abortRef.current = controller;
+    const { response } = await router.call(args.task, { messages: args.messages, stream: false, signal: controller.signal });
+    if (!response.ok) throw new Error(`HTTP ${response.status}`);
+    const data = await response.json();
+    return data?.choices?.[0]?.message?.content ?? '';
+  }, [router]);
+
   const abort = useCallback(() => abortRef.current?.abort(), []);
 
-  return { sendStream, abort, targetFor: router.targetFor };
+  return { sendStream, sendJson, abort, targetFor: router.targetFor };
 }

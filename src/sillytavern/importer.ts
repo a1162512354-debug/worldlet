@@ -221,6 +221,36 @@ export function importMultipleLorebooks(inputs: MultiImportInput[]): MultiImport
   return { successes, failures };
 }
 
+export interface PresetImportInput {
+  fileName: string;
+  json: Record<string, any>;
+}
+
+export interface PresetImportResults {
+  successes: Array<{ fileName: string; preset: ReturnType<typeof importPreset> }>;
+  failures: Array<{ fileName: string; error: string }>;
+}
+
+export function importMultiplePresets(inputs: PresetImportInput[]): PresetImportResults {
+  const successes: PresetImportResults['successes'] = [];
+  const failures: PresetImportResults['failures'] = [];
+  for (const input of inputs) {
+    try {
+      if (!input.json || typeof input.json !== 'object' || Array.isArray(input.json)) {
+        throw new Error('Invalid preset JSON: expected an object');
+      }
+      successes.push({ fileName: input.fileName, preset: importPreset(input.json) });
+    } catch (e) {
+      failures.push({ fileName: input.fileName, error: String((e as Error).message ?? e) });
+    }
+  }
+  return { successes, failures };
+}
+
+export function renamePreset(preset: ChatPreset, newName: string): ChatPreset {
+  return { ...preset, name: newName, updatedAt: Date.now() };
+}
+
 export function renameLorebook(lb: Lorebook, newName: string): Lorebook {
   return { ...lb, name: newName, updatedAt: Date.now() };
 }
