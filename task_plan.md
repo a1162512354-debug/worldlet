@@ -36,7 +36,7 @@
 - **每次修改都需要推送**
 
 ## Current Phase
-Phase 0 — 规划阶段（已基本完成，待确认后进入 Phase 1）
+Phase 2 — 核心功能验证（Phase 1 初始化已完成并通过 typecheck/build/test/dev server 验证）
 
 ## 项目目录
 `D:\酒馆\独立前端`
@@ -45,20 +45,21 @@ Phase 0 — 规划阶段（已基本完成，待确认后进入 Phase 1）
 
 ## Phases
 
-### Phase 0: 规划与准备 `in_progress`
+### Phase 0: 规划与准备 `complete`
 - [x] 审查废案（D:\酒馆\酒馆前端卡项目）
 - [x] 读取 tavernlike skill 了解核心功能
 - [x] 创建 task_plan.md, findings.md, progress.md
-- [ ] 初始化 Git 仓库并关联远程
-- [ ] 确认技术栈和 UI 方案
-- **Status:** `in_progress`
+- [x] 初始化 Git 仓库并关联远程
+- [x] 确认技术栈和 UI 方案
+- **Status:** `complete`
 
-### Phase 1: 项目初始化 `pending`
-- [ ] 使用 tavernlike skill 初始化项目（自动检测 React + 安装依赖 + 生成核心模块）
-- [ ] 验证生成的代码无 TypeScript 错误
-- [ ] 验证 dev server 可启动
-- [ ] 初始化 Git 并推送首次提交
-- **Status:** `pending`
+### Phase 1: 项目初始化 `complete`
+- [x] 使用 tavernlike skill 初始化项目（自动检测 React + 安装依赖 + 生成核心模块）
+- [x] 验证生成的代码无 TypeScript 错误（`npm run typecheck` 通过）
+- [x] 验证 dev server 可启动（Vite `http://127.0.0.1:5173/` 启动成功）
+- [x] 验证生产构建与单元测试（`npm run build` 通过；`npm test` 7 文件 / 41 测试通过）
+- [x] 初始化 Git 并推送首次提交
+- **Status:** `complete`
 - **依赖**: Phase 0 完成
 
 ### Phase 2: 核心功能验证 `pending`
@@ -406,7 +407,7 @@ interface VariableTypePlugin {
 ## Errors Encountered
 | Error | Attempt | Resolution |
 |-------|---------|------------|
-| （暂无） | | |
+| 当前环境缺少 Node/npm | `node --version && npm --version` | 已通过 winget 安装 Node.js LTS 24.16.0；Git Bash 需临时在 PATH 前置 `/c/Program Files/nodejs` 或重启终端刷新 PATH |
 
 ## Notes
 - 废案在 `D:\酒馆\酒馆前端卡项目`，可参考其架构但不要复制复杂功能
