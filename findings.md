@@ -24,8 +24,8 @@
 - ✅ **仅游戏模式**（RPG 终端风格，去掉聊天模式）
 - ✅ 变量快照回档系统（每条消息带变量快照，支持回档/分支）
 - ✅ 3 套主题（解耦）
+- ✅ **MOD 工坊（重新定位）**：开局模板 + 自定义变量结构 + 可视化展示面板
 - ❌ Agent 系统（不保留）
-- ❌ MOD 工坊（不保留）
 
 ### 废案中值得复用的部分
 - `sillytavern/` 核心模块（types, database, lorebook-engine, prompt-assembler, api-router, stream-parser, variables, importer, vars-merger, editor-utils）
