@@ -52,6 +52,7 @@ Phase 0 — 规划阶段
 - [ ] 变量结构编辑器（Variable Schema Editor）
   - 定义变量类型：数值、等级、列表、开关、文本
   - 定义展示方式：进度条、阶梯、网格、图标、文字
+  - **双描述系统**：玩家描述 + AI 描述 + 更新规则 + 有效值
   - 可视化拖拽设计
 - [ ] 开局模板系统（Scenario Template）
   - 创建模板：世界书 + 初始变量 + 角色设定 + 起始道具/技能
@@ -177,7 +178,7 @@ AI 输出格式：
 ```
 主 AI 生成剧情（<maintext> + 可选 <vars>）
     ↓
-异步 AI 读取正文，提取隐式变量变化
+异步 AI 读取正文 + 变量描述，提取隐式变量变化
     ↓
 合并显式 + 隐式更新 → 更新变量快照
 ```
@@ -190,6 +191,25 @@ AI 输出格式：
 | 状态变化 | 枚举更新 | "突破到筑基期" → `境界: 筑基期` |
 | 学会技能 | 列表添加 | "学会了御剑术" → `技能: +["御剑术"]` |
 | 模糊描述 | AI 推断 | "你变得更强大了" → `灵力: +5~10` |
+
+**管线变量选择**（选择性发送给 AI）：
+```
+管线步骤配置:
+├── 发送变量: [HP, 灵力, 背包]  ← 只发送相关变量
+├── 发送模式: 按选择 / 全部 / 不发送
+└── AI 收到的上下文:
+    「当前变量:
+    - 生命值 (HP): 80/100。角色生命值，受攻击减少，治疗增加。
+    - 灵力: 100。修炼能量，释放技能消耗。
+    - 背包: [灵石×50, 基础丹药×3]。
+    
+    请根据剧情发展更新这些变量。」
+```
+
+好处：
+- AI 知道每个变量是什么（aiDescription）
+- AI 知道怎么更新（aiUpdateRules）
+- 不同步骤可发送不同变量（节省 token）
 
 **优化点**：
 1. 统一为单引擎，消除 `agent/pipeline/` 目录
@@ -261,6 +281,39 @@ src/
 1. **组合扩展**（用户）：新类型 = 已有类型的组合。例如「灵兽」= name:text + species:enum + level:number + skills:list
 2. **插件扩展**（开发者）：注册新类型插件，定义渲染器/编辑器/合并策略。例如「技能树」插件
 3. **脚本扩展**（高级用户）：JavaScript 自定义逻辑。例如「好感度」根据对话自动增减
+
+**双描述变量结构**（玩家看一份，AI 看一份）：
+```typescript
+interface VariableDefinition {
+  id: string
+  type: VariableType           // 变量类型
+
+  // 给玩家看的
+  displayName: string          // 显示名称 (e.g., "生命值")
+  displayFormat: string        // 显示格式 (e.g., "{value}/{max}")
+  description?: string         // 玩家描述
+
+  // 给 AI 看的 ⬇️
+  aiDescription: string        // AI 描述 (必须)
+  aiUpdateRules?: string       // AI 更新规则
+  aiValidValues?: string       // AI 有效值范围
+}
+```
+
+示例「生命值」：
+```typescript
+{
+  id: "hp",
+  type: "bar",
+  config: { min: 0, max: 100 },
+  displayName: "生命值",
+  displayFormat: "{value}/{max}",
+  description: "角色的生命值，归零则死亡",
+  aiDescription: "角色生命值，范围0-100。受攻击减少，治疗增加。归零死亡。",
+  aiUpdateRules: "物理攻击: -10~-30, 魔法攻击: -20~-50, 治疗: +20~+50",
+  aiValidValues: "0-100的整数"
+}
+```
 
 **架构**：
 ```typescript
