@@ -36,7 +36,7 @@
 - **每次修改都需要推送**
 
 ## Current Phase
-Phase 2 — 核心功能验证（Phase 1 初始化已完成并通过 typecheck/build/test/dev server 验证）
+Phase 2 — 核心功能验证（已完成 Deep Space UI 迁移首轮；等待人工体验核心流程）
 
 ## 项目目录
 `D:\酒馆\独立前端`
@@ -62,16 +62,17 @@ Phase 2 — 核心功能验证（Phase 1 初始化已完成并通过 typecheck/b
 - **Status:** `complete`
 - **依赖**: Phase 0 完成
 
-### Phase 2: 核心功能验证 `pending`
-- [ ] 验证世界书导入/管理功能
+### Phase 2: 核心功能验证 `in_progress`
+- [ ] 验证世界书导入/管理功能（已修复批量导入后状态同步，待人工体验）
 - [ ] 验证预设导入/管理功能
-- [ ] 验证游戏模式：流式输出 + XML 标签解析
+- [ ] 验证游戏模式：流式输出 + XML 标签解析（已迁移消息时间线 UI，待真实 API 流程验证）
 - [ ] 验证变量系统：显式 `<vars>` 更新 + 隐式自动提取
-- [ ] 验证变量快照回档：点击历史消息 → 变量恢复
-- [ ] 验证消息编辑/删除/分支功能
+- [ ] 验证变量快照回档：点击历史消息 → 变量恢复（已统一 rollback/jump 快照恢复逻辑，待人工体验）
+- [ ] 验证消息编辑/删除/分支功能（已修复重 roll 旧闭包问题，待人工体验）
 - [ ] 验证选项点选功能
+- [x] 参考废案迁移 Deep Space 终端 UI 首轮
 - [ ] 推送到 Git
-- **Status:** `pending`
+- **Status:** `in_progress`
 - **依赖**: Phase 1 完成
 
 ### Phase 3: MOD 工坊系统 `pending`

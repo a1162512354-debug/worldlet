@@ -27,6 +27,7 @@ export class StreamTagParser {
   private currentTag = '';
   private currentBuf = '';
   private optionBuf = '';
+  private emittedOpaqueLength = 0;
   private events: ParserEvent[] = [];
 
   constructor(
@@ -51,9 +52,13 @@ export class StreamTagParser {
         this.events.push({ type: 'option-line', line: this.optionBuf });
         this.optionBuf = '';
       }
-      this.events.push({ type: 'tag-close', tag: this.currentTag, full: this.currentBuf });
+      const full = this.state === 'OPAQUE'
+        ? this.currentBuf.slice(0, this.emittedOpaqueLength)
+        : this.currentBuf;
+      this.events.push({ type: 'tag-close', tag: this.currentTag, full });
       this.currentBuf = '';
       this.currentTag = '';
+      this.emittedOpaqueLength = 0;
     }
     this.state = 'NORMAL';
     return this.events;
@@ -89,13 +94,20 @@ export class StreamTagParser {
       const closeMarker = `</${this.currentTag}>`;
       if (this.currentBuf.endsWith(closeMarker)) {
         const full = this.currentBuf.slice(0, -closeMarker.length);
-        this.events.push({ type: 'tag-chunk', tag: this.currentTag, chunk: ch });
+        const pending = full.slice(this.emittedOpaqueLength);
+        if (pending) this.events.push({ type: 'tag-chunk', tag: this.currentTag, chunk: pending });
         this.events.push({ type: 'tag-close', tag: this.currentTag, full });
         this.state = 'NORMAL';
         this.currentBuf = '';
         this.currentTag = '';
+        this.emittedOpaqueLength = 0;
       } else {
-        this.events.push({ type: 'tag-chunk', tag: this.currentTag, chunk: ch });
+        const maxEmitLength = Math.max(0, this.currentBuf.length - closeMarker.length + 1);
+        if (maxEmitLength > this.emittedOpaqueLength) {
+          const pending = this.currentBuf.slice(this.emittedOpaqueLength, maxEmitLength);
+          this.events.push({ type: 'tag-chunk', tag: this.currentTag, chunk: pending });
+          this.emittedOpaqueLength = maxEmitLength;
+        }
       }
       return;
     }
@@ -150,6 +162,7 @@ export class StreamTagParser {
 
     this.currentTag = name;
     this.currentBuf = '';
+    this.emittedOpaqueLength = 0;
     this.optionBuf = '';
     this.events.push({ type: 'tag-open', tag: name });
     this.state = this.opaqueTags.includes(name) ? 'OPAQUE' : 'TAGGED';

@@ -306,8 +306,9 @@ function useSillytavernState() {
   const router = useApiRouter(settings?.api ?? DEFAULT_SETTINGS.api);
 
   const sendGameMessage = useCallback(
-    async (userText: string) => {
-      if (!activeChat || !settings) return;
+    async (userText: string, baseChat?: ChatSession) => {
+      const sourceChat = baseChat ?? activeChat;
+      if (!sourceChat || !settings) return;
       if (!activePreset) {
         showToast('请先创建或导入预设');
         return;
@@ -320,8 +321,8 @@ function useSillytavernState() {
         timestamp: Date.now(),
       };
       const updatedChat: ChatSession = {
-        ...activeChat,
-        messages: [...activeChat.messages, userMsg],
+        ...sourceChat,
+        messages: [...sourceChat.messages, userMsg],
         updatedAt: Date.now(),
       };
       await db.chats.put(updatedChat);
@@ -330,7 +331,7 @@ function useSillytavernState() {
       const activeLorebookIds = new Set(settings.activeLorebookIds ?? []);
       const { messages } = assemblePrompt({
         userInput: userText,
-        history: activeChat.messages,
+        history: sourceChat.messages,
         preset: activePreset,
         lorebooks: lorebooks.filter((l) => activeLorebookIds.has(l.id)),
         userName: settings.userName,
@@ -378,7 +379,7 @@ function useSillytavernState() {
       await db.chats.put(finalChat);
       setChats((prev) => prev.map((c) => (c.id === finalChat.id ? finalChat : c)));
     },
-    [activeChat, settings, lorebooks, activePreset, parser, router]
+    [activeChat, settings, lorebooks, activePreset, parser, router, showToast]
   );
 
   const jumpToFloor = useCallback(
@@ -408,15 +409,20 @@ function useSillytavernState() {
     if (lastUserIdx < 0) return;
     const targetIdx = activeChat.messages.length - 1 - lastUserIdx;
     const truncated = activeChat.messages.slice(0, targetIdx);
+    const restoredVars =
+      truncated.length > 0
+        ? restoreVariablesAtMessage(truncated[truncated.length - 1].id)
+        : {};
     const next: ChatSession = {
       ...activeChat,
       messages: truncated,
+      variables: restoredVars,
       updatedAt: Date.now(),
     };
     await db.chats.put(next);
     setChats((prev) => prev.map((c) => (c.id === next.id ? next : c)));
-    await sendGameMessage(activeChat.messages[targetIdx].content);
-  }, [activeChat, sendGameMessage]);
+    await sendGameMessage(activeChat.messages[targetIdx].content, next);
+  }, [activeChat, restoreVariablesAtMessage, sendGameMessage]);
 
   const setChatVariables = useCallback(
     async (vars: Record<string, any>) => {

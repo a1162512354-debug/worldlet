@@ -36,39 +36,9 @@ export function VariablesModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,.5)',
-        zIndex: 200,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          background: '#fff',
-          width: 'min(560px, 95vw)',
-          maxHeight: '85vh',
-          display: 'flex',
-          flexDirection: 'column',
-          borderRadius: 6,
-          overflow: 'hidden',
-        }}
-      >
-        <header
-          style={{
-            padding: '12px 16px',
-            borderBottom: '1px solid #eee',
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-          }}
-        >
+    <div className="legacy-modal-overlay" onClick={onClose}>
+      <div className="legacy-modal-shell" onClick={(e) => e.stopPropagation()}>
+        <header className="legacy-modal-header">
           <strong>📊 变量面板</strong>
           <button onClick={onClose}>×</button>
         </header>

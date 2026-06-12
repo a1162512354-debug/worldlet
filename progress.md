@@ -66,4 +66,23 @@
 - `npm run build` ✅ 通过（Vite 构建成功，仅有动态导入 chunk 提示，不阻塞）。
 - `npm test` ✅ 通过：7 个测试文件 / 41 个测试。
 - `npm run dev -- --host 127.0.0.1` ✅ 启动成功，地址 `http://127.0.0.1:5173/`。
-- Phase 1 初始化验证完成，下一阶段进入 Phase 2：核心功能验证。
+
+### UI 迁移 - 2026-06-13
+
+#### 完成
+- 参考废案 `D:\酒馆\酒馆前端卡项目` 的 Deep Space 终端 UI，迁移主题变量、星空/扫描线背景、终端状态栏、卡片式导航、六边形核心面板、会话卡片和深色面板样式。
+- 新增 `src/components/Shell/SpacePortal.tsx`，用精简版终端外壳替换原 `App` 顶层布局；仅保留当前产品需要的会话、对话终端、资料库、设置入口，未迁移废案 Agent/MOD 复杂逻辑。
+- 改造 `GameView` 为消息时间线布局：用户/AI 气泡、头像、时间、选项 chips、底部终端输入框、自动滚动。
+- `ThinkingFold`、`MainTextPane`、`OptionList`、`Toast` 改为 Deep Space class 驱动样式。
+- 当前 Modal/Drawer 外层深色化：Settings、Lorebook、Preset、Variables、LorebookEditor、HistoryDrawer。
+- 修复明确运行问题：
+  - `regenerateLast` 使用旧闭包导致重 roll 追加到旧历史后的问题。
+  - 批量导入世界书后未同步 Provider state，导致 prompt 不立即使用新世界书的问题。
+  - opaque `<thinking>` 流式显示闭合标签污染的问题。
+- `vite.config.ts` 排除 `.claude/**`，避免 Vitest 扫描子代理 worktree 中的重复测试。
+
+#### 验证
+- `npm run typecheck` ✅
+- `npm run build` ✅（仍有 `INEFFECTIVE_DYNAMIC_IMPORT` 提示，不阻塞构建）
+- `npm test` ✅：7 个测试文件 / 41 个测试
+- `npm run dev -- --host 127.0.0.1` ✅：5173 被占用时自动启动在 `http://127.0.0.1:5174/`

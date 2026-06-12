@@ -220,39 +220,9 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
   };
 
   return (
-    <div
-      onClick={tryClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,.5)',
-        zIndex: 200,
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-      }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          background: '#fff',
-          width: 'min(1100px, 95vw)',
-          height: '90vh',
-          display: 'flex',
-          flexDirection: 'column',
-          borderRadius: 6,
-          overflow: 'hidden',
-        }}
-      >
-        <header
-          style={{
-            padding: '12px 16px',
-            borderBottom: '1px solid #eee',
-            display: 'flex',
-            alignItems: 'center',
-            gap: 12,
-          }}
-        >
+    <div className="legacy-modal-overlay" onClick={tryClose}>
+      <div className="legacy-modal-shell wide" onClick={(e) => e.stopPropagation()}>
+        <header className="legacy-modal-header">
           <strong>预设管理</strong>
           <button onClick={handleNewPreset}>+ 新建</button>
           {draft && (

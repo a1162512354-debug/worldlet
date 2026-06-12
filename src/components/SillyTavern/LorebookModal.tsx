@@ -8,7 +8,7 @@ import { LorebookEditorModal } from './LorebookEditorModal';
 const db = getDatabase();
 
 export function LorebookModal({ onClose }: { onClose: () => void }) {
-  const { lorebooks, toggleLorebook, addLorebookFromDefault, deleteLorebook } = useSillytavern();
+  const { lorebooks, toggleLorebook, addLorebook, addLorebookFromDefault, deleteLorebook } = useSillytavern();
   const [list, setList] = useState<Lorebook[]>(lorebooks);
   const [activeIds, setActiveIds] = useState<Set<string>>(new Set());
   const [editing, setEditing] = useState<Lorebook | null>(null);
@@ -28,36 +28,9 @@ export function LorebookModal({ onClose }: { onClose: () => void }) {
   }, [db, lorebooks]);
 
   return (
-    <div
-      onClick={onClose}
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,.4)',
-        zIndex: 100,
-      }}
-    >
-      <aside
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          position: 'absolute',
-          right: 0,
-          top: 0,
-          bottom: 0,
-          width: 360,
-          background: '#fff',
-          padding: 16,
-          overflowY: 'auto',
-        }}
-      >
-        <header
-          style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: 16,
-          }}
-        >
+    <div className="legacy-modal-overlay" onClick={onClose}>
+      <aside className="legacy-modal-shell side" onClick={(e) => e.stopPropagation()}>
+        <header className="legacy-modal-header">
           <strong>世界书</strong>
           <button onClick={onClose}>×</button>
         </header>
@@ -98,7 +71,7 @@ export function LorebookModal({ onClose }: { onClose: () => void }) {
                     createdAt: Date.now(),
                     updatedAt: Date.now(),
                   };
-                  await db.lorebooks.add(lorebook);
+                  await addLorebook(lorebook);
                 }
 
                 if (failures.length) {

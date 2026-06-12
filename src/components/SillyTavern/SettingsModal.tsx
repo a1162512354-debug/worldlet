@@ -134,24 +134,9 @@ export function SettingsModal({
   };
 
   return (
-    <div
-      onClick={onClose}
-      style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,.4)', zIndex: 100 }}
-    >
-      <div
-        onClick={(e) => e.stopPropagation()}
-        style={{
-          position: 'absolute',
-          right: 0,
-          top: 0,
-          bottom: 0,
-          width: 480,
-          background: '#fff',
-          overflowY: 'auto',
-          padding: 16,
-        }}
-      >
-        <header style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 12 }}>
+    <div className="legacy-modal-overlay" onClick={onClose}>
+      <div className="legacy-modal-shell side" onClick={(e) => e.stopPropagation()}>
+        <header className="legacy-modal-header">
           <strong>设置</strong>
           <button onClick={onClose}>×</button>
         </header>
