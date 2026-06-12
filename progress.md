@@ -102,3 +102,26 @@
 - `npm run typecheck` ✅
 - `npm run build` ✅（仍有 `INEFFECTIVE_DYNAMIC_IMPORT` 提示，不阻塞构建）
 - `npm test` ✅：7 个测试文件 / 47 个测试
+
+### Phase 2 合并与 UI 精简 - 2026-06-13
+
+#### 完成
+- `phase2-core-validation` 工作树改动合并到 main 分支（16 个文件，+577/-733 行）
+- **工具栏精简**：
+  - GameView 内部重复工具栏删除（历史/设置/世界书/预设/变量/重roll/Badge 组件）
+  - 「历史」按钮移至 SpacePortal 顶部栏（返回会话 | 历史 | 变量 | 世界书 | 预设 | 设置）
+  - HistoryDrawer 控制权从 GameView 转移到 SpacePortal
+  - ↻ 重 roll 和停止按钮移至输入框区域（发送按钮左侧）
+- **模态框重构**：LorebookModal 大幅重构，PresetModal 新增
+- **Hook 增强**：useSillytavern / useApiRouter 改进
+- **变量/导入扩展**：importer.ts、variables.ts 功能增强，测试覆盖增加
+- **样式**：新增 `.space-input-action-button` 按钮样式
+
+#### Git 提交
+- `60b88e0` - ui: phase2 核心验证 - 工具栏精简、模态框重构、变量系统增强
+- 已推送到 origin/main
+
+#### 验证
+- `npm run typecheck` ✅
+- `npm run build` ✅
+- 开发服务器 `http://localhost:5173/` 正常运行
