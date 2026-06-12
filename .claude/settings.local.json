@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(claude plugin *)",
+      "Bash(claude marketplace *)",
+      "Bash(git clone *)",
+      "Bash(claude --plugin-dir . -p \"test\")",
+      "Bash(claude *)",
+      "Skill(planning-with-files)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(git push *)"
+    ]
+  }
+}

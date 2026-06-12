@@ -18,6 +18,14 @@
 4. **管线系统混乱**：同时存在 flow-executor 和 PipelineEngine 两套并行系统
 5. **没有多平台适配**：纯 Web，没有考虑移动端和桌面端
 
+### 新项目保留的功能
+- ✅ 核心 SillyTavern 集成（完整）
+- ✅ 管线系统（合并为单引擎 FlowGroup，移除 DAG PipelineEngine）
+- ✅ 聊天/游戏双模式
+- ✅ 3 套主题（解耦）
+- ❌ Agent 系统（不保留）
+- ❌ MOD 工坊（不保留）
+
 ### 废案中值得复用的部分
 - `sillytavern/` 核心模块（types, database, lorebook-engine, prompt-assembler, api-router, stream-parser, variables, importer, vars-merger, editor-utils）
 - 基本的 UI 组件结构（SettingsModal, LorebookModal, PresetModal, Chat, VariablePanel）

@@ -78,17 +78,64 @@ Phase 0 — 规划阶段
 
 ---
 
-## 核心架构（精简版）
+## 核心架构
 
 ### 与废案的区别
 | 废案 | 新项目 |
 |------|--------|
 | Agent 系统（22 工具） | ❌ 不需要 |
 | MOD 工坊系统 | ❌ 不需要 |
-| 管线系统（双引擎） | ❌ 不需要，用默认流程即可 |
+| 管线系统（双引擎并行） | ✅ 保留，**合并为单引擎**优化 |
 | 3 套主题 | ✅ 保留，但解耦 |
 | Deep Space 终端 UI | ✅ 简化版，响应式 |
 | 核心 SillyTavern 集成 | ✅ 完整保留 |
+| 聊天/游戏双模式 | ✅ 完整保留 |
+
+### 聊天模式 vs 游戏模式
+
+| | 聊天模式 | 游戏模式 |
+|--|---------|---------|
+| **界面** | 标准聊天气泡（类似 ChatGPT） | RPG 终端风格（正文 + 选项列表） |
+| **AI 输出** | 纯文本回复 | XML 标签结构化输出 |
+| **交互** | 自由输入 | 可点选选项 或 自由输入 |
+| **变量** | 无/简单 | 自动提取 `<vars>` 标签，每条消息带变量快照 |
+| **适用场景** | 普通对话、问答 | 文字 RPG、互动小说、角色扮演 |
+
+游戏模式 AI 输出格式：
+```xml
+<thinking>AI 思考过程（折叠显示）</thinking>
+<maintext>剧情正文，流式显示</maintext>
+<option>选项A
+选项B
+选项C</option>
+<sum>本回合一句话总结</sum>
+<vars>{ "HP": 80, "gold": 15 }</vars>
+```
+
+### 管线系统（优化版）
+
+废案有两套并行引擎，新项目合并为一套：
+
+| 废案 | 新项目 |
+|------|--------|
+| `flow-executor.ts`（FlowGroup 模型） | ✅ 保留，作为主引擎 |
+| `agent/pipeline/pipeline-engine.ts`（DAG 模型） | ❌ 移除，功能合并到 FlowGroup |
+
+**FlowGroup 模型**（保留并优化）：
+- 组间**顺序**执行，组内步骤**并发**执行
+- 每个步骤：选 API 端点、选世界书、配提示词、流式开关
+- `{{prev_result}}` 引用上一组结果
+- 模板变量：`{{chat_history}}`, `{{world_book}}`, `{{prev_result}}`, `{{variables}}`, `{{user_input}}`
+
+**默认管线**（开箱即用）：
+- 第 1 组：主剧情（流式、高温度、大 token）
+- 第 2 组：变量提取 + 总结（并发非流式、低温度）
+
+**优化点**：
+1. 统一为单引擎，消除 `agent/pipeline/` 目录
+2. 管线配置存 IndexedDB（而非 localStorage），与世界书/预设统一
+3. 简化 UI，去掉复杂的 DAG 编辑器
+4. 支持导入/导出管线配置（兼容废案格式）
 
 ### 保留的核心模块
 ```
@@ -99,6 +146,7 @@ src/
 │   ├── lorebook-engine.ts # 世界书匹配引擎
 │   ├── prompt-assembler.ts # 提示词拼装
 │   ├── api-router.ts     # API 调用
+│   ├── flow-executor.ts  # 管线执行引擎（FlowGroup）
 │   ├── stream-parser.ts  # 流式 XML 解析
 │   ├── variables.ts      # 变量管理
 │   ├── vars-merger.ts    # 变量合并
@@ -116,19 +164,13 @@ src/
 ### 数据存储
 | 数据 | 存储位置 | 说明 |
 |------|----------|------|
-| 世界书 / 预设 / 对话 / 设置 | IndexedDB (Dexie) | 结构化数据 |
+| 世界书 / 预设 / 对话 / 设置 / 管线 | IndexedDB (Dexie) | 结构化数据，统一存储 |
 | 变量 | 跟随 ChatSession | 每条消息带变量快照 |
 
-### 默认输出格式
-```xml
-<thinking>思考过程（可选）</thinking>
-<maintext>剧情正文</maintext>
-<option>选项A
-选项B
-选项C</option>
-<sum>本回合总结</sum>
-<vars>{ "HP": 80, "gold": 15 }</vars>
-```
+### API 管理
+- 统一 API 端点列表（每个端点：id, name, baseUrl, apiKey, model, temperature, maxTokens）
+- 标记一个为「默认 API」
+- 管线步骤可选择不同端点（主剧情用贵模型，变量提取用便宜模型）
 
 ---
 
