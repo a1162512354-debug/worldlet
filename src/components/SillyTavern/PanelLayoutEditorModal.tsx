@@ -323,6 +323,9 @@ function LayoutPreview({
   inventory: { weapons: any[]; armor: any[]; consumables: any[]; materials: any[]; other: any[] };
   defMap: Map<string, VariableDefinition>;
 }) {
+  const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
+  const [expandedItem, setExpandedItem] = useState<string | null>(null);
+
   // group widgets by row
   const rowMap = new Map<number, PanelWidget[]>();
   for (const w of layout.widgets) {
@@ -348,23 +351,63 @@ function LayoutPreview({
       const category = w.variableKey as keyof typeof inventory;
       const items = inventory[category] ?? [];
       const catInfo = INVENTORY_CATEGORIES.find((c) => c.key === category);
+      const isExpanded = expandedCategory === category;
+
       return (
-        <div className="st-border st-rounded st-p-8" style={{ background: 'var(--space-surface-deep)' }}>
-          <div className="st-text-12 st-font-bold st-mb-4">
-            {catInfo?.icon || '📦'} {catInfo?.label || category}
-            <span className="st-text-11 st-text-muted st-ml-4">({items.length})</span>
-          </div>
-          {items.length === 0 ? (
-            <div className="st-text-11 st-text-muted">空</div>
-          ) : (
-            <div className="st-flex-col st-gap-2">
-              {items.slice(0, 3).map((item: any) => (
-                <div key={item.id} className="st-text-12 st-truncate">
-                  {item.name} {item.quantity > 1 ? `×${item.quantity}` : ''}
+        <div className="st-border st-rounded" style={{ background: 'var(--space-surface-deep)' }}>
+          <button
+            onClick={() => setExpandedCategory(isExpanded ? null : category)}
+            className="st-flex-row st-items-center st-justify-between st-w-full st-p-8"
+            style={{ cursor: 'pointer', background: 'transparent' }}
+          >
+            <div className="st-text-12 st-font-bold">
+              {catInfo?.icon || '📦'} {catInfo?.label || category}
+              <span className="st-text-11 st-text-muted st-ml-4">({items.length})</span>
+            </div>
+            <span className="st-text-11 st-text-muted">{isExpanded ? '▼' : '▶'}</span>
+          </button>
+
+          {isExpanded && (
+            <div className="st-p-8 st-border-top" style={{ borderColor: 'var(--space-border-medium)' }}>
+              {items.length === 0 ? (
+                <div className="st-text-11 st-text-muted">空</div>
+              ) : (
+                <div className="st-flex-col st-gap-4">
+                  {items.map((item: any) => (
+                    <div key={item.id}>
+                      <button
+                        onClick={() => setExpandedItem(expandedItem === item.id ? null : item.id)}
+                        className="st-flex-row st-items-center st-justify-between st-w-full st-text-12"
+                        style={{ cursor: 'pointer', background: 'transparent', padding: '4px 0' }}
+                      >
+                        <span>
+                          {item.name} {item.quantity > 1 ? `×${item.quantity}` : ''}
+                        </span>
+                        <span className="st-text-11 st-text-muted">
+                          {expandedItem === item.id ? '▼' : '▶'}
+                        </span>
+                      </button>
+                      {expandedItem === item.id && (
+                        <div className="st-ml-12 st-mt-4 st-flex-col st-gap-2">
+                          {item.description && (
+                            <div className="st-text-11 st-text-muted">{item.description}</div>
+                          )}
+                          {Object.entries(item.values).map(([key, value]) => {
+                            const def = defMap.get(key);
+                            return (
+                              <div key={key} className="st-flex-row st-gap-8 st-text-11">
+                                <span className="st-text-muted" style={{ minWidth: 60 }}>
+                                  {def?.displayName || key}
+                                </span>
+                                <span className="st-mono">{String(value)}</span>
+                              </div>
+                            );
+                          })}
+                        </div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
-              {items.length > 3 && (
-                <div className="st-text-11 st-text-muted">+{items.length - 3} 更多</div>
               )}
             </div>
           )}
@@ -373,7 +416,6 @@ function LayoutPreview({
     }
 
     if (w.widgetType === 'inventory-item') {
-      // Find item in inventory by id
       const allItems = Object.values(inventory).flat();
       const item = allItems.find((i: any) => i.id === w.variableKey);
       if (!item) {
