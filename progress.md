@@ -288,4 +288,6 @@
 
 **数据库升级**：v3 → v4（新增 `variableSchemas` / `scenarios` 表）
 
+| 3.2.5 自定义展示面板 | ✅ | `c7fba27` |
+
 **下一步**：Phase 4 测试与质量保证
