@@ -82,7 +82,7 @@ export function VariablesModal({ onClose }: { onClose: () => void }) {
 
             {Object.keys(vars).length === 0 ? (
               <div style={{ color: '#888', padding: 24, textAlign: 'center', fontSize: 13 }}>
-                暂无变量。AI 回复中包含 <code>{'<var name="hp" value="100" />'}</code> 时会自动提取。
+                暂无变量。AI 回复中包含 <code>{'<vars>{"hp": 100}</vars>'}</code> 时会自动提取。
               </div>
             ) : (
               <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>

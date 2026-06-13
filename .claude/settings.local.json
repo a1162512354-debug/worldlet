@@ -35,7 +35,9 @@
       "Skill(run)",
       "Bash(PATH=\"/c/Program Files/nodejs:$PATH\" npm run *)",
       "Bash(cmd.exe *)",
-      "Skill(update-config)"
+      "Skill(update-config)",
+      "Bash(npm run *)",
+      "Bash(PATH='/c/Program Files/nodejs:__TRACKED_VAR__' npx vitest run)"
     ]
   }
 }

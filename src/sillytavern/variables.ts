@@ -6,19 +6,6 @@ import type { ChatSession, ParsedTags } from './types';
 import type { ParserEvent } from './stream-parser';
 import { parseVarsBlock, applyVarsPatch } from './vars-merger';
 
-export function extractVariables(text: string): { cleanedText: string; updates: Record<string, string | number> } {
-  const updates: Record<string, string | number> = {};
-  const regex = /<var\s+name="([^"]+)"\s+value="([^"]+)"\s*\/?>/g;
-  let match;
-  while ((match = regex.exec(text)) !== null) {
-    const [, name, rawValue] = match;
-    const num = Number(rawValue);
-    updates[name] = Number.isNaN(num) ? rawValue : num;
-  }
-  const cleanedText = text.replace(regex, '').replace(/\n{2,}/g, '\n').trim();
-  return { cleanedText, updates };
-}
-
 export function mergeVariables(
   base: Record<string, string | number> = {},
   updates: Record<string, string | number> = {}

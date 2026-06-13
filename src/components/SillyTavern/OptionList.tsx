@@ -8,9 +8,10 @@ export function OptionList(props: {
 }) {
   const [custom, setCustom] = useState('');
   const showCustomInput = props.showCustomInput ?? true;
+  const filteredOptions = props.options.filter(opt => opt.trim().length > 0);
   return (
     <div className="st-options">
-      {props.options.map((opt, i) => (
+      {filteredOptions.map((opt, i) => (
         <button key={i} disabled={props.disabled} onClick={() => props.onPick(opt)}>
           <span>[{i + 1}]</span> {opt}
         </button>
