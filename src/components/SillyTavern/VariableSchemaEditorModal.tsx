@@ -95,6 +95,7 @@ export function VariableSchemaEditorModal({ onClose }: { onClose: () => void }) 
     addVariableSchema,
     updateVariableSchema,
     deleteVariableSchema,
+    showToast,
   } = useSillytavern();
 
   const [drafts, setDrafts] = useState<VariableSchema[]>(() =>
@@ -292,7 +293,7 @@ export function VariableSchemaEditorModal({ onClose }: { onClose: () => void }) 
           await deleteVariableSchema(orig.id);
         }
       }
-      onClose();
+      showToast('已保存');
     } catch (e) {
       alert('保存失败: ' + (e as Error).message);
     }

@@ -41,6 +41,7 @@ export function ScenarioTemplateModal({ onClose }: { onClose: () => void }) {
     presets,
     variableSchemas,
     createChat,
+    showToast,
   } = useSillytavern();
 
   const [drafts, setDrafts] = useState<ScenarioTemplate[]>(() =>
@@ -215,7 +216,7 @@ export function ScenarioTemplateModal({ onClose }: { onClose: () => void }) {
           await deleteScenario(orig.id);
         }
       }
-      onClose();
+      showToast('已保存');
     } catch (e) {
       alert('保存失败: ' + (e as Error).message);
     }

@@ -73,7 +73,7 @@ const FIELD_TYPE_LABELS: Record<ModVariableFieldType, string> = {
 
 // ---- main component ----
 export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
-  const { mods, addMod, updateMod, deleteMod, lorebooks } = useSillytavern();
+  const { mods, addMod, updateMod, deleteMod, lorebooks, showToast } = useSillytavern();
 
   const [drafts, setDrafts] = useState<Mod[]>(() => mods.map((m) => structuredClone(m)));
   const [selectedId, setSelectedId] = useState<string | null>(drafts[0]?.id ?? null);
@@ -314,7 +314,7 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
       for (const orig of mods) {
         if (!drafts.find((d) => d.id === orig.id)) await deleteMod(orig.id);
       }
-      onClose();
+      showToast('已保存');
     } catch (e) {
       alert('保存失败: ' + (e as Error).message);
     }
