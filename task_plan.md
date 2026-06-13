@@ -41,7 +41,7 @@
 - **每次修改都需要推送**
 
 ## Current Phase
-Phase 2 — 核心功能验证（Deep Space UI 已迁移；预设导入导出、变量快照/分支、隐式变量提取代码验证完成；等待真实 API 与人工体验核心流程）
+Phase 2 — 核心功能验证（Deep Space UI 已迁移；预设导入导出、变量快照/分支、隐式变量提取代码验证完成；HistoryDrawer/OptionList/VariablesModal 代码级修复完成，lorebook-engine 22 测试新增；等待真实 API 与人工体验核心流程）
 
 ## 项目目录
 `D:\酒馆\独立前端`
@@ -77,8 +77,8 @@ Phase 2 — 核心功能验证（Deep Space UI 已迁移；预设导入导出、
 - [ ] 验证选项点选功能（OptionList 已过滤空选项；待人工体验）
 - [x] 参考废案迁移 Deep Space 终端 UI 首轮
 - [x] UI 精简：工具栏重构（历史移至顶部栏，重roll移至输入框）
-- [x] 代码级修复：HistoryDrawer 确认框 + textarea 编辑、OptionList 空过滤、lorebook-engine 测试（`7c46087`）
-- [x] 推送到 Git（`60b88e0` 已推送 origin/main）
+- [x] 代码级修复：HistoryDrawer 确认框 + textarea 编辑、OptionList 空过滤、VariablesModal 提示修正、lorebook-engine 测试、删除死代码（`7c46087`）
+- [x] 推送到 Git（`60b88e0` → `7c46087` → `4d0404a` 已推送 origin/main）
 - **Status:** `in_progress`（待人工体验验证剩余项目，需配置真实 API）
 - **依赖**: Phase 1 完成
 
