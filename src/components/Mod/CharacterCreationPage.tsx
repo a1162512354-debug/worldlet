@@ -5,14 +5,14 @@ import { useSillytavern } from '../../hooks/useSillytavern';
 const MOD_TYPE_ICONS: Record<ModType, string> = {
   worldbook: '📚',
   item: '🎒',
-  attribute: '⚔️',
+  skill: '⚔️',
   plot: '📖',
 };
 
 const MOD_TYPE_LABELS: Record<ModType, string> = {
   worldbook: '世界书',
   item: '物品',
-  attribute: '属性',
+  skill: '技能',
   plot: '剧情',
 };
 
@@ -54,7 +54,7 @@ export function CharacterCreationPage({ onClose }: { onClose: () => void }) {
   const mergedVariables = useMemo(() => {
     const vars: Record<string, any> = {};
     for (const mod of selectedMods) {
-      if (mod.content.type === 'item' || mod.content.type === 'attribute') {
+      if (mod.content.type === 'item' || mod.content.type === 'skill') {
         // 合并字段值到变量
         for (const [key, value] of Object.entries(mod.content.values)) {
           vars[key] = value;

@@ -456,9 +456,9 @@ function useSillytavernState() {
       // 2. 解析选中的 MOD
       const selectedMods = mods.filter((m) => selectedModIds.includes(m.id));
 
-      // 3. 合并物品/属性 MOD 的变量注入
+      // 3. 合并物品/技能 MOD 的变量注入
       for (const mod of selectedMods) {
-        if (mod.content.type === 'item' || mod.content.type === 'attribute') {
+        if (mod.content.type === 'item' || mod.content.type === 'skill') {
           variables = { ...variables, ...mod.content.values };
         }
       }

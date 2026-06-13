@@ -431,7 +431,7 @@ export interface PanelTemplate {
 // ========== MOD 系统类型 ==========
 
 /** MOD 类型 */
-export type ModType = 'worldbook' | 'item' | 'attribute' | 'plot';
+export type ModType = 'worldbook' | 'item' | 'skill' | 'plot';
 
 /** MOD 变量字段类型 */
 export type ModVariableFieldType = 'number' | 'text' | 'boolean' | 'select';
@@ -452,7 +452,7 @@ export interface ModVariableField {
 export type ModContent =
   | ModContentWorldbook
   | ModContentItem
-  | ModContentAttribute
+  | ModContentSkill
   | ModContentPlot;
 
 export interface ModContentWorldbook {
@@ -469,8 +469,8 @@ export interface ModContentItem {
   values: Record<string, any>;
 }
 
-export interface ModContentAttribute {
-  type: 'attribute';
+export interface ModContentSkill {
+  type: 'skill';
   /** 自定义字段定义 */
   fields: ModVariableField[];
   /** 字段值 */

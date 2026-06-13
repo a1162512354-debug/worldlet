@@ -11,7 +11,7 @@ function newModId(): string {
 const MOD_TYPE_INFO: Record<ModType, { label: string; icon: string; desc: string }> = {
   worldbook: { label: '世界书', icon: '📚', desc: '注入世界书设定（世界观、NPC、地点）' },
   item: { label: '物品', icon: '🎒', desc: '注入物品到初始变量（装备、道具、消耗品）' },
-  attribute: { label: '属性', icon: '⚔️', desc: '注入属性值（力量、敏捷、技能等级）' },
+  skill: { label: '技能', icon: '⚔️', desc: '注入技能（剑术、火球术、治疗术等）' },
   plot: { label: '剧情', icon: '📖', desc: '注入开局剧情/背景设定' },
 };
 
@@ -51,14 +51,14 @@ function createContentForType(type: ModType): ModContent {
       ],
       values: { name: '', description: '', quantity: 1 },
     };
-    case 'attribute': return {
-      type: 'attribute',
+    case 'skill': return {
+      type: 'skill',
       fields: [
-        { key: 'name', label: '属性名', type: 'text', defaultValue: '' },
-        { key: 'value', label: '数值', type: 'number', defaultValue: 0 },
+        { key: 'name', label: '技能名', type: 'text', defaultValue: '' },
+        { key: 'level', label: '等级', type: 'number', defaultValue: 1, min: 1, max: 100 },
         { key: 'description', label: '描述', type: 'text', defaultValue: '' },
       ],
-      values: { name: '', value: 0, description: '' },
+      values: { name: '', level: 1, description: '' },
     };
     case 'plot': return { type: 'plot', openingText: '' };
   }
@@ -166,7 +166,7 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
     setDrafts((prev) =>
       prev.map((m) => {
         if (m.id !== selectedId) return m;
-        if (m.content.type !== 'item' && m.content.type !== 'attribute') return m;
+        if (m.content.type !== 'item' && m.content.type !== 'skill') return m;
         if (m.content.fields.some((f) => f.key === key)) {
           alert('字段名已存在');
           return m;
@@ -196,7 +196,7 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
       setDrafts((prev) =>
         prev.map((m) => {
           if (m.id !== selectedId) return m;
-          if (m.content.type !== 'item' && m.content.type !== 'attribute') return m;
+          if (m.content.type !== 'item' && m.content.type !== 'skill') return m;
           const { [fieldKey]: _, ...restValues } = m.content.values;
           return {
             ...m,
@@ -219,7 +219,7 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
       setDrafts((prev) =>
         prev.map((m) => {
           if (m.id !== selectedId) return m;
-          if (m.content.type !== 'item' && m.content.type !== 'attribute') return m;
+          if (m.content.type !== 'item' && m.content.type !== 'skill') return m;
           return {
             ...m,
             content: {
@@ -243,7 +243,7 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
       setDrafts((prev) =>
         prev.map((m) => {
           if (m.id !== selectedId) return m;
-          if (m.content.type !== 'item' && m.content.type !== 'attribute') return m;
+          if (m.content.type !== 'item' && m.content.type !== 'skill') return m;
           return {
             ...m,
             content: {
@@ -399,7 +399,7 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
         );
 
       case 'item':
-      case 'attribute':
+      case 'skill':
         const fields = content.fields ?? [];
         const values = content.values ?? {};
         return (
@@ -408,7 +408,7 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
             <div className="st-fieldset">
               <div className="st-flex st-items-center st-justify-between st-mb-4">
                 <span className="st-text-12 st-text-secondary">
-                  {content.type === 'item' ? '物品字段定义' : '属性字段定义'}
+                  {content.type === 'item' ? '物品字段定义' : '技能字段定义'}
                 </span>
                 <button className="st-btn-xs" onClick={handleFieldAdd}>+ 添加字段</button>
               </div>
