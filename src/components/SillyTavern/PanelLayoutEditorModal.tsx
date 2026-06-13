@@ -60,6 +60,7 @@ const WIDGET_TYPE_LABELS: Record<WidgetType, string> = {
   separator: '分隔线',
   'inventory-category': '背包分类',
   'inventory-item': '背包物品',
+  'nested-layout': '嵌套布局',
 };
 
 const INVENTORY_CATEGORIES = [
@@ -161,6 +162,7 @@ function WidgetRow({
   widget,
   index,
   variableOptions,
+  layoutOptions,
   columns,
   onChange,
   onRemove,
@@ -170,6 +172,7 @@ function WidgetRow({
   widget: PanelWidget;
   index: number;
   variableOptions: { key: string; label: string }[];
+  layoutOptions: { id: string; name: string }[];
   columns: number;
   onChange: (w: PanelWidget) => void;
   onRemove: () => void;
@@ -178,6 +181,7 @@ function WidgetRow({
 }) {
   const isInventoryCategory = widget.widgetType === 'inventory-category';
   const isInventoryItem = widget.widgetType === 'inventory-item';
+  const isNestedLayout = widget.widgetType === 'nested-layout';
 
   return (
     <div
@@ -213,6 +217,19 @@ function WidgetRow({
             {variableOptions.map((o) => (
               <option key={o.key} value={o.key}>
                 {o.label} ({o.key})
+              </option>
+            ))}
+          </select>
+        ) : isNestedLayout ? (
+          <select
+            value={widget.variableKey}
+            onChange={(e) => onChange({ ...widget, variableKey: e.target.value })}
+            className="st-p-4 st-flex-1 st-text-12"
+          >
+            <option value="">-- 选择嵌套布局 --</option>
+            {layoutOptions.map((l) => (
+              <option key={l.id} value={l.id}>
+                📊 {l.name}
               </option>
             ))}
           </select>
@@ -317,14 +334,17 @@ function LayoutPreview({
   variables,
   inventory,
   defMap,
+  allLayouts,
 }: {
   layout: PanelLayout;
   variables: Record<string, any>;
   inventory: { weapons: any[]; armor: any[]; consumables: any[]; materials: any[]; other: any[] };
   defMap: Map<string, VariableDefinition>;
+  allLayouts: PanelLayout[];
 }) {
   const [expandedCategory, setExpandedCategory] = useState<string | null>(null);
   const [expandedItem, setExpandedItem] = useState<string | null>(null);
+  const [nestedLayoutId, setNestedLayoutId] = useState<string | null>(null);
 
   // group widgets by row
   const rowMap = new Map<number, PanelWidget[]>();
@@ -431,6 +451,23 @@ function LayoutPreview({
       );
     }
 
+    if (w.widgetType === 'nested-layout') {
+      const nestedLayout = allLayouts.find((l) => l.id === w.variableKey);
+      if (!nestedLayout) {
+        return <div className="st-text-12 st-text-muted">布局未找到</div>;
+      }
+      return (
+        <button
+          onClick={() => setNestedLayoutId(w.variableKey)}
+          className="st-border st-rounded st-p-8 st-w-full st-text-left"
+          style={{ background: 'var(--space-surface-deep)', cursor: 'pointer' }}
+        >
+          <div className="st-text-12 st-font-bold">📊 {nestedLayout.name}</div>
+          <div className="st-text-11 st-text-muted">点击查看详情</div>
+        </button>
+      );
+    }
+
     return (
       <VariableBadge
         varKey={w.variableKey}
@@ -439,6 +476,30 @@ function LayoutPreview({
       />
     );
   };
+
+  // 如果选择了嵌套布局，显示嵌套布局的预览
+  if (nestedLayoutId) {
+    const nestedLayout = allLayouts.find((l) => l.id === nestedLayoutId);
+    if (nestedLayout) {
+      return (
+        <div>
+          <button
+            onClick={() => setNestedLayoutId(null)}
+            className="st-btn-xs st-mb-8"
+          >
+            ← 返回主布局
+          </button>
+          <LayoutPreview
+            layout={nestedLayout}
+            variables={variables}
+            inventory={inventory}
+            defMap={defMap}
+            allLayouts={allLayouts}
+          />
+        </div>
+      );
+    }
+  }
 
   return (
     <div
@@ -750,6 +811,7 @@ export function PanelLayoutEditorModal({ onClose }: { onClose: () => void }) {
                         widget={w}
                         index={i}
                         variableOptions={varOptions}
+                        layoutOptions={panelLayouts.filter((l) => l.id !== draft.id).map((l) => ({ id: l.id, name: l.name }))}
                         columns={draft.columns}
                         onChange={(updated) => handleWidgetChange(i, updated)}
                         onRemove={() => handleWidgetRemove(i)}
@@ -765,7 +827,13 @@ export function PanelLayoutEditorModal({ onClose }: { onClose: () => void }) {
                   <span className="st-text-12 st-font-bold st-mb-8" style={{ display: 'block' }}>
                     实时预览
                   </span>
-                  <LayoutPreview layout={draft} variables={variables} inventory={activeChat?.inventory ?? { weapons: [], armor: [], consumables: [], materials: [], other: [] }} defMap={defMap} />
+                  <LayoutPreview
+                    layout={draft}
+                    variables={variables}
+                    inventory={activeChat?.inventory ?? { weapons: [], armor: [], consumables: [], materials: [], other: [] }}
+                    defMap={defMap}
+                    allLayouts={panelLayouts}
+                  />
                 </div>
               </>
             )}

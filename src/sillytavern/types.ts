@@ -399,7 +399,7 @@ export interface ScenarioTemplate {
 // ========== Panel Layout Types (自定义展示面板) ==========
 
 /** 面板组件类型 */
-export type WidgetType = 'progress' | 'badge' | 'list' | 'grid' | 'text' | 'separator' | 'inventory-category' | 'inventory-item';
+export type WidgetType = 'progress' | 'badge' | 'list' | 'grid' | 'text' | 'separator' | 'inventory-category' | 'inventory-item' | 'nested-layout';
 
 /** 单个面板组件 */
 export interface PanelWidget {
