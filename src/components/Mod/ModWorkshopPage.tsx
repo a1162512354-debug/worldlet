@@ -78,7 +78,10 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
     for (const d of drafts) {
       const orig = mods.find((m) => m.id === d.id);
       if (!orig) return true;
-      if (JSON.stringify(d) !== JSON.stringify(orig)) return true;
+      // 比较时忽略 updatedAt
+      const { updatedAt: _1, ...dRest } = d;
+      const { updatedAt: _2, ...oRest } = orig;
+      if (JSON.stringify(dRest) !== JSON.stringify(oRest)) return true;
     }
     return false;
   }, [drafts, mods]);
