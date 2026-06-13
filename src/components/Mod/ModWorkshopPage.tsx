@@ -324,8 +324,19 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
                   onChange={(e) => {
                     const schemaId = e.target.value || null;
                     handleContentField('schemaId', schemaId);
-                    // 切换结构时清空值
-                    if (schemaId !== content.schemaId) {
+                    // 切换结构时自动填充默认值
+                    if (schemaId && schemaId !== content.schemaId) {
+                      const schema = variableSchemas.find((s) => s.id === schemaId);
+                      if (schema) {
+                        const defaultValues: Record<string, any> = {};
+                        for (const def of schema.definitions) {
+                          if (def.defaultValue !== undefined) {
+                            defaultValues[def.id] = def.defaultValue;
+                          }
+                        }
+                        handleContentField('values', defaultValues);
+                      }
+                    } else if (!schemaId) {
                       handleContentField('values', {});
                     }
                   }}
