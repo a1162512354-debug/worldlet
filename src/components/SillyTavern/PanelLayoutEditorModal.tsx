@@ -58,7 +58,17 @@ const WIDGET_TYPE_LABELS: Record<WidgetType, string> = {
   grid: '网格',
   text: '文字',
   separator: '分隔线',
+  'inventory-category': '背包分类',
+  'inventory-item': '背包物品',
 };
+
+const INVENTORY_CATEGORIES = [
+  { key: 'weapons', label: '武器', icon: '⚔️' },
+  { key: 'armor', label: '防具', icon: '🛡️' },
+  { key: 'consumables', label: '消耗品', icon: '🧪' },
+  { key: 'materials', label: '材料', icon: '📦' },
+  { key: 'other', label: '其他', icon: '📋' },
+];
 
 // ---- helpers ----
 
@@ -166,6 +176,9 @@ function WidgetRow({
   onMoveUp: () => void;
   onMoveDown: () => void;
 }) {
+  const isInventoryCategory = widget.widgetType === 'inventory-category';
+  const isInventoryItem = widget.widgetType === 'inventory-item';
+
   return (
     <div
       className="st-border st-rounded st-p-8 st-mb-8"
@@ -176,26 +189,54 @@ function WidgetRow({
           #{index + 1}
         </span>
 
-        {/* variable key */}
-        <select
-          value={widget.variableKey}
-          onChange={(e) => onChange({ ...widget, variableKey: e.target.value })}
-          className="st-p-4 st-flex-1 st-text-12"
-        >
-          <option value="">-- 选择变量 --</option>
-          {variableOptions.map((o) => (
-            <option key={o.key} value={o.key}>
-              {o.label} ({o.key})
-            </option>
-          ))}
-        </select>
+        {/* variable key or inventory selector */}
+        {isInventoryCategory ? (
+          <select
+            value={widget.variableKey}
+            onChange={(e) => onChange({ ...widget, variableKey: e.target.value })}
+            className="st-p-4 st-flex-1 st-text-12"
+          >
+            <option value="">-- 选择背包分类 --</option>
+            {INVENTORY_CATEGORIES.map((cat) => (
+              <option key={cat.key} value={cat.key}>
+                {cat.icon} {cat.label}
+              </option>
+            ))}
+          </select>
+        ) : isInventoryItem ? (
+          <select
+            value={widget.variableKey}
+            onChange={(e) => onChange({ ...widget, variableKey: e.target.value })}
+            className="st-p-4 st-flex-1 st-text-12"
+          >
+            <option value="">-- 选择背包物品 --</option>
+            {variableOptions.map((o) => (
+              <option key={o.key} value={o.key}>
+                {o.label} ({o.key})
+              </option>
+            ))}
+          </select>
+        ) : (
+          <select
+            value={widget.variableKey}
+            onChange={(e) => onChange({ ...widget, variableKey: e.target.value })}
+            className="st-p-4 st-flex-1 st-text-12"
+          >
+            <option value="">-- 选择变量 --</option>
+            {variableOptions.map((o) => (
+              <option key={o.key} value={o.key}>
+                {o.label} ({o.key})
+              </option>
+            ))}
+          </select>
+        )}
 
         {/* widget type */}
         <select
           value={widget.widgetType}
           onChange={(e) => onChange({ ...widget, widgetType: e.target.value as WidgetType })}
           className="st-p-4 st-text-12"
-          style={{ width: 90 }}
+          style={{ width: 100 }}
         >
           {Object.entries(WIDGET_TYPE_LABELS).map(([v, l]) => (
             <option key={v} value={v}>{l}</option>
@@ -274,10 +315,12 @@ function WidgetRow({
 function LayoutPreview({
   layout,
   variables,
+  inventory,
   defMap,
 }: {
   layout: PanelLayout;
   variables: Record<string, any>;
+  inventory: { weapons: any[]; armor: any[]; consumables: any[]; materials: any[]; other: any[] };
   defMap: Map<string, VariableDefinition>;
 }) {
   // group widgets by row
@@ -288,6 +331,72 @@ function LayoutPreview({
     rowMap.set(w.row, list);
   }
   const rows = Array.from(rowMap.entries()).sort(([a], [b]) => a - b);
+
+  const renderWidget = (w: PanelWidget) => {
+    if (w.widgetType === 'separator') {
+      return (
+        <div
+          style={{
+            borderTop: '1px solid var(--space-border-medium)',
+            margin: '8px 0',
+          }}
+        />
+      );
+    }
+
+    if (w.widgetType === 'inventory-category') {
+      const category = w.variableKey as keyof typeof inventory;
+      const items = inventory[category] ?? [];
+      const catInfo = INVENTORY_CATEGORIES.find((c) => c.key === category);
+      return (
+        <div className="st-border st-rounded st-p-8" style={{ background: 'var(--space-surface-deep)' }}>
+          <div className="st-text-12 st-font-bold st-mb-4">
+            {catInfo?.icon || '📦'} {catInfo?.label || category}
+            <span className="st-text-11 st-text-muted st-ml-4">({items.length})</span>
+          </div>
+          {items.length === 0 ? (
+            <div className="st-text-11 st-text-muted">空</div>
+          ) : (
+            <div className="st-flex-col st-gap-2">
+              {items.slice(0, 3).map((item: any) => (
+                <div key={item.id} className="st-text-12 st-truncate">
+                  {item.name} {item.quantity > 1 ? `×${item.quantity}` : ''}
+                </div>
+              ))}
+              {items.length > 3 && (
+                <div className="st-text-11 st-text-muted">+{items.length - 3} 更多</div>
+              )}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (w.widgetType === 'inventory-item') {
+      // Find item in inventory by id
+      const allItems = Object.values(inventory).flat();
+      const item = allItems.find((i: any) => i.id === w.variableKey);
+      if (!item) {
+        return <div className="st-text-12 st-text-muted">物品未找到</div>;
+      }
+      return (
+        <div className="st-border st-rounded st-p-8" style={{ background: 'var(--space-surface-deep)' }}>
+          <div className="st-text-12 st-font-bold">{(item as any).name}</div>
+          {(item as any).quantity > 1 && (
+            <span className="st-text-11 st-text-muted">×{(item as any).quantity}</span>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <VariableBadge
+        varKey={w.variableKey}
+        value={variables[w.variableKey]}
+        definition={defMap.get(w.variableKey)}
+      />
+    );
+  };
 
   return (
     <div
@@ -310,20 +419,7 @@ function LayoutPreview({
                 minHeight: 32,
               }}
             >
-              {w.widgetType === 'separator' ? (
-                <div
-                  style={{
-                    borderTop: '1px solid var(--space-border-medium)',
-                    margin: '8px 0',
-                  }}
-                />
-              ) : (
-                <VariableBadge
-                  varKey={w.variableKey}
-                  value={variables[w.variableKey]}
-                  definition={defMap.get(w.variableKey)}
-                />
-              )}
+              {renderWidget(w)}
             </div>
           )),
       )}
@@ -625,7 +721,7 @@ export function PanelLayoutEditorModal({ onClose }: { onClose: () => void }) {
                   <span className="st-text-12 st-font-bold st-mb-8" style={{ display: 'block' }}>
                     实时预览
                   </span>
-                  <LayoutPreview layout={draft} variables={variables} defMap={defMap} />
+                  <LayoutPreview layout={draft} variables={variables} inventory={activeChat?.inventory ?? { weapons: [], armor: [], consumables: [], materials: [], other: [] }} defMap={defMap} />
                 </div>
               </>
             )}
