@@ -497,6 +497,12 @@ input, textarea, select { color: var(--space-text); }
   .st-message-bubble { max-width: calc(100vw - 86px); }
   .space-chat-input-shell { grid-template-columns: 1fr; }
   .legacy-modal-shell.side, .legacy-modal-shell.side.left { left: 10px; right: 10px; top: 46px; bottom: 10px; width: auto; }
+  .legacy-modal-shell.wide { width: calc(100vw - 16px); height: calc(100vh - 16px); }
+  .legacy-modal-overlay { padding: 8px; }
+  .st-two-panel { flex-direction: column; }
+  .st-sidebar-panel, .st-sidebar-panel-wide { width: 100%; border-right: none; border-bottom: 1px solid var(--space-border-medium); max-height: 200px; }
+  .st-flex-wrap { flex-wrap: wrap; }
+  .legacy-modal-header { flex-wrap: wrap; gap: 8px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
