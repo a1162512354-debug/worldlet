@@ -5,6 +5,7 @@ import { LorebookModal } from '../SillyTavern/LorebookModal'
 import { PresetModal } from '../SillyTavern/PresetModal'
 import { VariablesModal } from '../SillyTavern/VariablesModal'
 import { VariableSchemaEditorModal } from '../SillyTavern/VariableSchemaEditorModal'
+import { ScenarioTemplateModal } from '../SillyTavern/ScenarioTemplateModal'
 import { HistoryDrawer } from '../SillyTavern/HistoryDrawer'
 import { Toast } from '../SillyTavern/Toast'
 import { useSillytavern } from '../../hooks/useSillytavern'
@@ -244,7 +245,7 @@ export function SpacePortal() {
                 </div>
               )}
               {page === 'library' && <LibraryPage onOpenLorebooks={st.openLorebooks} onOpenPresets={st.openPresets} />}
-              {page === 'workshop' && <WorkshopLanding />}
+              {page === 'workshop' && <WorkshopLanding onOpenScenarios={st.openScenarioManager} onOpenSchemaEditor={st.openSchemaEditor} />}
               {page === 'settings' && <SettingsLanding onOpenSettings={st.openSettings} />}
             </div>
           )}
@@ -256,6 +257,7 @@ export function SpacePortal() {
       {st.showPresets && <PresetModal onClose={() => st.setShowPresets(false)} />}
       {st.showVariables && <VariablesModal onClose={() => st.setShowVariables(false)} />}
       {st.showSchemaEditor && <VariableSchemaEditorModal onClose={() => st.setShowSchemaEditor(false)} />}
+      {st.showScenarioManager && <ScenarioTemplateModal onClose={() => st.setShowScenarioManager(false)} />}
       {historyOpen && <HistoryDrawer onClose={() => setHistoryOpen(false)} />}
       <Toast message={st.toast} />
     </div>
@@ -356,17 +358,15 @@ function LibraryPage({ onOpenLorebooks, onOpenPresets }: { onOpenLorebooks: () =
   )
 }
 
-function WorkshopLanding() {
+function WorkshopLanding({ onOpenScenarios, onOpenSchemaEditor }: { onOpenScenarios: () => void; onOpenSchemaEditor: () => void }) {
   return (
     <div className="launcher-grid">
+      <LauncherPanel title="场景模板" text="创建、编辑开局场景模板，绑定预设、世界书与变量结构。" action="打开场景模板" onClick={onOpenScenarios} />
+      <LauncherPanel title="变量结构" text="定义可复用的变量结构（数值、枚举、列表等），供场景模板引用。" action="打开变量结构" onClick={onOpenSchemaEditor} />
       <div className="launcher-panel">
-        <h2>创意工坊</h2>
-        <p>这里将和后续 MOD 工坊阶段一起实现：开局模板、变量结构编辑器、自定义展示面板与导入导出。</p>
-        <button className="primary-command" disabled>等待 Phase 3 实现</button>
-      </div>
-      <div className="launcher-panel">
-        <h2>规划目标</h2>
-        <p>把废案中的 MOD 工坊重新定位为“可视化开局创作工具”，避免迁移旧 Agent 生成逻辑。</p>
+        <h2>展示面板</h2>
+        <p>自定义变量在对话界面中的展示样式（进度条、徽章、网格等）。后续阶段实现。</p>
+        <button className="primary-command" disabled>等待后续阶段</button>
       </div>
     </div>
   )

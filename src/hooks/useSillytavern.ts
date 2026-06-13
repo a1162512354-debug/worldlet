@@ -118,16 +118,34 @@ function useSillytavernState() {
 
   // ---- chat helpers ----
   const createChat = useCallback(
-    async (name: string, options?: { presetId?: string; lorebookIds?: string[] }) => {
+    async (name: string, options?: { presetId?: string; lorebookIds?: string[]; scenarioId?: string }) => {
+      let variables: Record<string, any> = {};
+      let presetId = options?.presetId ?? settings?.activePresetId ?? null;
+      let lorebookIds = options?.lorebookIds ?? settings?.activeLorebookIds ?? [];
+      let characterName = settings?.characterName ?? DEFAULT_SETTINGS.characterName;
+      let userName = settings?.userName ?? DEFAULT_SETTINGS.userName;
+
+      // Apply scenario template if specified
+      if (options?.scenarioId) {
+        const scenario = scenarios.find((s) => s.id === options.scenarioId);
+        if (scenario) {
+          variables = { ...scenario.initialVariables };
+          if (scenario.presetId) presetId = scenario.presetId;
+          if (scenario.lorebookIds.length > 0) lorebookIds = scenario.lorebookIds;
+          if (scenario.characterName) characterName = scenario.characterName;
+          if (scenario.userName) userName = scenario.userName;
+        }
+      }
+
       const chat: ChatSession = {
         id: crypto.randomUUID(),
         name,
         messages: [],
-        characterName: settings?.characterName ?? DEFAULT_SETTINGS.characterName,
-        userName: settings?.userName ?? DEFAULT_SETTINGS.userName,
-        presetId: options?.presetId ?? settings?.activePresetId ?? null,
-        lorebookIds: options?.lorebookIds ?? settings?.activeLorebookIds ?? [],
-        variables: {},
+        characterName,
+        userName,
+        presetId,
+        lorebookIds,
+        variables,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -136,7 +154,7 @@ function useSillytavernState() {
       setActiveChatId(chat.id);
       return chat.id;
     },
-    [settings]
+    [settings, scenarios]
   );
 
   const selectChat = useCallback((id: string) => setActiveChatId(id), []);

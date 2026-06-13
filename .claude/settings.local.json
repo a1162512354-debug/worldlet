@@ -41,7 +41,10 @@
       "Bash(PATH='/c/Program Files/nodejs:__TRACKED_VAR__' npm test -- --run)",
       "Read(//c/Users/37315/.claude/**)",
       "Read(//c/Users/37315/.claude/plugins/**)",
-      "Bash(npx tsc *)"
+      "Bash(npx tsc *)",
+      "Bash(python3 -c ' *)",
+      "Bash(node -e ' *)",
+      "Bash(npx vite *)"
     ]
   }
 }
