@@ -476,7 +476,7 @@ export function PanelLayoutEditorModal({ onClose }: { onClose: () => void }) {
           <button
             onClick={handleSave}
             disabled={!dirty}
-            className="ds-save st-btn-sm"
+            className="st-btn-save st-btn-sm"
           >
             保存
           </button>
