@@ -56,7 +56,8 @@ export function CharacterCreationPage({ onClose }: { onClose: () => void }) {
     for (const mod of selectedMods) {
       if (mod.content.type === 'item' || mod.content.type === 'attribute') {
         // 合并字段值到变量
-        for (const [key, value] of Object.entries(mod.content.values)) {
+        const values = mod.content.values ?? {};
+        for (const [key, value] of Object.entries(values)) {
           vars[key] = value;
         }
       }
