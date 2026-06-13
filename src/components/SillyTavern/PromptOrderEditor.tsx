@@ -43,7 +43,7 @@ export function PromptOrderEditor({
             alignItems: 'center',
             gap: 8,
             padding: '6px 8px',
-            borderBottom: '1px solid #eee',
+            borderBottom: '1px solid var(--space-border-light)',
           }}
         >
           <input

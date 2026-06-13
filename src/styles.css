@@ -246,6 +246,25 @@ input, textarea, select { color: var(--space-text); }
 .legacy-modal-shell input:not([type="checkbox"]):not([type="radio"]), .legacy-modal-shell select, .legacy-modal-shell textarea, .space-field { min-height: 40px; padding: 9px 11px !important; border: 1px solid var(--space-border-strong) !important; border-radius: 0 !important; background: linear-gradient(135deg, var(--color-accent-dim), transparent 30%), var(--space-surface-deep) !important; color: var(--space-text) !important; font-family: var(--font-mono); clip-path: var(--clip-corner); }
 .legacy-modal-shell input:focus, .legacy-modal-shell select:focus, .legacy-modal-shell textarea:focus { outline: none; border-color: var(--color-accent) !important; box-shadow: 0 0 0 1px var(--space-accent-border-subtle), 0 0 24px var(--color-accent-dim); }
 
+/* Deep Space overrides: buttons, chips, selected items, borders, text inside modals */
+.legacy-modal-shell button { background: var(--color-accent-dim) !important; border-color: var(--space-accent-border) !important; color: var(--space-text) !important; }
+.legacy-modal-shell button.ds-save { background: #2c8 !important; color: #fff !important; }
+.legacy-modal-shell button.ds-danger { background: rgba(248, 113, 113, 0.15) !important; border-color: var(--space-error-border) !important; color: var(--color-error) !important; }
+.legacy-modal-shell button.ds-purple { background: #6464a8 !important; color: #fff !important; }
+.legacy-modal-shell button.ds-green { background: #2c8 !important; color: #fff !important; }
+.legacy-modal-shell button:disabled { opacity: 0.45; cursor: not-allowed; }
+.legacy-modal-shell .ds-selected { background: var(--space-accent-glow-faint) !important; }
+.legacy-modal-shell aside, .legacy-modal-shell footer, .legacy-modal-shell details { border-color: var(--space-border-medium) !important; }
+.legacy-modal-shell fieldset { border-color: var(--space-border-medium) !important; }
+.legacy-modal-shell legend { color: var(--space-text-secondary) !important; }
+.legacy-modal-shell summary { color: var(--space-text-secondary) !important; }
+.legacy-modal-shell hr { border-color: var(--space-border-medium) !important; }
+.legacy-modal-shell label > span:first-child { color: var(--space-text-secondary) !important; }
+.legacy-modal-shell small { color: var(--space-text-muted) !important; }
+.legacy-modal-shell code { background: rgba(178, 255, 5, 0.08) !important; color: var(--color-accent) !important; padding: 0 4px; border-radius: 2px; }
+.legacy-modal-shell .modal-chip { display: inline-block !important; background: rgba(178, 255, 5, 0.12) !important; border: 1px solid var(--space-accent-border) !important; color: var(--space-text) !important; }
+.legacy-modal-shell .modal-warn { background: rgba(251, 191, 36, 0.12) !important; border: 1px solid rgba(251, 191, 36, 0.36) !important; color: var(--color-warning) !important; }
+
 .lorebook-shell { display: flex; flex-direction: column; gap: 14px; overflow: hidden; width: min(880px, 94vw); height: min(86vh, 820px); }
 .lorebook-header { margin-bottom: 0; }
 .lorebook-header > div { display: grid; gap: 4px; }

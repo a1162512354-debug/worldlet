@@ -43,7 +43,7 @@ function ChipInput({
   return (
     <div
       style={{
-        border: '1px solid #ccc',
+        border: '1px solid var(--space-border-medium)',
         borderRadius: 4,
         padding: 4,
         minHeight: 32,
@@ -55,9 +55,8 @@ function ChipInput({
       {value.map((v, i) => (
         <span
           key={i}
+          className="modal-chip"
           style={{
-            background: '#eef',
-            border: '1px solid #99c',
             borderRadius: 3,
             padding: '2px 6px',
             fontSize: 12,
@@ -73,7 +72,7 @@ function ChipInput({
               border: 'none',
               background: 'transparent',
               cursor: 'pointer',
-              color: '#777',
+              color: 'var(--color-text-secondary)',
               padding: 0,
             }}
             title="移除"
@@ -109,7 +108,7 @@ function ChipInput({
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <label style={{ display: 'block', marginBottom: 12 }}>
-      <span style={{ display: 'block', fontSize: 12, color: '#555', marginBottom: 4 }}>
+      <span style={{ display: 'block', fontSize: 12, color: 'var(--color-text-secondary)', marginBottom: 4 }}>
         {label}
       </span>
       {children}
@@ -263,8 +262,8 @@ export function EntryForm({
         )}
       </div>
 
-      <details style={{ borderTop: '1px solid #eee', paddingTop: 12 }}>
-        <summary style={{ cursor: 'pointer', fontSize: 13, color: '#555' }}>
+      <details style={{ borderTop: '1px solid var(--space-border-medium)', paddingTop: 12 }}>
+        <summary style={{ cursor: 'pointer', fontSize: 13, color: 'var(--color-text-secondary)' }}>
           高级设置
         </summary>
         <div style={{ paddingTop: 12 }}>
@@ -371,8 +370,8 @@ export function EntryForm({
             分组评分
           </label>
 
-          <fieldset style={{ marginBottom: 12, border: '1px solid #ddd', padding: 8 }}>
-            <legend style={{ fontSize: 12, color: '#555' }}>字符卡匹配</legend>
+          <fieldset style={{ marginBottom: 12, border: '1px solid var(--space-border-medium)', padding: 8 }}>
+            <legend style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>字符卡匹配</legend>
             <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
               {(
                 [

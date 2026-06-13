@@ -99,12 +99,9 @@ export function LorebookEditorModal({
           <button
             onClick={handleSave}
             disabled={!dirty}
+            className="ds-save"
             style={{
               padding: '6px 14px',
-              background: dirty ? '#2c8' : '#bbb',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 4,
               cursor: dirty ? 'pointer' : 'not-allowed',
             }}
           >
@@ -117,7 +114,7 @@ export function LorebookEditorModal({
           <aside
             style={{
               width: 280,
-              borderRight: '1px solid #eee',
+              borderRight: '1px solid var(--space-border-medium)',
               overflowY: 'auto',
               padding: 8,
             }}
@@ -128,9 +125,6 @@ export function LorebookEditorModal({
                 width: '100%',
                 padding: '6px 10px',
                 marginBottom: 8,
-                background: '#f0f0f0',
-                border: '1px solid #ccc',
-                borderRadius: 4,
                 cursor: 'pointer',
               }}
             >
@@ -141,10 +135,10 @@ export function LorebookEditorModal({
                 <li
                   key={e.id}
                   onClick={() => setSelectedId(e.id)}
+                  className={e.id === selectedId ? 'ds-selected' : ''}
                   style={{
                     padding: '6px 8px',
                     cursor: 'pointer',
-                    background: e.id === selectedId ? '#e6f0ff' : 'transparent',
                     borderRadius: 4,
                     display: 'flex',
                     alignItems: 'center',
@@ -167,10 +161,10 @@ export function LorebookEditorModal({
                       ev.stopPropagation();
                       handleDeleteEntry(e.id);
                     }}
+                    className="ds-danger"
                     style={{
                       border: 'none',
                       background: 'transparent',
-                      color: '#c00',
                       cursor: 'pointer',
                       fontSize: 16,
                     }}
@@ -202,11 +196,11 @@ export function LorebookEditorModal({
         <footer
           style={{
             padding: '8px 16px',
-            borderTop: '1px solid #eee',
+            borderTop: '1px solid var(--space-border-medium)',
             display: 'flex',
             gap: 16,
             fontSize: 12,
-            color: '#666',
+            color: 'var(--color-text-secondary)',
           }}
         >
           <label>

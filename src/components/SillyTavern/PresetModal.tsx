@@ -55,7 +55,7 @@ function NumberField({
 }) {
   return (
     <label style={{ display: 'block', marginBottom: 8 }}>
-      <span style={{ display: 'block', fontSize: 12, color: '#555', marginBottom: 2 }}>
+      <span style={{ display: 'block', fontSize: 12, color: 'var(--color-text-secondary)', marginBottom: 2 }}>
         {label}
       </span>
       <input
@@ -84,7 +84,7 @@ function TextField({
 }) {
   return (
     <label style={{ display: 'block', marginBottom: 8 }}>
-      <span style={{ display: 'block', fontSize: 12, color: '#555', marginBottom: 2 }}>
+      <span style={{ display: 'block', fontSize: 12, color: 'var(--color-text-secondary)', marginBottom: 2 }}>
         {label}
       </span>
       <input
@@ -111,7 +111,7 @@ function TextArea({
 }) {
   return (
     <label style={{ display: 'block', marginBottom: 12 }}>
-      <span style={{ display: 'block', fontSize: 12, color: '#555', marginBottom: 4 }}>
+      <span style={{ display: 'block', fontSize: 12, color: 'var(--color-text-secondary)', marginBottom: 4 }}>
         {label}
       </span>
       <textarea
@@ -291,7 +291,7 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
               <button onClick={handleActivate} disabled={settings?.activePresetId === draft.id}>
                 {settings?.activePresetId === draft.id ? '当前已激活' : '设为激活'}
               </button>
-              <button onClick={handleDelete} style={{ color: '#c00' }}>
+              <button onClick={handleDelete} className="ds-danger">
                 删除
               </button>
             </>
@@ -300,12 +300,9 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
           <button
             onClick={handleSave}
             disabled={!dirty}
+            className="ds-save"
             style={{
               padding: '6px 14px',
-              background: dirty ? '#2c8' : '#bbb',
-              color: '#fff',
-              border: 'none',
-              borderRadius: 4,
               cursor: dirty ? 'pointer' : 'not-allowed',
             }}
           >
@@ -318,7 +315,7 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
           <aside
             style={{
               width: 240,
-              borderRight: '1px solid #eee',
+              borderRight: '1px solid var(--space-border-medium)',
               overflowY: 'auto',
               padding: 8,
             }}
@@ -328,10 +325,10 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
                 <li
                   key={p.id}
                   onClick={() => handleSelectPreset(p.id)}
+                  className={p.id === selectedId ? 'ds-selected' : ''}
                   style={{
                     padding: '6px 8px',
                     cursor: 'pointer',
-                    background: p.id === selectedId ? '#e6f0ff' : 'transparent',
                     borderRadius: 4,
                     fontSize: 13,
                     overflow: 'hidden',
@@ -378,8 +375,8 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
                       style={{
                         padding: '4px 10px',
                         border: 'none',
-                        background: tab === t ? '#333' : '#f0f0f0',
-                        color: tab === t ? '#fff' : '#333',
+                        background: tab === t ? 'rgba(178, 255, 5, 0.2)' : 'rgba(90, 98, 112, 0.14)',
+                        color: tab === t ? 'var(--color-accent)' : 'var(--color-text-secondary)',
                         borderRadius: 4,
                         cursor: 'pointer',
                       }}
@@ -534,7 +531,7 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
                         <li
                           key={p.identifier + idx}
                           style={{
-                            border: '1px solid #ddd',
+                            border: '1px solid var(--space-border-medium)',
                             borderRadius: 4,
                             padding: 8,
                             marginBottom: 8,
@@ -571,7 +568,7 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
                                 );
                                 patchSettings({ prompts: list });
                               }}
-                              style={{ color: '#c00' }}
+                              className="ds-danger"
                             >
                               删除
                             </button>

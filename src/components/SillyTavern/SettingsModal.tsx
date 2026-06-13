@@ -141,7 +141,7 @@ export function SettingsModal({
           <button onClick={onClose}>×</button>
         </header>
 
-        <div style={{ display: 'flex', gap: 4, marginBottom: 16, borderBottom: '1px solid #eee', paddingBottom: 8, flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: 4, marginBottom: 16, borderBottom: '1px solid var(--space-border-medium)', paddingBottom: 8, flexWrap: 'wrap' }}>
           {TABS.map((t) => (
             <button
               key={t}
@@ -149,8 +149,8 @@ export function SettingsModal({
               style={{
                 padding: '4px 10px',
                 border: 'none',
-                background: tab === t ? '#333' : '#f0f0f0',
-                color: tab === t ? '#fff' : '#333',
+                background: tab === t ? 'rgba(178, 255, 5, 0.2)' : 'rgba(90, 98, 112, 0.14)',
+                color: tab === t ? 'var(--color-accent)' : 'var(--color-text-secondary)',
                 borderRadius: 4,
                 cursor: 'pointer',
                 fontSize: 13,
@@ -246,7 +246,7 @@ export function SettingsModal({
                 {busy === 'test-primary' ? '测试中…' : '测试连通性'}
               </button>
             </div>
-            <hr style={{ border: 'none', borderTop: '1px solid #eee', margin: '8px 0' }} />
+            <hr style={{ border: 'none', borderTop: '1px solid var(--space-border-medium)', margin: '8px 0' }} />
             <label>
               用户名
               <input
@@ -271,7 +271,7 @@ export function SettingsModal({
         {tab === 'secondary' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
             {!isDual && (
-              <div style={{ padding: 10, background: '#fff8e1', border: '1px solid #ffd54f', borderRadius: 4, fontSize: 12, color: '#7a5800' }}>
+              <div className="modal-warn" style={{ padding: 10, borderRadius: 4, fontSize: 12 }}>
                 当前为单 API 模式。在「主 API」面板切换到双 API 模式以启用此页面的配置。
               </div>
             )}
@@ -373,10 +373,9 @@ export function SettingsModal({
               {settings.customTags.map((t, i) => (
                 <span
                   key={i}
+                  className="modal-chip"
                   style={{
-                    display: 'inline-block',
                     padding: '4px 8px',
-                    background: '#eee',
                     borderRadius: 4,
                     margin: 4,
                     fontSize: 13,
@@ -403,7 +402,7 @@ export function SettingsModal({
                   updateSettings({ customTags: [...settings.customTags, v] });
                 }
               }}
-              style={{ padding: '6px 12px', borderRadius: 4, border: '1px solid #ccc', cursor: 'pointer' }}
+              style={{ padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}
             >
               + 新增
             </button>
@@ -419,7 +418,7 @@ export function SettingsModal({
             />
             <button
               onClick={() => updateSettings({ formatPromptTemplate: DEFAULT_FORMAT_PROMPT })}
-              style={{ marginTop: 8, padding: '6px 12px', borderRadius: 4, border: '1px solid #ccc', cursor: 'pointer' }}
+              style={{ marginTop: 8, padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}
             >
               恢复默认
             </button>
@@ -428,7 +427,7 @@ export function SettingsModal({
 
         {tab === 'display' && (
           <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <fieldset style={{ border: '1px solid #ddd', borderRadius: 4, padding: 12 }}>
+            <fieldset style={{ border: '1px solid var(--space-border-medium)', borderRadius: 4, padding: 12 }}>
               <legend style={{ fontSize: 14, fontWeight: 'bold' }}>思考过程显示</legend>
               <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
                 {(['fold', 'hide', 'inline'] as const).map((m) => (
@@ -443,7 +442,7 @@ export function SettingsModal({
                 ))}
               </div>
             </fieldset>
-            <fieldset style={{ border: '1px solid #ddd', borderRadius: 4, padding: 12 }}>
+            <fieldset style={{ border: '1px solid var(--space-border-medium)', borderRadius: 4, padding: 12 }}>
               <legend style={{ fontSize: 14, fontWeight: 'bold' }}>界面模式</legend>
               <p style={{ margin: 0, color: '#666', fontSize: 13 }}>
                 当前项目仅保留游戏模式：剧情正文、选项点选、变量快照回档。
@@ -461,7 +460,8 @@ export function SettingsModal({
               </p>
               <button
                 onClick={handleExportAll}
-                style={{ padding: '8px 16px', background: '#2c8', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
+                className="ds-green"
+                style={{ padding: '8px 16px', borderRadius: 4, cursor: 'pointer' }}
               >
                 导出全部数据
               </button>
@@ -473,7 +473,8 @@ export function SettingsModal({
               </p>
               <button
                 onClick={handleImportAll}
-                style={{ padding: '8px 16px', background: '#6464a8', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
+                className="ds-purple"
+                style={{ padding: '8px 16px', borderRadius: 4, cursor: 'pointer' }}
               >
                 导入备份文件
               </button>
@@ -485,7 +486,8 @@ export function SettingsModal({
               </p>
               <button
                 onClick={handleClearAll}
-                style={{ padding: '8px 16px', background: '#c44', color: '#fff', border: 'none', borderRadius: 4, cursor: 'pointer' }}
+                className="ds-danger"
+                style={{ padding: '8px 16px', borderRadius: 4, cursor: 'pointer' }}
               >
                 清除所有数据
               </button>

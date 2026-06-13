@@ -55,7 +55,7 @@ export function VariablesModal({ onClose }: { onClose: () => void }) {
                 gap: 8,
                 marginBottom: 16,
                 paddingBottom: 12,
-                borderBottom: '1px solid #eee',
+                borderBottom: '1px solid var(--space-border-medium)',
               }}
             >
               <input
@@ -105,11 +105,11 @@ export function VariablesModal({ onClose }: { onClose: () => void }) {
                 background: 'rgba(110,207,207,0.08)',
                 borderRadius: 6,
                 fontSize: 12,
-                color: '#555',
+                color: 'var(--color-text-secondary)',
               }}
             >
-              <strong style={{ color: '#266' }}>提示:</strong> 变量随当前对话保存。AI 回复包含
-              <code style={{ background: '#eee', padding: '0 4px', margin: '0 4px' }}>
+              <strong style={{ color: 'var(--color-accent)' }}>提示:</strong> 变量随当前对话保存。AI 回复包含
+              <code style={{ padding: '0 4px', margin: '0 4px' }}>
                 {'<vars>{"hp": 80}</vars>'}
               </code>
               块时也会自动合并。
@@ -143,7 +143,7 @@ function VariableRow({
         gap: 8,
         alignItems: 'center',
         padding: '6px 0',
-        borderBottom: '1px solid #f0f0f0',
+        borderBottom: '1px solid var(--space-border-light)',
       }}
     >
       <input
@@ -163,8 +163,8 @@ function VariableRow({
         disabled={!dirty || !name.trim()}
         style={{
           padding: '4px 10px',
-          background: dirty && name.trim() ? '#2c8' : '#ddd',
-          color: '#fff',
+          background: dirty && name.trim() ? '#2c8' : 'rgba(90, 98, 112, 0.2)',
+          color: dirty && name.trim() ? '#fff' : 'var(--color-text-muted)',
           border: 'none',
           borderRadius: 3,
           cursor: dirty && name.trim() ? 'pointer' : 'not-allowed',
