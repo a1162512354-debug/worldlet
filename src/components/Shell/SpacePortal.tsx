@@ -4,6 +4,7 @@ import { SettingsModal } from '../SillyTavern/SettingsModal'
 import { LorebookModal } from '../SillyTavern/LorebookModal'
 import { PresetModal } from '../SillyTavern/PresetModal'
 import { VariablesModal } from '../SillyTavern/VariablesModal'
+import { VariablePanel } from '../SillyTavern/VariablePanel'
 import { VariableSchemaEditorModal } from '../SillyTavern/VariableSchemaEditorModal'
 import { ScenarioTemplateModal } from '../SillyTavern/ScenarioTemplateModal'
 import { HistoryDrawer } from '../SillyTavern/HistoryDrawer'
@@ -86,6 +87,7 @@ export function SpacePortal() {
   const [activeCard, setActiveCard] = useState<Exclude<PortalPage, 'home'>>('sessions')
   const [mouse, setMouse] = useState({ x: 0, y: 0, clientX: 0, clientY: 0 })
   const [historyOpen, setHistoryOpen] = useState(false)
+  const [varViewMode, setVarViewMode] = useState<'simple' | 'rich'>('simple')
   const [clock, setClock] = useState(() => new Date().toTimeString().slice(0, 8))
 
   useEffect(() => {
@@ -236,7 +238,8 @@ export function SpacePortal() {
                   <div className="chat-toolbar">
                     <button onClick={() => setPage('sessions')}>返回会话</button>
                     <button onClick={() => setHistoryOpen(true)}>历史</button>
-                    <button onClick={() => st.openVariables()}>变量</button>
+                    <button onClick={() => { setVarViewMode('simple'); st.openVariables(); }}>变量</button>
+                    <button onClick={() => { setVarViewMode('rich'); st.openVariables(); }}>变量面板</button>
                     <button onClick={() => st.openLorebooks()}>世界书</button>
                     <button onClick={() => st.openPresets()}>预设</button>
                     <button onClick={() => st.openSettings()}>设置</button>
@@ -255,7 +258,8 @@ export function SpacePortal() {
       {st.showSettings && st.settings && <SettingsModal settings={st.settings} updateSettings={st.updateSettings} onClose={() => st.setShowSettings(false)} />}
       {st.showLorebooks && <LorebookModal onClose={() => st.setShowLorebooks(false)} />}
       {st.showPresets && <PresetModal onClose={() => st.setShowPresets(false)} />}
-      {st.showVariables && <VariablesModal onClose={() => st.setShowVariables(false)} />}
+      {st.showVariables && varViewMode === 'simple' && <VariablesModal onClose={() => st.setShowVariables(false)} />}
+      {st.showVariables && varViewMode === 'rich' && <VariablePanel onClose={() => st.setShowVariables(false)} />}
       {st.showSchemaEditor && <VariableSchemaEditorModal onClose={() => st.setShowSchemaEditor(false)} />}
       {st.showScenarioManager && <ScenarioTemplateModal onClose={() => st.setShowScenarioManager(false)} />}
       {historyOpen && <HistoryDrawer onClose={() => setHistoryOpen(false)} />}

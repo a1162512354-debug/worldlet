@@ -103,11 +103,11 @@ Phase 3 — CSS 迁移 + MOD 工坊 + 主题系统（Phase 2 已完成：API 验
 - [ ] VariableSchemaEditorModal 组件（定义变量类型/描述/默认值）
 
 ##### 3.2.2 开局模板系统
-- [ ] 新增 `ScenarioTemplate` 类型（name/description/lorebookIds/presetId/variableSchemaId/initialVariables/systemPrompt）
-- [ ] 新增 `scenarios` IndexedDB 表
-- [ ] 新增 scenario CRUD 函数
-- [ ] ScenarioTemplateModal 组件（创建/编辑/选择模板）
-- [ ] 集成到 createChat：选择模板自动设置世界书+变量+预设
+- [x] 新增 `ScenarioTemplate` 类型（name/description/lorebookIds/presetId/variableSchemaId/initialVariables/systemPrompt）
+- [x] 新增 `scenarios` IndexedDB 表
+- [x] 新增 scenario CRUD 函数
+- [x] ScenarioTemplateModal 组件（创建/编辑/选择模板）
+- [x] 集成到 createChat：选择模板自动设置世界书+变量+预设
 
 ##### 3.2.3 变量展示组件
 - [ ] VariableBadge 组件（数值/枚举/列表/布尔/文本的可视化展示）
