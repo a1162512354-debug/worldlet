@@ -26,7 +26,11 @@ function createEmptyMod(): Mod {
     content: {
       type: 'item',
       schemaId: null,
+      itemName: '',
+      itemDescription: '',
+      quantity: 1,
       values: {},
+      category: 'other',
     },
     tags: [],
     openingDescription: '',
@@ -41,7 +45,11 @@ function createContentForType(type: ModType): ModContent {
     case 'item': return {
       type: 'item',
       schemaId: null,
+      itemName: '',
+      itemDescription: '',
+      quantity: 1,
       values: {},
+      category: 'other',
     };
     case 'skill': return {
       type: 'skill',
@@ -302,7 +310,6 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
         );
 
       case 'item':
-      case 'skill':
         // 获取当前绑定的变量结构
         const boundSchema = content.schemaId
           ? variableSchemas.find((s) => s.id === content.schemaId)
@@ -312,12 +319,61 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
 
         return (
           <div className="st-flex-col st-gap-12">
+            {/* 物品基本信息 */}
+            <div className="st-fieldset">
+              <span className="st-text-12 st-font-bold">物品信息</span>
+              <div className="st-flex-col st-gap-4 st-mt-4">
+                <div className="st-flex-row st-gap-8">
+                  <label className="st-flex-col st-gap-2 st-flex-1">
+                    <span className="st-text-11 st-text-muted">物品名称</span>
+                    <input
+                      className="st-input st-text-12"
+                      value={content.itemName || ''}
+                      onChange={(e) => handleContentField('itemName', e.target.value)}
+                      placeholder="如：铁剑、治疗药水"
+                    />
+                  </label>
+                  <label className="st-flex-col st-gap-2" style={{ width: 100 }}>
+                    <span className="st-text-11 st-text-muted">数量</span>
+                    <input
+                      type="number"
+                      className="st-input st-text-12"
+                      value={content.quantity || 1}
+                      onChange={(e) => handleContentField('quantity', Math.max(1, Number(e.target.value)))}
+                      min={1}
+                    />
+                  </label>
+                </div>
+                <label className="st-flex-col st-gap-2">
+                  <span className="st-text-11 st-text-muted">物品描述</span>
+                  <input
+                    className="st-input st-text-12"
+                    value={content.itemDescription || ''}
+                    onChange={(e) => handleContentField('itemDescription', e.target.value)}
+                    placeholder="物品的简要描述"
+                  />
+                </label>
+                <label className="st-flex-col st-gap-2">
+                  <span className="st-text-11 st-text-muted">背包分类</span>
+                  <select
+                    className="st-input st-text-12"
+                    value={content.category || 'other'}
+                    onChange={(e) => handleContentField('category', e.target.value)}
+                  >
+                    <option value="weapons">⚔️ 武器</option>
+                    <option value="armor">🛡️ 防具</option>
+                    <option value="consumables">🧪 消耗品</option>
+                    <option value="materials">📦 材料</option>
+                    <option value="other">📋 其他</option>
+                  </select>
+                </label>
+              </div>
+            </div>
+
             {/* 变量结构选择 */}
             <div className="st-fieldset">
               <div className="st-flex-row st-gap-8 st-items-center">
-                <span className="st-text-12 st-font-bold">
-                  {content.type === 'item' ? '物品变量结构' : '技能变量结构'}
-                </span>
+                <span className="st-text-12 st-font-bold">变量结构</span>
                 <select
                   className="st-input st-flex-1 st-text-12"
                   value={content.schemaId ?? ''}

@@ -79,6 +79,7 @@ describe('variables aggregator', () => {
       variables: { hp: 20, gold: 99 },
       createdAt: 0,
       updatedAt: 0,
+      inventory: { weapons: [], armor: [], consumables: [], materials: [], other: [] },
     };
 
     const truncated = truncateChatAt(chat, 2);
@@ -102,6 +103,7 @@ describe('variables aggregator', () => {
       variables: { hp: 20 },
       createdAt: 0,
       updatedAt: 0,
+      inventory: { weapons: [], armor: [], consumables: [], materials: [], other: [] },
     };
 
     const branch = branchChat(chat, 1, {

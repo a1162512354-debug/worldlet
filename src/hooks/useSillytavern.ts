@@ -7,6 +7,7 @@ import {
   DEFAULT_TAGS,
   DEFAULT_OPAQUE_TAGS,
   DEFAULT_SETTINGS,
+  createEmptyInventory,
   type AppSettings,
   type ChatPreset,
   type ChatSession,
@@ -16,6 +17,7 @@ import {
   type ScenarioTemplate,
   type PanelLayout,
   type Mod,
+  type InventoryItem,
 } from '../sillytavern/types';
 import {
   getDatabase,
@@ -163,6 +165,7 @@ function useSillytavernState() {
         presetId,
         lorebookIds,
         variables,
+        inventory: createEmptyInventory(),
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
@@ -436,6 +439,7 @@ function useSillytavernState() {
       options?: { scenarioId?: string; presetId?: string }
     ): Promise<string> => {
       let variables: Record<string, any> = {};
+      const inventory = createEmptyInventory();
       let presetId = options?.presetId ?? settings?.activePresetId ?? null;
       let lorebookIds: string[] = settings?.activeLorebookIds ?? [];
       let characterName = settings?.characterName ?? DEFAULT_SETTINGS.characterName;
@@ -456,21 +460,39 @@ function useSillytavernState() {
       // 2. 解析选中的 MOD
       const selectedMods = mods.filter((m) => selectedModIds.includes(m.id));
 
-      // 3. 合并物品/技能 MOD 的变量注入
+      // 3. 处理物品 MOD - 添加到背包
       for (const mod of selectedMods) {
-        if (mod.content.type === 'item' || mod.content.type === 'skill') {
+        if (mod.content.type === 'item') {
+          const item: InventoryItem = {
+            id: crypto.randomUUID(),
+            schemaId: mod.content.schemaId || '',
+            name: mod.content.itemName || mod.name,
+            description: mod.content.itemDescription || mod.description,
+            quantity: mod.content.quantity || 1,
+            values: { ...mod.content.values },
+            equipped: false,
+            createdAt: Date.now(),
+          };
+          const category = mod.content.category || 'other';
+          inventory[category].push(item);
+        }
+      }
+
+      // 4. 处理技能 MOD - 添加到变量
+      for (const mod of selectedMods) {
+        if (mod.content.type === 'skill') {
           variables = { ...variables, ...mod.content.values };
         }
       }
 
-      // 4. 合并世界书 MOD 的世界书引用
+      // 5. 合并世界书 MOD 的世界书引用
       for (const mod of selectedMods) {
         if (mod.content.type === 'worldbook') {
           lorebookIds = [...new Set([...lorebookIds, ...mod.content.lorebookIds])];
         }
       }
 
-      // 5. 构建开局描述
+      // 6. 构建开局描述
       const openingParts: string[] = [];
       for (const mod of selectedMods) {
         if (mod.openingDescription) openingParts.push(mod.openingDescription);
@@ -478,7 +500,7 @@ function useSillytavernState() {
       }
       const openingBlock = openingParts.join('\n\n');
 
-      // 6. 创建会话
+      // 7. 创建会话
       const chat: ChatSession = {
         id: crypto.randomUUID(),
         name,
@@ -488,11 +510,12 @@ function useSillytavernState() {
         presetId,
         lorebookIds,
         variables,
+        inventory,
         createdAt: Date.now(),
         updatedAt: Date.now(),
       };
 
-      // 7. 如果有开局描述，注入为系统消息
+      // 8. 如果有开局描述，注入为系统消息
       if (openingBlock) {
         chat.messages.push({
           id: crypto.randomUUID(),

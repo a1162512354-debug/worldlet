@@ -66,6 +66,7 @@ export function branchChat(
     presetId: options.presetId,
     lorebookIds: [...options.lorebookIds],
     variables: options.variables ? cloneVariables(options.variables) : variablesAtMessage(source, index),
+    inventory: source.inventory ? { ...source.inventory } : { weapons: [], armor: [], consumables: [], materials: [], other: [] },
     createdAt: Date.now(),
     updatedAt: Date.now(),
   };

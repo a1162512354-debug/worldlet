@@ -229,6 +229,8 @@ export interface ChatSession {
   presetId: string | null;
   lorebookIds: string[];
   variables: Record<string, any>;
+  /** 背包系统 */
+  inventory: Inventory;
   createdAt: number;
   updatedAt: number;
 }
@@ -248,6 +250,17 @@ export const DEFAULT_PROMPT_ORDER = [
   { identifier: 'worldInfoAfter', name: 'World Info (After)', role: 'system' as const },
   { identifier: 'groupNudge', name: 'Group Nudge', role: 'system' as const },
 ];
+
+/** 创建空背包 */
+export function createEmptyInventory(): Inventory {
+  return {
+    weapons: [],
+    armor: [],
+    consumables: [],
+    materials: [],
+    other: [],
+  };
+}
 
 export function createDefaultPreset(): Omit<ChatPreset, 'id' | 'createdAt' | 'updatedAt'> {
   return {
@@ -433,19 +446,38 @@ export interface PanelTemplate {
 /** MOD 类型 */
 export type ModType = 'worldbook' | 'item' | 'skill' | 'plot';
 
-/** MOD 变量字段类型 */
-export type ModVariableFieldType = 'number' | 'text' | 'boolean' | 'select';
+/** 背包物品实例 */
+export interface InventoryItem {
+  /** 物品实例ID */
+  id: string;
+  /** 引用的变量结构ID */
+  schemaId: string;
+  /** 物品名称 */
+  name: string;
+  /** 物品描述 */
+  description?: string;
+  /** 数量 */
+  quantity: number;
+  /** 字段值 */
+  values: Record<string, any>;
+  /** 是否装备中 */
+  equipped?: boolean;
+  /** 创建时间 */
+  createdAt: number;
+}
 
-/** MOD 变量字段定义 */
-export interface ModVariableField {
-  key: string;                    // 变量键名（如 "attack", "quantity"）
-  label: string;                  // 显示名称（如 "攻击力", "数量"）
-  type: ModVariableFieldType;     // 字段类型
-  defaultValue: any;              // 默认值
-  description?: string;           // 字段描述
-  options?: string[];             // type='select' 时的选项
-  min?: number;                   // type='number' 时的最小值
-  max?: number;                   // type='number' 时的最大值
+/** 背包系统 */
+export interface Inventory {
+  /** 武器 */
+  weapons: InventoryItem[];
+  /** 防具 */
+  armor: InventoryItem[];
+  /** 消耗品 */
+  consumables: InventoryItem[];
+  /** 材料 */
+  materials: InventoryItem[];
+  /** 其他 */
+  other: InventoryItem[];
 }
 
 /** MOD 内容 — 歧义联合类型 */
@@ -465,8 +497,16 @@ export interface ModContentItem {
   type: 'item';
   /** 引用的变量结构 ID */
   schemaId: string | null;
-  /** 字段值，如 { name: "铁剑", description: "一把铁剑", quantity: 1, attack: 10 } */
+  /** 物品名称 */
+  itemName: string;
+  /** 物品描述 */
+  itemDescription: string;
+  /** 数量 */
+  quantity: number;
+  /** 字段值，如 { attack: 10, durability: 100 } */
   values: Record<string, any>;
+  /** 背包分类：weapons, armor, consumables, materials, other */
+  category: 'weapons' | 'armor' | 'consumables' | 'materials' | 'other';
 }
 
 export interface ModContentSkill {
