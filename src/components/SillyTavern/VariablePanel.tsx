@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import type { VariableSchema, VariableDefinition, Inventory, InventoryItem } from '../../sillytavern/types';
+import type { VariableSchema, VariableDefinition, Inventory, InventoryItem, PanelLayout, PanelWidget } from '../../sillytavern/types';
 import { useSillytavern } from '../../hooks/useSillytavern';
 import { VariableBadge } from './VariableBadge';
 
@@ -13,40 +13,31 @@ const CATEGORY_LABELS: Record<keyof Inventory, { label: string; icon: string }> 
   other: { label: '其他', icon: '📋' },
 };
 
-/** Find a schema whose definitions cover at least one key in the variables map */
-function findMatchingSchema(
-  variables: Record<string, any>,
-  schemas: VariableSchema[],
-): VariableSchema | null {
-  const keys = Object.keys(variables);
-  if (keys.length === 0) return null;
-
-  // Score each schema by how many variable keys it covers
-  let best: VariableSchema | null = null;
-  let bestScore = 0;
-
-  for (const schema of schemas) {
-    const defIds = new Set(schema.definitions.map((d) => d.id));
-    let score = 0;
-    for (const k of keys) {
-      if (defIds.has(k)) score++;
-    }
-    if (score > bestScore) {
-      bestScore = score;
-      best = schema;
-    }
-  }
-
-  return bestScore > 0 ? best : null;
-}
-
 /** Build a lookup map: variableKey -> definition */
-function buildDefMap(schema: VariableSchema): Map<string, VariableDefinition> {
+function buildDefMap(schemas: VariableSchema[]): Map<string, VariableDefinition> {
   const map = new Map<string, VariableDefinition>();
-  for (const def of schema.definitions) {
-    map.set(def.id, def);
+  for (const schema of schemas) {
+    for (const def of schema.definitions) {
+      map.set(def.id, def);
+    }
   }
   return map;
+}
+
+/** Find the best matching layout for current variables/inventory */
+function findMatchingLayout(
+  layouts: PanelLayout[],
+  variables: Record<string, any>,
+  inventory: Inventory,
+): PanelLayout | null {
+  if (layouts.length === 0) return null;
+
+  // Find default layout first
+  const defaultLayout = layouts.find((l) => l.isDefault);
+  if (defaultLayout) return defaultLayout;
+
+  // Otherwise find the first layout
+  return layouts[0] ?? null;
 }
 
 // ---- component ----
@@ -56,37 +47,19 @@ export interface VariablePanelProps {
 }
 
 export function VariablePanel({ onClose }: VariablePanelProps) {
-  const { activeChat, variableSchemas } = useSillytavern();
+  const { activeChat, variableSchemas, panelLayouts } = useSillytavern();
   const variables = activeChat?.variables ?? {};
   const inventory = activeChat?.inventory ?? { weapons: [], armor: [], consumables: [], materials: [], other: [] };
 
-  const matchedSchema = useMemo(
-    () => findMatchingSchema(variables, variableSchemas),
-    [variables, variableSchemas],
+  const defMap = useMemo(() => buildDefMap(variableSchemas), [variableSchemas]);
+
+  // Find matching layout
+  const activeLayout = useMemo(
+    () => findMatchingLayout(panelLayouts, variables, inventory),
+    [panelLayouts, variables, inventory],
   );
 
-  const defMap = useMemo(
-    () => (matchedSchema ? buildDefMap(matchedSchema) : new Map()),
-    [matchedSchema],
-  );
-
-  // Sort entries by definition sortOrder if schema available, otherwise alphabetical
-  const sortedEntries = useMemo(() => {
-    const entries = Object.entries(variables);
-    if (matchedSchema) {
-      return entries.sort((a, b) => {
-        const da = defMap.get(a[0]);
-        const db = defMap.get(b[0]);
-        const sa = da?.sortOrder ?? 9999;
-        const sb = db?.sortOrder ?? 9999;
-        if (sa !== sb) return sa - sb;
-        return a[0].localeCompare(b[0]);
-      });
-    }
-    return entries.sort((a, b) => a[0].localeCompare(b[0]));
-  }, [variables, matchedSchema, defMap]);
-
-  const isEmpty = sortedEntries.length === 0 && Object.values(inventory).flat().length === 0;
+  const isEmpty = Object.keys(variables).length === 0 && Object.values(inventory).flat().length === 0;
 
   // ---- render ----
 
@@ -98,83 +71,19 @@ export function VariablePanel({ onClose }: VariablePanelProps) {
         <div className="st-empty-state st-text-13">
           暂无变量。AI 回复中包含 <code>{'<vars>{"hp": 100}</vars>'}</code> 时会自动提取。
         </div>
+      ) : activeLayout ? (
+        <LayoutRenderer
+          layout={activeLayout}
+          variables={variables}
+          inventory={inventory}
+          defMap={defMap}
+        />
       ) : (
-        <div className="st-flex-col st-gap-16">
-          {/* 背包物品 */}
-          {Object.entries(inventory).map(([category, items]) => {
-            if ((items as InventoryItem[]).length === 0) return null;
-            const { label, icon } = CATEGORY_LABELS[category as keyof Inventory];
-            return (
-              <div key={category}>
-                <div className="st-text-12 st-font-bold st-mb-8">
-                  {icon} {label} ({(items as InventoryItem[]).length})
-                </div>
-                <div
-                  className="st-flex-wrap st-gap-8"
-                  style={{
-                    display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                    gap: 8,
-                  }}
-                >
-                  {(items as InventoryItem[]).map((item) => (
-                    <InventoryItemCard
-                      key={item.id}
-                      item={item}
-                      schema={variableSchemas.find((s) => s.id === item.schemaId)}
-                    />
-                  ))}
-                </div>
-              </div>
-            );
-          })}
-
-          {/* 普通变量 */}
-          {sortedEntries.length > 0 && (
-            <div>
-              <div className="st-text-12 st-font-bold st-mb-8">
-                📊 变量 ({sortedEntries.length})
-              </div>
-              <div
-                className="st-flex-wrap st-gap-8"
-                style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-                  gap: 8,
-                }}
-              >
-                {sortedEntries.map(([key, value]) => (
-                  <div
-                    key={key}
-                    className="st-border st-border-light st-rounded"
-                    style={{
-                      padding: '8px 10px',
-                      background: 'var(--space-surface-deep)',
-                    }}
-                  >
-                    <VariableBadge
-                      varKey={key}
-                      value={value}
-                      definition={defMap.get(key)}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-      )}
-
-      {matchedSchema && (
-        <div
-          className="st-mt-12 st-p-8 st-text-11 st-text-muted st-border-top"
-          style={{ borderColor: 'var(--space-border-medium)' }}
-        >
-          使用模板: <strong className="st-text-secondary">{matchedSchema.name}</strong>
-          {matchedSchema.description && (
-            <span> — {matchedSchema.description}</span>
-          )}
-        </div>
+        <DefaultRenderer
+          variables={variables}
+          inventory={inventory}
+          defMap={defMap}
+        />
       )}
     </main>
   );
@@ -186,7 +95,7 @@ export function VariablePanel({ onClose }: VariablePanelProps) {
         <div className="legacy-modal-shell" onClick={(e) => e.stopPropagation()}>
           <header className="legacy-modal-header">
             <strong>
-              {matchedSchema ? `📊 ${matchedSchema.name}` : '📊 变量面板'}
+              {activeLayout ? `📊 ${activeLayout.name}` : '📊 变量面板'}
             </strong>
             <button onClick={onClose}>×</button>
           </header>
@@ -204,12 +113,211 @@ export function VariablePanel({ onClose }: VariablePanelProps) {
   );
 }
 
+// ---- layout renderer ----
+
+function LayoutRenderer({
+  layout,
+  variables,
+  inventory,
+  defMap,
+}: {
+  layout: PanelLayout;
+  variables: Record<string, any>;
+  inventory: Inventory;
+  defMap: Map<string, VariableDefinition>;
+}) {
+  // Group widgets by row
+  const rowMap = new Map<number, PanelWidget[]>();
+  for (const w of layout.widgets) {
+    const list = rowMap.get(w.row) ?? [];
+    list.push(w);
+    rowMap.set(w.row, list);
+  }
+  const rows = Array.from(rowMap.entries()).sort(([a], [b]) => a - b);
+
+  const renderWidget = (w: PanelWidget) => {
+    if (w.widgetType === 'separator') {
+      return (
+        <div
+          style={{
+            borderTop: '1px solid var(--space-border-medium)',
+            margin: '8px 0',
+          }}
+        />
+      );
+    }
+
+    if (w.widgetType === 'inventory-category') {
+      const category = w.variableKey as keyof typeof inventory;
+      const items = inventory[category] ?? [];
+      const catInfo = CATEGORY_LABELS[category];
+      return (
+        <div className="st-border st-rounded st-p-8" style={{ background: 'var(--space-surface-deep)' }}>
+          <div className="st-text-12 st-font-bold st-mb-4">
+            {catInfo?.icon || '📦'} {catInfo?.label || category}
+            <span className="st-text-11 st-text-muted st-ml-4">({items.length})</span>
+          </div>
+          {items.length === 0 ? (
+            <div className="st-text-11 st-text-muted">空</div>
+          ) : (
+            <div className="st-flex-col st-gap-2">
+              {items.map((item) => (
+                <div key={item.id} className="st-text-12">
+                  {item.name} {item.quantity > 1 ? `×${item.quantity}` : ''}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    if (w.widgetType === 'inventory-item') {
+      const allItems = Object.values(inventory).flat();
+      const item = allItems.find((i) => i.id === w.variableKey);
+      if (!item) {
+        return <div className="st-text-12 st-text-muted">物品未找到</div>;
+      }
+      return (
+        <div className="st-border st-rounded st-p-8" style={{ background: 'var(--space-surface-deep)' }}>
+          <div className="st-text-12 st-font-bold">{item.name}</div>
+          {item.quantity > 1 && (
+            <span className="st-text-11 st-text-muted">×{item.quantity}</span>
+          )}
+        </div>
+      );
+    }
+
+    return (
+      <VariableBadge
+        varKey={w.variableKey}
+        value={variables[w.variableKey]}
+        definition={defMap.get(w.variableKey)}
+      />
+    );
+  };
+
+  return (
+    <div
+      style={{
+        display: 'grid',
+        gridTemplateColumns: `repeat(${layout.columns}, 1fr)`,
+        gap: 8,
+      }}
+    >
+      {rows.map(([, widgets]) =>
+        widgets
+          .sort((a, b) => a.col - b.col)
+          .map((w) => (
+            <div
+              key={w.id}
+              style={{
+                gridColumn: `span ${w.colSpan ?? 1}`,
+                minHeight: 32,
+              }}
+            >
+              {renderWidget(w)}
+            </div>
+          )),
+      )}
+      {layout.widgets.length === 0 && (
+        <div
+          className="st-text-muted st-text-13 st-text-center"
+          style={{ gridColumn: `1 / -1`, padding: 24 }}
+        >
+          布局为空，请在编辑器中添加组件
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---- default renderer (no layout) ----
+
+function DefaultRenderer({
+  variables,
+  inventory,
+  defMap,
+}: {
+  variables: Record<string, any>;
+  inventory: Inventory;
+  defMap: Map<string, VariableDefinition>;
+}) {
+  return (
+    <div className="st-flex-col st-gap-16">
+      {/* 背包物品 */}
+      {Object.entries(inventory).map(([category, items]) => {
+        if ((items as InventoryItem[]).length === 0) return null;
+        const { label, icon } = CATEGORY_LABELS[category as keyof Inventory];
+        return (
+          <div key={category}>
+            <div className="st-text-12 st-font-bold st-mb-8">
+              {icon} {label} ({(items as InventoryItem[]).length})
+            </div>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                gap: 8,
+              }}
+            >
+              {(items as InventoryItem[]).map((item) => (
+                <InventoryItemCard
+                  key={item.id}
+                  item={item}
+                  schemaId={item.schemaId}
+                  defMap={defMap}
+                />
+              ))}
+            </div>
+          </div>
+        );
+      })}
+
+      {/* 普通变量 */}
+      {Object.keys(variables).length > 0 && (
+        <div>
+          <div className="st-text-12 st-font-bold st-mb-8">
+            📊 变量 ({Object.keys(variables).length})
+          </div>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
+              gap: 8,
+            }}
+          >
+            {Object.entries(variables).map(([key, value]) => (
+              <div
+                key={key}
+                className="st-border st-border-light st-rounded"
+                style={{
+                  padding: '8px 10px',
+                  background: 'var(--space-surface-deep)',
+                }}
+              >
+                <VariableBadge
+                  varKey={key}
+                  value={value}
+                  definition={defMap.get(key)}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function InventoryItemCard({
   item,
-  schema,
+  schemaId,
+  defMap,
 }: {
   item: InventoryItem;
-  schema?: VariableSchema;
+  schemaId: string;
+  defMap: Map<string, VariableDefinition>;
 }) {
   return (
     <div
@@ -230,7 +338,7 @@ function InventoryItemCard({
       )}
       <div className="st-flex-col st-gap-2">
         {Object.entries(item.values).slice(0, 3).map(([key, value]) => {
-          const def = schema?.definitions.find((d) => d.id === key);
+          const def = defMap.get(key);
           return (
             <div key={key} className="st-flex-row st-gap-4 st-text-11">
               <span className="st-text-muted">{def?.displayName || key}:</span>
