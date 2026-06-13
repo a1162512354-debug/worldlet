@@ -8,6 +8,8 @@ import { VariablePanel } from '../SillyTavern/VariablePanel'
 import { VariableSchemaEditorModal } from '../SillyTavern/VariableSchemaEditorModal'
 import { ScenarioTemplateModal } from '../SillyTavern/ScenarioTemplateModal'
 import { PanelLayoutEditorModal } from '../SillyTavern/PanelLayoutEditorModal'
+import { ModWorkshopPage } from '../Mod/ModWorkshopPage'
+import { CharacterCreationPage } from '../Mod/CharacterCreationPage'
 import { HistoryDrawer } from '../SillyTavern/HistoryDrawer'
 import { Toast } from '../SillyTavern/Toast'
 import { useSillytavern } from '../../hooks/useSillytavern'
@@ -89,6 +91,8 @@ export function SpacePortal() {
   const [mouse, setMouse] = useState({ x: 0, y: 0, clientX: 0, clientY: 0 })
   const [historyOpen, setHistoryOpen] = useState(false)
   const [varViewMode, setVarViewMode] = useState<'simple' | 'rich'>('simple')
+  const [showCharacterCreation, setShowCharacterCreation] = useState(false)
+  const [showModWorkshop, setShowModWorkshop] = useState(false)
   const [clock, setClock] = useState(() => new Date().toTimeString().slice(0, 8))
 
   useEffect(() => {
@@ -125,11 +129,7 @@ export function SpacePortal() {
   }
 
   const handleCreateChat = async () => {
-    const name = window.prompt('新建会话名称', `新的冒险 ${st.chats.length + 1}`)
-    if (!name?.trim()) return
-    await st.createChat(name.trim())
-    setActiveCard('chat')
-    setPage('chat')
+    setShowCharacterCreation(true)
   }
 
   const handleEnterChat = (id: string) => {
@@ -249,7 +249,7 @@ export function SpacePortal() {
                 </div>
               )}
               {page === 'library' && <LibraryPage onOpenLorebooks={st.openLorebooks} onOpenPresets={st.openPresets} />}
-              {page === 'workshop' && <WorkshopLanding onOpenScenarios={st.openScenarioManager} onOpenSchemaEditor={st.openSchemaEditor} onOpenPanelEditor={st.openPanelEditor} />}
+              {page === 'workshop' && <WorkshopLanding onOpenScenarios={st.openScenarioManager} onOpenSchemaEditor={st.openSchemaEditor} onOpenPanelEditor={st.openPanelEditor} onOpenModWorkshop={() => setShowModWorkshop(true)} />}
               {page === 'settings' && <SettingsLanding onOpenSettings={st.openSettings} />}
             </div>
           )}
@@ -264,6 +264,8 @@ export function SpacePortal() {
       {st.showSchemaEditor && <VariableSchemaEditorModal onClose={() => st.setShowSchemaEditor(false)} />}
       {st.showScenarioManager && <ScenarioTemplateModal onClose={() => st.setShowScenarioManager(false)} />}
       {st.showPanelEditor && <PanelLayoutEditorModal onClose={() => st.setShowPanelEditor(false)} />}
+      {showModWorkshop && <ModWorkshopPage onClose={() => setShowModWorkshop(false)} />}
+      {showCharacterCreation && <CharacterCreationPage onClose={() => setShowCharacterCreation(false)} />}
       {historyOpen && <HistoryDrawer onClose={() => setHistoryOpen(false)} />}
       <Toast message={st.toast} />
     </div>
@@ -364,9 +366,10 @@ function LibraryPage({ onOpenLorebooks, onOpenPresets }: { onOpenLorebooks: () =
   )
 }
 
-function WorkshopLanding({ onOpenScenarios, onOpenSchemaEditor, onOpenPanelEditor }: { onOpenScenarios: () => void; onOpenSchemaEditor: () => void; onOpenPanelEditor: () => void }) {
+function WorkshopLanding({ onOpenScenarios, onOpenSchemaEditor, onOpenPanelEditor, onOpenModWorkshop }: { onOpenScenarios: () => void; onOpenSchemaEditor: () => void; onOpenPanelEditor: () => void; onOpenModWorkshop: () => void }) {
   return (
     <div className="launcher-grid">
+      <LauncherPanel title="MOD 工坊" text="创建、编辑 MOD（世界书、物品、属性、剧情），支持导入导出。" action="打开 MOD 工坊" onClick={onOpenModWorkshop} />
       <LauncherPanel title="场景模板" text="创建、编辑开局场景模板，绑定预设、世界书与变量结构。" action="打开场景模板" onClick={onOpenScenarios} />
       <LauncherPanel title="变量结构" text="定义可复用的变量结构（数值、枚举、列表等），供场景模板引用。" action="打开变量结构" onClick={onOpenSchemaEditor} />
       <LauncherPanel title="展示面板" text="自定义变量在对话界面中的展示样式（进度条、徽章、网格等），支持预设模板。" action="打开面板编辑器" onClick={onOpenPanelEditor} />
