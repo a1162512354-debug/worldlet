@@ -293,6 +293,8 @@ export function VariableSchemaEditorModal({ onClose }: { onClose: () => void }) 
           await deleteVariableSchema(orig.id);
         }
       }
+      // 保存后同步 drafts 到最新状态
+      setDrafts((prev) => prev.map((d) => ({ ...d, updatedAt: Date.now() })));
       showToast('已保存');
     } catch (e) {
       alert('保存失败: ' + (e as Error).message);
