@@ -88,6 +88,95 @@ function defLabel(d: VariableDefinition): string {
   return '(未命名)';
 }
 
+// --- 预设模板 ---
+interface SchemaTemplate {
+  name: string;
+  description: string;
+  icon: string;
+  definitions: Omit<VariableDefinition, 'id' | 'createdAt' | 'updatedAt'>[];
+}
+
+const SCHEMA_TEMPLATES: SchemaTemplate[] = [
+  {
+    name: '武器',
+    description: '剑、弓、法杖等武器',
+    icon: '⚔️',
+    definitions: [
+      { type: 'text', displayName: '名称', aiDescription: '武器名称', sortOrder: 0, defaultValue: '铁剑' },
+      { type: 'text', displayName: '描述', aiDescription: '武器描述', sortOrder: 1, defaultValue: '一把普通的铁剑' },
+      { type: 'number', displayName: '攻击力', aiDescription: '武器攻击力', sortOrder: 2, defaultValue: 10, config: { min: 0, max: 999, step: 1 } },
+      { type: 'number', displayName: '耐久度', aiDescription: '武器耐久度', sortOrder: 3, defaultValue: 100, config: { min: 0, max: 100, step: 1 } },
+      { type: 'enum', displayName: '类型', aiDescription: '武器类型', sortOrder: 4, defaultValue: '剑', config: { options: ['剑', '弓', '法杖', '斧', '锤'] } },
+    ],
+  },
+  {
+    name: '防具',
+    description: '盔甲、盾牌等防具',
+    icon: '🛡️',
+    definitions: [
+      { type: 'text', displayName: '名称', aiDescription: '防具名称', sortOrder: 0, defaultValue: '皮甲' },
+      { type: 'text', displayName: '描述', aiDescription: '防具描述', sortOrder: 1, defaultValue: '一件普通的皮甲' },
+      { type: 'number', displayName: '防御力', aiDescription: '防具防御力', sortOrder: 2, defaultValue: 5, config: { min: 0, max: 999, step: 1 } },
+      { type: 'number', displayName: '耐久度', aiDescription: '防具耐久度', sortOrder: 3, defaultValue: 100, config: { min: 0, max: 100, step: 1 } },
+      { type: 'enum', displayName: '部位', aiDescription: '防具穿戴部位', sortOrder: 4, defaultValue: '身体', config: { options: ['头', '身体', '腿', '脚', '手'] } },
+    ],
+  },
+  {
+    name: '消耗品',
+    description: '药水、食物等消耗品',
+    icon: '🧪',
+    definitions: [
+      { type: 'text', displayName: '名称', aiDescription: '物品名称', sortOrder: 0, defaultValue: '治疗药水' },
+      { type: 'text', displayName: '描述', aiDescription: '物品描述', sortOrder: 1, defaultValue: '恢复少量生命值' },
+      { type: 'number', displayName: '数量', aiDescription: '物品数量', sortOrder: 2, defaultValue: 1, config: { min: 0, max: 999, step: 1 } },
+      { type: 'text', displayName: '效果', aiDescription: '物品效果描述', sortOrder: 3, defaultValue: '恢复20点生命值' },
+    ],
+  },
+  {
+    name: '技能',
+    description: '战斗技能、生活技能等',
+    icon: '✨',
+    definitions: [
+      { type: 'text', displayName: '名称', aiDescription: '技能名称', sortOrder: 0, defaultValue: '火球术' },
+      { type: 'text', displayName: '描述', aiDescription: '技能描述', sortOrder: 1, defaultValue: '发射一个火球' },
+      { type: 'number', displayName: '等级', aiDescription: '技能等级', sortOrder: 2, defaultValue: 1, config: { min: 1, max: 100, step: 1 } },
+      { type: 'number', displayName: '消耗', aiDescription: '技能消耗值', sortOrder: 3, defaultValue: 10, config: { min: 0, max: 999, step: 1 } },
+      { type: 'enum', displayName: '类型', aiDescription: '技能类型', sortOrder: 4, defaultValue: '攻击', config: { options: ['攻击', '防御', '治疗', '辅助', '被动'] } },
+    ],
+  },
+  {
+    name: '角色属性',
+    description: '角色基础属性',
+    icon: '👤',
+    definitions: [
+      { type: 'number', displayName: '生命值', aiDescription: '角色当前生命值', sortOrder: 0, defaultValue: 100, config: { min: 0, max: 999, step: 1 } },
+      { type: 'number', displayName: '魔力值', aiDescription: '角色当前魔力值', sortOrder: 1, defaultValue: 50, config: { min: 0, max: 999, step: 1 } },
+      { type: 'number', displayName: '力量', aiDescription: '角色力量属性', sortOrder: 2, defaultValue: 10, config: { min: 0, max: 100, step: 1 } },
+      { type: 'number', displayName: '敏捷', aiDescription: '角色敏捷属性', sortOrder: 3, defaultValue: 10, config: { min: 0, max: 100, step: 1 } },
+      { type: 'number', displayName: '智力', aiDescription: '角色智力属性', sortOrder: 4, defaultValue: 10, config: { min: 0, max: 100, step: 1 } },
+      { type: 'number', displayName: '等级', aiDescription: '角色等级', sortOrder: 5, defaultValue: 1, config: { min: 1, max: 100, step: 1 } },
+      { type: 'number', displayName: '经验值', aiDescription: '角色当前经验值', sortOrder: 6, defaultValue: 0, config: { min: 0, max: 99999, step: 1 } },
+    ],
+  },
+];
+
+function createFromTemplate(template: SchemaTemplate): VariableSchema {
+  const now = Date.now();
+  return {
+    id: newSchemaId(),
+    name: template.name,
+    description: template.description,
+    definitions: template.definitions.map((def, i) => ({
+      ...def,
+      id: newDefId(),
+      createdAt: now,
+      updatedAt: now,
+    })),
+    createdAt: now,
+    updatedAt: now,
+  };
+}
+
 // --- main component ---
 export function VariableSchemaEditorModal({ onClose }: { onClose: () => void }) {
   const {
@@ -321,12 +410,37 @@ export function VariableSchemaEditorModal({ onClose }: { onClose: () => void }) 
         <div className="st-flex-1 st-flex st-overflow-hidden">
           {/* ---- Left sidebar: schema list ---- */}
           <aside className="st-sidebar-panel-wide">
-            <button
-              onClick={handleAddSchema}
-              className="st-w-full st-btn-sm st-mb-8"
-            >
-              + 新建模板
-            </button>
+            <div className="st-flex st-gap-4 st-mb-8">
+              <button
+                onClick={handleAddSchema}
+                className="st-flex-1 st-btn-sm"
+              >
+                + 新建
+              </button>
+              <select
+                className="st-input st-text-12"
+                style={{ width: 120 }}
+                onChange={(e) => {
+                  const templateName = e.target.value;
+                  if (!templateName) return;
+                  const template = SCHEMA_TEMPLATES.find((t) => t.name === templateName);
+                  if (template) {
+                    const schema = createFromTemplate(template);
+                    setDrafts((prev) => [...prev, schema]);
+                    setSelectedSchemaId(schema.id);
+                    setSelectedDefId(null);
+                  }
+                  e.target.value = '';
+                }}
+              >
+                <option value="">从模板创建</option>
+                {SCHEMA_TEMPLATES.map((t) => (
+                  <option key={t.name} value={t.name}>
+                    {t.icon} {t.name}
+                  </option>
+                ))}
+              </select>
+            </div>
             <ul className="st-list-reset">
               {drafts.map((s) => (
                 <li
