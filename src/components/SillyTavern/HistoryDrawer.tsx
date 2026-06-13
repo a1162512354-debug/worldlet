@@ -41,17 +41,17 @@ export function HistoryDrawer({ onClose }: { onClose: () => void }) {
               <li key={m.id} className="history-floor-card">
                 <div className="history-floor-meta">#{i} · {m.role} · {new Date(m.timestamp).toLocaleTimeString()}</div>
                 {isEditing ? (
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6, marginTop: 4 }}>
+                  <div className="st-flex-col st-gap-6 st-mt-4">
                     <textarea
                       value={editText}
                       onChange={e => setEditText(e.target.value)}
                       rows={6}
-                      style={{ width: '100%', padding: 6, fontFamily: 'inherit', fontSize: 13, resize: 'vertical', boxSizing: 'border-box' }}
+                      className="st-textarea"
                       autoFocus
                     />
-                    <div style={{ display: 'flex', gap: 6, justifyContent: 'flex-end' }}>
-                      <button onClick={cancelEdit} style={{ padding: '4px 10px' }}>取消</button>
-                      <button onClick={() => void confirmEdit()} style={{ padding: '4px 10px', background: '#2c8', color: '#fff', border: 'none', borderRadius: 3 }}>保存</button>
+                    <div className="st-flex-row st-gap-6 st-justify-end">
+                      <button onClick={cancelEdit} className="st-btn-xs">取消</button>
+                      <button onClick={() => void confirmEdit()} className="st-btn-xs st-btn-save st-border-none st-rounded-3">保存</button>
                     </div>
                   </div>
                 ) : (

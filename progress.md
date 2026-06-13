@@ -202,8 +202,25 @@
 - 新增第二套主题验证切换
 - 然后做 3.2 MOD 工坊（变量编辑器、开局模板、展示面板）
 
+#### 3.1.1 CSS 提取完成 - 2026-06-13
+- **通用工具类**：在 `styles.css` 新增 `.st-*` 系列 60+ 工具类（布局、间距、文字、边框、按钮、表单、侧边栏等）
+- **PromptOrderEditor**：7/7 内联样式 → CSS class（`st-list-reset`、`st-flex-row`、`st-text-muted`、`st-btn-xxs` 等）
+- **HistoryDrawer**：5/5 内联样式 → CSS class（`st-flex-col`、`st-textarea`、`st-btn-xs`、`st-btn-save` 等）
+- **LorebookEditorModal**：13/13 内联样式 → CSS class（`st-sidebar-panel-wide`、`st-two-panel-main`、`st-empty-state-lg` 等）
+- **VariablesModal**：16/16 内联样式 → CSS class（条件样式 `st-btn-save` + `canSave` 切换）
+- **PresetModal**：36/36 内联样式 → CSS class（`st-tab`/`st-tab-active` 标签页系统、`st-sidebar-panel` 等）
+- **EntryForm**：38/38 内联样式 → CSS class（`st-border`、`st-fieldset`、`st-flex-wrap` 等）
+- **SettingsModal**：57/57 内联样式 → CSS class（`st-tab` 标签页、`st-fieldset`、`st-hidden` 等）
+- **硬编码颜色映射**：`#888` → `var(--color-text-muted)`、`#666` → `var(--color-text-secondary)`、`fontFamily: 'monospace'` → `var(--font-mono)`
+- 保留备份 tab 的语义颜色（`#2c8`绿、`#8a8acc`紫、`#c44`红）用于区分操作类型
+
+#### 验证
+- `npm run typecheck` ✅
+- `npm run build` ✅
+- `npm test` ✅：8 文件 / 69 测试
+
 #### 待做清单
-- 3.1.1 CSS 提取：7 个内联组件 → CSS class
+- ~~3.1.1 CSS 提取：7 个内联组件 → CSS class~~ ✅
 - 3.1.2 主题系统：`data-theme` 切换 + 主题配置文件
 - 3.1.3 新增第二套主题
 - 3.1.4 移动端响应式适配

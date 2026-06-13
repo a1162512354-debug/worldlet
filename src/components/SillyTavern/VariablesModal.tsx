@@ -44,48 +44,43 @@ export function VariablesModal({ onClose }: { onClose: () => void }) {
         </header>
 
         {!activeChat ? (
-          <div style={{ padding: 60, textAlign: 'center', color: '#888' }}>
+          <div className="st-empty-state-lg">
             请先创建或选择一个对话
           </div>
         ) : (
-          <main style={{ flex: 1, overflowY: 'auto', padding: 16 }}>
+          <main className="st-flex-1 st-overflow-y-auto" style={{ padding: 16 }}>
             <div
-              style={{
-                display: 'flex',
-                gap: 8,
-                marginBottom: 16,
-                paddingBottom: 12,
-                borderBottom: '1px solid var(--space-border-medium)',
-              }}
+              className="st-flex-row st-gap-8 st-mb-16"
+              style={{ paddingBottom: 12, borderBottom: '1px solid var(--space-border-medium)' }}
             >
               <input
                 type="text"
                 placeholder="变量名"
                 value={draftKey}
                 onChange={(e) => setDraftKey(e.target.value)}
-                style={{ flex: 1, padding: 6 }}
+                className="st-flex-1 st-p-6"
               />
               <input
                 type="text"
                 placeholder="值"
                 value={draftValue}
                 onChange={(e) => setDraftValue(e.target.value)}
-                style={{ flex: 2, padding: 6 }}
+                className="st-flex-2 st-p-6"
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleAdd();
                 }}
               />
-              <button onClick={handleAdd} style={{ padding: '6px 12px' }}>
+              <button onClick={handleAdd} className="st-btn-sm">
                 + 添加
               </button>
             </div>
 
             {Object.keys(vars).length === 0 ? (
-              <div style={{ color: '#888', padding: 24, textAlign: 'center', fontSize: 13 }}>
+              <div className="st-empty-state st-text-13">
                 暂无变量。AI 回复中包含 <code>{'<vars>{"hp": 100}</vars>'}</code> 时会自动提取。
               </div>
             ) : (
-              <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+              <ul className="st-list-reset">
                 {Object.entries(vars).map(([key, value]) => (
                   <VariableRow
                     key={key}
@@ -99,14 +94,8 @@ export function VariablesModal({ onClose }: { onClose: () => void }) {
             )}
 
             <div
-              style={{
-                marginTop: 16,
-                padding: 12,
-                background: 'rgba(110,207,207,0.08)',
-                borderRadius: 6,
-                fontSize: 12,
-                color: 'var(--color-text-secondary)',
-              }}
+              className="st-mt-12 st-p-12 st-text-12 st-text-secondary"
+              style={{ background: 'rgba(110,207,207,0.08)', borderRadius: 6 }}
             >
               <strong style={{ color: 'var(--color-accent)' }}>提示:</strong> 变量随当前对话保存。AI 回复包含
               <code style={{ padding: '0 4px', margin: '0 4px' }}>
@@ -135,47 +124,36 @@ function VariableRow({
   const [name, setName] = useState(varKey);
   const [value, setValue] = useState(varValue);
   const dirty = name !== varKey || value !== varValue;
+  const canSave = dirty && !!name.trim();
 
   return (
     <li
-      style={{
-        display: 'flex',
-        gap: 8,
-        alignItems: 'center',
-        padding: '6px 0',
-        borderBottom: '1px solid var(--space-border-light)',
-      }}
+      className="st-flex-row st-gap-8 st-items-center st-border-bottom"
+      style={{ padding: '6px 0' }}
     >
       <input
         type="text"
         value={name}
         onChange={(e) => setName(e.target.value)}
-        style={{ flex: 1, padding: 4, fontFamily: 'monospace' }}
+        className="st-flex-1 st-mono st-p-4"
       />
       <input
         type="text"
         value={value}
         onChange={(e) => setValue(e.target.value)}
-        style={{ flex: 2, padding: 4 }}
+        className="st-flex-2 st-p-4"
       />
       <button
         onClick={() => onSave(varKey, name.trim() || varKey, value)}
-        disabled={!dirty || !name.trim()}
-        style={{
-          padding: '4px 10px',
-          background: dirty && name.trim() ? '#2c8' : 'rgba(90, 98, 112, 0.2)',
-          color: dirty && name.trim() ? '#fff' : 'var(--color-text-muted)',
-          border: 'none',
-          borderRadius: 3,
-          cursor: dirty && name.trim() ? 'pointer' : 'not-allowed',
-          fontSize: 12,
-        }}
+        disabled={!canSave}
+        className={`st-btn-xs st-border-none st-rounded-3 st-text-12 ${canSave ? 'st-btn-save' : ''}`}
+        style={!canSave ? { background: 'rgba(90, 98, 112, 0.2)', color: 'var(--color-text-muted)', cursor: 'not-allowed' } : undefined}
       >
         保存
       </button>
       <button
         onClick={onDelete}
-        style={{ padding: '4px 8px', color: '#c00', background: 'transparent', border: '1px solid #c00', borderRadius: 3, fontSize: 12 }}
+        className="st-btn-xxs st-btn-danger-border st-bg-transparent st-rounded-3 st-text-12"
       >
         删除
       </button>

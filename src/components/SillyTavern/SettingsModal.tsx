@@ -141,20 +141,12 @@ export function SettingsModal({
           <button onClick={onClose}>×</button>
         </header>
 
-        <div style={{ display: 'flex', gap: 4, marginBottom: 16, borderBottom: '1px solid var(--space-border-medium)', paddingBottom: 8, flexWrap: 'wrap' }}>
+        <div className="st-flex-wrap st-gap-4 st-mb-16 st-pb-8" style={{ borderBottom: '1px solid var(--space-border-medium)' }}>
           {TABS.map((t) => (
             <button
               key={t}
               onClick={() => setTab(t)}
-              style={{
-                padding: '4px 10px',
-                border: 'none',
-                background: tab === t ? 'rgba(178, 255, 5, 0.2)' : 'rgba(90, 98, 112, 0.14)',
-                color: tab === t ? 'var(--color-accent)' : 'var(--color-text-secondary)',
-                borderRadius: 4,
-                cursor: 'pointer',
-                fontSize: 13,
-              }}
+              className={`st-btn-xs st-border-none st-rounded st-text-13 ${tab === t ? 'st-tab-active' : 'st-tab'}`}
             >
               {TAB_LABELS[t]}
             </button>
@@ -162,18 +154,18 @@ export function SettingsModal({
         </div>
 
         {tab === 'primary' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="st-flex-col st-gap-12">
             <label>
               API 模式
               <select
                 value={settings.apiMode}
                 onChange={(e) => updateSettings({ apiMode: e.target.value as 'single' | 'dual' })}
-                style={{ width: '100%', padding: 6, marginTop: 4 }}
+                className="st-w-full st-p-6 st-mt-4"
               >
                 <option value="single">单 API (一个 LLM 处理所有任务)</option>
                 <option value="dual">双 API (主 API 剧情 + 次 API 变量)</option>
               </select>
-              <small style={{ display: 'block', color: '#888', marginTop: 4, fontSize: 11 }}>
+              <small className="st-text-11 st-text-muted st-mt-4" style={{ display: 'block' }}>
                 {isDual
                   ? '双 API 模式: 主 API 负责剧情/对话, 次 API 负责变量更新等次要任务。'
                   : '单 API 模式: 主 API 同时负责剧情和变量。'}
@@ -188,7 +180,7 @@ export function SettingsModal({
                   updateSettings({ api: { ...settings.api, baseUrl: e.target.value } })
                 }
                 placeholder="https://api.openai.com/v1"
-                style={{ width: '100%', padding: 6, marginTop: 4 }}
+                className="st-w-full st-p-6 st-mt-4"
               />
             </label>
             <label>
@@ -200,7 +192,7 @@ export function SettingsModal({
                   updateSettings({ api: { ...settings.api, apiKey: e.target.value } })
                 }
                 placeholder="sk-..."
-                style={{ width: '100%', padding: 6, marginTop: 4 }}
+                className="st-w-full st-p-6 st-mt-4"
               />
             </label>
             <label>
@@ -212,7 +204,7 @@ export function SettingsModal({
                   updateSettings({ api: { ...settings.api, model: e.target.value } })
                 }
                 placeholder="gpt-3.5-turbo"
-                style={{ width: '100%', padding: 6, marginTop: 4 }}
+                className="st-w-full st-p-6 st-mt-4"
               />
               {primaryModels.length > 0 && (
                 <select
@@ -220,7 +212,7 @@ export function SettingsModal({
                     if (!e.target.value) return;
                     updateSettings({ api: { ...settings.api, model: e.target.value } });
                   }}
-                  style={{ width: '100%', padding: 6, marginTop: 4, background: '#f8f8f8' }}
+                  className="st-w-full st-p-6 st-mt-4"
                   defaultValue=""
                 >
                   <option value="">-- 选择模型 ({primaryModels.length}) --</option>
@@ -230,18 +222,18 @@ export function SettingsModal({
                 </select>
               )}
             </label>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <div className="st-flex-wrap st-gap-8">
               <button
                 onClick={() => handleFetchModels('primary')}
                 disabled={busy !== null}
-                style={{ padding: '6px 12px' }}
+                className="st-btn-sm"
               >
                 {busy === 'fetch-primary' ? '获取中…' : '获取模型列表'}
               </button>
               <button
                 onClick={() => handleTestConnection('primary')}
                 disabled={busy !== null}
-                style={{ padding: '6px 12px' }}
+                className="st-btn-sm"
               >
                 {busy === 'test-primary' ? '测试中…' : '测试连通性'}
               </button>
@@ -253,7 +245,7 @@ export function SettingsModal({
                 type="text"
                 value={settings.userName}
                 onChange={(e) => updateSettings({ userName: e.target.value })}
-                style={{ width: '100%', padding: 6, marginTop: 4 }}
+                className="st-w-full st-p-6 st-mt-4"
               />
             </label>
             <label>
@@ -262,16 +254,16 @@ export function SettingsModal({
                 type="text"
                 value={settings.characterName}
                 onChange={(e) => updateSettings({ characterName: e.target.value })}
-                style={{ width: '100%', padding: 6, marginTop: 4 }}
+                className="st-w-full st-p-6 st-mt-4"
               />
             </label>
           </div>
         )}
 
         {tab === 'secondary' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 12 }}>
+          <div className="st-flex-col st-gap-12">
             {!isDual && (
-              <div className="modal-warn" style={{ padding: 10, borderRadius: 4, fontSize: 12 }}>
+              <div className="modal-warn st-p-8 st-rounded st-text-12">
                 当前为单 API 模式。在「主 API」面板切换到双 API 模式以启用此页面的配置。
               </div>
             )}
@@ -282,7 +274,7 @@ export function SettingsModal({
                 value={secondary.baseUrl}
                 onChange={(e) => updateSecondary({ baseUrl: e.target.value, enabled: true })}
                 placeholder="https://api.deepseek.com/v1"
-                style={{ width: '100%', padding: 6, marginTop: 4 }}
+                className="st-w-full st-p-6 st-mt-4"
               />
             </label>
             <label>
@@ -292,7 +284,7 @@ export function SettingsModal({
                 value={secondary.apiKey}
                 onChange={(e) => updateSecondary({ apiKey: e.target.value, enabled: true })}
                 placeholder="sk-..."
-                style={{ width: '100%', padding: 6, marginTop: 4 }}
+                className="st-w-full st-p-6 st-mt-4"
               />
             </label>
             <label>
@@ -302,7 +294,7 @@ export function SettingsModal({
                 value={secondary.model}
                 onChange={(e) => updateSecondary({ model: e.target.value, enabled: true })}
                 placeholder="deepseek-chat"
-                style={{ width: '100%', padding: 6, marginTop: 4 }}
+                className="st-w-full st-p-6 st-mt-4"
               />
               {secondaryModels.length > 0 && (
                 <select
@@ -310,7 +302,7 @@ export function SettingsModal({
                     if (!e.target.value) return;
                     updateSecondary({ model: e.target.value, enabled: true });
                   }}
-                  style={{ width: '100%', padding: 6, marginTop: 4, background: '#f8f8f8' }}
+                  className="st-w-full st-p-6 st-mt-4"
                   defaultValue=""
                 >
                   <option value="">-- 选择模型 ({secondaryModels.length}) --</option>
@@ -320,8 +312,8 @@ export function SettingsModal({
                 </select>
               )}
             </label>
-            <div style={{ display: 'flex', gap: 12 }}>
-              <label style={{ flex: 1 }}>
+            <div className="st-flex-row st-gap-12">
+              <label className="st-flex-1">
                 温度 (0-2)
                 <input
                   type="number"
@@ -330,10 +322,10 @@ export function SettingsModal({
                   step={0.1}
                   value={secondary.temperature ?? 0.7}
                   onChange={(e) => updateSecondary({ temperature: Number(e.target.value), enabled: true })}
-                  style={{ width: '100%', padding: 6, marginTop: 4 }}
+                  className="st-w-full st-p-6 st-mt-4"
                 />
               </label>
-              <label style={{ flex: 1 }}>
+              <label className="st-flex-1">
                 Max Tokens
                 <input
                   type="number"
@@ -341,22 +333,22 @@ export function SettingsModal({
                   max={32768}
                   value={secondary.maxTokens ?? 8000}
                   onChange={(e) => updateSecondary({ maxTokens: Number(e.target.value), enabled: true })}
-                  style={{ width: '100%', padding: 6, marginTop: 4 }}
+                  className="st-w-full st-p-6 st-mt-4"
                 />
               </label>
             </div>
-            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap' }}>
+            <div className="st-flex-wrap st-gap-8">
               <button
                 onClick={() => handleFetchModels('secondary')}
                 disabled={busy !== null}
-                style={{ padding: '6px 12px' }}
+                className="st-btn-sm"
               >
                 {busy === 'fetch-secondary' ? '获取中…' : '获取模型列表'}
               </button>
               <button
                 onClick={() => handleTestConnection('secondary')}
                 disabled={busy !== null}
-                style={{ padding: '6px 12px' }}
+                className="st-btn-sm"
               >
                 {busy === 'test-secondary' ? '测试中…' : '测试连通性'}
               </button>
@@ -366,20 +358,15 @@ export function SettingsModal({
 
         {tab === 'tags' && (
           <div>
-            <p style={{ fontSize: 12, color: '#666', marginBottom: 12 }}>
+            <p className="st-text-12 st-text-secondary st-mb-12">
               注册标签由解析器识别。删除 maintext / option / sum / vars / thinking 会破坏默认 UI。
             </p>
-            <div style={{ marginBottom: 12 }}>
+            <div className="st-mb-12">
               {settings.customTags.map((t, i) => (
                 <span
                   key={i}
-                  className="modal-chip"
-                  style={{
-                    padding: '4px 8px',
-                    borderRadius: 4,
-                    margin: 4,
-                    fontSize: 13,
-                  }}
+                  className="modal-chip st-rounded st-text-13"
+                  style={{ padding: '4px 8px', margin: 4 }}
                 >
                   {t}{' '}
                   <button
@@ -388,7 +375,7 @@ export function SettingsModal({
                         customTags: settings.customTags.filter((_, j) => j !== i),
                       })
                     }
-                    style={{ border: 'none', background: 'transparent', cursor: 'pointer', color: '#888' }}
+                    className="st-border-none st-bg-transparent st-text-muted"
                   >
                     ×
                   </button>
@@ -402,7 +389,7 @@ export function SettingsModal({
                   updateSettings({ customTags: [...settings.customTags, v] });
                 }
               }}
-              style={{ padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}
+              className="st-btn-sm st-rounded"
             >
               + 新增
             </button>
@@ -414,11 +401,12 @@ export function SettingsModal({
             <textarea
               value={settings.formatPromptTemplate}
               onChange={(e) => updateSettings({ formatPromptTemplate: e.target.value })}
-              style={{ width: '100%', height: 240, padding: 8, fontFamily: 'monospace', fontSize: 13 }}
+              className="st-w-full st-mono st-text-13"
+              style={{ height: 240, padding: 8 }}
             />
             <button
               onClick={() => updateSettings({ formatPromptTemplate: DEFAULT_FORMAT_PROMPT })}
-              style={{ marginTop: 8, padding: '6px 12px', borderRadius: 4, cursor: 'pointer' }}
+              className="st-btn-sm st-rounded st-mt-8"
             >
               恢复默认
             </button>
@@ -426,12 +414,12 @@ export function SettingsModal({
         )}
 
         {tab === 'display' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
-            <fieldset style={{ border: '1px solid var(--space-border-medium)', borderRadius: 4, padding: 12 }}>
-              <legend style={{ fontSize: 14, fontWeight: 'bold' }}>思考过程显示</legend>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginTop: 4 }}>
+          <div className="st-flex-col st-gap-16">
+            <fieldset className="st-fieldset" style={{ padding: 12 }}>
+              <legend className="st-text-14 st-font-bold">思考过程显示</legend>
+              <div className="st-flex-col st-gap-8 st-mt-4">
                 {(['fold', 'hide', 'inline'] as const).map((m) => (
-                  <label key={m} style={{ display: 'flex', alignItems: 'center', gap: 8, cursor: 'pointer' }}>
+                  <label key={m} className="st-flex-row st-gap-8" style={{ cursor: 'pointer' }}>
                     <input
                       type="radio"
                       checked={settings.thinkingDisplay === m}
@@ -442,9 +430,9 @@ export function SettingsModal({
                 ))}
               </div>
             </fieldset>
-            <fieldset style={{ border: '1px solid var(--space-border-medium)', borderRadius: 4, padding: 12 }}>
-              <legend style={{ fontSize: 14, fontWeight: 'bold' }}>界面模式</legend>
-              <p style={{ margin: 0, color: '#666', fontSize: 13 }}>
+            <fieldset className="st-fieldset" style={{ padding: 12 }}>
+              <legend className="st-text-14 st-font-bold">界面模式</legend>
+              <p className="st-text-secondary st-text-13" style={{ margin: 0 }}>
                 当前项目仅保留游戏模式：剧情正文、选项点选、变量快照回档。
               </p>
             </fieldset>
@@ -452,42 +440,39 @@ export function SettingsModal({
         )}
 
         {tab === 'backup' && (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 16 }}>
+          <div className="st-flex-col st-gap-16">
             <fieldset style={{ border: '1px solid #2c8', borderRadius: 4, padding: 12 }}>
               <legend style={{ fontSize: 14, fontWeight: 'bold', color: '#2c8' }}>导出</legend>
-              <p style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
+              <p className="st-text-12 st-text-secondary st-mb-8">
                 将所有世界书、预设、设置、对话导出为单个 JSON 文件。
               </p>
               <button
                 onClick={handleExportAll}
-                className="ds-green"
-                style={{ padding: '8px 16px', borderRadius: 4, cursor: 'pointer' }}
+                className="ds-green st-btn-sm st-rounded"
               >
                 导出全部数据
               </button>
             </fieldset>
             <fieldset style={{ border: '1px solid #8a8acc', borderRadius: 4, padding: 12 }}>
               <legend style={{ fontSize: 14, fontWeight: 'bold', color: '#6464a8' }}>导入</legend>
-              <p style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
+              <p className="st-text-12 st-text-secondary st-mb-8">
                 从之前导出的备份文件恢复数据。<strong>会覆盖现有数据</strong>。
               </p>
               <button
                 onClick={handleImportAll}
-                className="ds-purple"
-                style={{ padding: '8px 16px', borderRadius: 4, cursor: 'pointer' }}
+                className="ds-purple st-btn-sm st-rounded"
               >
                 导入备份文件
               </button>
             </fieldset>
             <fieldset style={{ border: '1px solid #c44', borderRadius: 4, padding: 12 }}>
               <legend style={{ fontSize: 14, fontWeight: 'bold', color: '#c44' }}>清除</legend>
-              <p style={{ fontSize: 12, color: '#666', marginBottom: 8 }}>
+              <p className="st-text-12 st-text-secondary st-mb-8">
                 清除所有本地存储数据。<strong>不可恢复</strong>。
               </p>
               <button
                 onClick={handleClearAll}
-                className="ds-danger"
-                style={{ padding: '8px 16px', borderRadius: 4, cursor: 'pointer' }}
+                className="ds-danger st-btn-sm st-rounded"
               >
                 清除所有数据
               </button>

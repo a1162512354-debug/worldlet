@@ -27,36 +27,31 @@ export function PromptOrderEditor({
 
   if (value.length === 0) {
     return (
-      <div style={{ color: '#888', fontSize: 13, padding: 12 }}>
+      <div className="st-text-secondary st-text-13 st-p-12">
         当前预设没有 prompt_order 数组。导入 SillyTavern 预设或新建默认预设以获得标准顺序。
       </div>
     );
   }
 
   return (
-    <ol style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+    <ol className="st-list-reset">
       {value.map((item, idx) => (
         <li
           key={item.identifier}
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            gap: 8,
-            padding: '6px 8px',
-            borderBottom: '1px solid var(--space-border-light)',
-          }}
+          className="st-flex-row st-gap-8 st-border-bottom"
+          style={{ padding: '6px 8px' }}
         >
           <input
             type="checkbox"
             checked={item.enabled !== false}
             onChange={(e) => setEnabled(idx, e.target.checked)}
           />
-          <code style={{ fontSize: 12, color: '#888', minWidth: 140 }}>{item.identifier}</code>
-          <span style={{ flex: 1 }}>{item.name ?? item.identifier}</span>
+          <code className="st-text-12 st-text-muted" style={{ minWidth: 140 }}>{item.identifier}</code>
+          <span className="st-flex-1">{item.name ?? item.identifier}</span>
           <button
             disabled={idx === 0}
             onClick={() => move(idx, idx - 1)}
-            style={{ padding: '2px 8px' }}
+            className="st-btn-xxs"
             title="上移"
           >
             ↑
@@ -64,7 +59,7 @@ export function PromptOrderEditor({
           <button
             disabled={idx === value.length - 1}
             onClick={() => move(idx, idx + 1)}
-            style={{ padding: '2px 8px' }}
+            className="st-btn-xxs"
             title="下移"
           >
             ↓

@@ -54,8 +54,8 @@ function NumberField({
   fallback: number;
 }) {
   return (
-    <label style={{ display: 'block', marginBottom: 8 }}>
-      <span style={{ display: 'block', fontSize: 12, color: 'var(--color-text-secondary)', marginBottom: 2 }}>
+    <label className="st-mb-8">
+      <span className="st-text-12 st-text-secondary st-mb-4" style={{ display: 'block' }}>
         {label}
       </span>
       <input
@@ -65,7 +65,8 @@ function NumberField({
         onChange={(e) =>
           onChange(clampNumber(e.target.value, min ?? -1e9, max ?? 1e9, fallback))
         }
-        style={{ padding: 6, width: 140 }}
+        className="st-p-6"
+        style={{ width: 140 }}
       />
     </label>
   );
@@ -83,8 +84,8 @@ function TextField({
   placeholder?: string;
 }) {
   return (
-    <label style={{ display: 'block', marginBottom: 8 }}>
-      <span style={{ display: 'block', fontSize: 12, color: 'var(--color-text-secondary)', marginBottom: 2 }}>
+    <label className="st-mb-8">
+      <span className="st-text-12 st-text-secondary st-mb-4" style={{ display: 'block' }}>
         {label}
       </span>
       <input
@@ -92,7 +93,7 @@ function TextField({
         value={value ?? ''}
         placeholder={placeholder}
         onChange={(e) => onChange(e.target.value)}
-        style={{ padding: 6, width: '100%' }}
+        className="st-p-6 st-w-full"
       />
     </label>
   );
@@ -110,19 +111,15 @@ function TextArea({
   rows?: number;
 }) {
   return (
-    <label style={{ display: 'block', marginBottom: 12 }}>
-      <span style={{ display: 'block', fontSize: 12, color: 'var(--color-text-secondary)', marginBottom: 4 }}>
+    <label className="st-mb-12">
+      <span className="st-text-12 st-text-secondary st-mb-4" style={{ display: 'block' }}>
         {label}
       </span>
       <textarea
         value={value ?? ''}
         onChange={(e) => onChange(e.target.value)}
-        style={{
-          width: '100%',
-          padding: 8,
-          fontFamily: 'monospace',
-          fontSize: 12,
-        }}
+        className="st-w-full st-mono st-text-12"
+        style={{ padding: 8 }}
         rows={rows ?? 4}
       />
     </label>
@@ -275,7 +272,7 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
               type="file"
               multiple
               accept=".json,application/json"
-              style={{ display: 'none' }}
+              className="st-hidden"
               onChange={(event) => {
                 void handleImportPresets(Array.from(event.target.files ?? []));
                 event.target.value = '';
@@ -296,41 +293,29 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
               </button>
             </>
           )}
-          <span style={{ flex: 1 }} />
+          <span className="st-flex-1" />
           <button
             onClick={handleSave}
             disabled={!dirty}
-            className="ds-save"
-            style={{
-              padding: '6px 14px',
-              cursor: dirty ? 'pointer' : 'not-allowed',
-            }}
+            className="ds-save st-btn-sm"
           >
             保存
           </button>
           <button onClick={tryClose}>×</button>
         </header>
 
-        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-          <aside
-            style={{
-              width: 240,
-              borderRight: '1px solid var(--space-border-medium)',
-              overflowY: 'auto',
-              padding: 8,
-            }}
-          >
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+        <div className="st-flex-1 st-flex st-overflow-hidden">
+          <aside className="st-sidebar-panel">
+            <ul className="st-list-reset">
               {presets.map((p) => (
                 <li
                   key={p.id}
                   onClick={() => handleSelectPreset(p.id)}
-                  className={p.id === selectedId ? 'ds-selected' : ''}
+                  className={`st-text-13 ${p.id === selectedId ? 'ds-selected' : ''}`}
                   style={{
                     padding: '6px 8px',
                     cursor: 'pointer',
                     borderRadius: 4,
-                    fontSize: 13,
                     overflow: 'hidden',
                     textOverflow: 'ellipsis',
                     whiteSpace: 'nowrap',
@@ -342,44 +327,37 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
               ))}
             </ul>
             {presets.length === 0 && (
-              <div style={{ textAlign: 'center', color: '#888', padding: 24, fontSize: 13 }}>
+              <div className="st-empty-state st-text-13">
                 暂无预设
               </div>
             )}
           </aside>
 
-          <main style={{ flex: 1, overflowY: 'auto', padding: 12 }}>
+          <main className="st-two-panel-main" style={{ padding: 12 }}>
             {!draft ? (
-              <div style={{ textAlign: 'center', color: '#888', padding: 60 }}>
+              <div className="st-empty-state-lg">
                 选择左侧预设或新建一个
               </div>
             ) : (
               <>
-                <div style={{ marginBottom: 12 }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <div className="st-mb-12">
+                  <label className="st-flex-row st-gap-8">
                     名称:
                     <input
                       type="text"
                       value={draft.name}
                       onChange={(e) => setDraft({ ...draft, name: e.target.value })}
-                      style={{ padding: 6, flex: 1 }}
+                      className="st-p-6 st-flex-1"
                     />
                   </label>
                 </div>
 
-                <div style={{ display: 'flex', gap: 4, marginBottom: 16 }}>
+                <div className="st-flex-row st-gap-4 st-mb-16">
                   {TABS.map((t) => (
                     <button
                       key={t}
                       onClick={() => setTab(t)}
-                      style={{
-                        padding: '4px 10px',
-                        border: 'none',
-                        background: tab === t ? 'rgba(178, 255, 5, 0.2)' : 'rgba(90, 98, 112, 0.14)',
-                        color: tab === t ? 'var(--color-accent)' : 'var(--color-text-secondary)',
-                        borderRadius: 4,
-                        cursor: 'pointer',
-                      }}
+                      className={`st-btn-xs st-border-none st-rounded ${tab === t ? 'st-tab-active' : 'st-tab'}`}
                     >
                       {TAB_LABELS[t]}
                     </button>
@@ -387,7 +365,7 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
                 </div>
 
                 {tab === 'sampling' && (
-                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: 8 }}>
+                  <div className="st-flex-wrap st-gap-8">
                     <NumberField
                       label="temp_openai (温度)"
                       value={draft.settings.temp_openai}
@@ -484,7 +462,7 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
                       onChange={(v) => patchSettings({ openai_model: v })}
                       placeholder="gpt-3.5-turbo"
                     />
-                    <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+                    <div className="st-flex-row st-gap-16">
                       <label>
                         <input
                           type="checkbox"
@@ -523,29 +501,17 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
 
                 {tab === 'custom' && (
                   <div>
-                    <button onClick={handleAddCustomPrompt} style={{ marginBottom: 12 }}>
+                    <button onClick={handleAddCustomPrompt} className="st-mb-12">
                       + 新建自定义 prompt
                     </button>
-                    <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+                    <ul className="st-list-reset">
                       {((draft.settings.prompts ?? []) as CustomPromptItem[]).map((p, idx) => (
                         <li
                           key={p.identifier + idx}
-                          style={{
-                            border: '1px solid var(--space-border-medium)',
-                            borderRadius: 4,
-                            padding: 8,
-                            marginBottom: 8,
-                          }}
+                          className="st-border st-rounded st-p-8 st-mb-8"
                         >
-                          <div
-                            style={{
-                              display: 'flex',
-                              gap: 8,
-                              alignItems: 'center',
-                              marginBottom: 8,
-                            }}
-                          >
-                            <code style={{ fontSize: 12, color: '#888' }}>{p.identifier}</code>
+                          <div className="st-flex-row st-gap-8 st-items-center st-mb-8">
+                            <code className="st-text-12 st-text-muted">{p.identifier}</code>
                             <select
                               value={p.role ?? 'system'}
                               onChange={(e) => {
@@ -553,13 +519,13 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
                                 list[idx] = { ...list[idx], role: e.target.value as any };
                                 patchSettings({ prompts: list });
                               }}
-                              style={{ padding: 4 }}
+                              className="st-p-4"
                             >
                               <option value="system">system</option>
                               <option value="user">user</option>
                               <option value="assistant">assistant</option>
                             </select>
-                            <span style={{ flex: 1 }} />
+                            <span className="st-flex-1" />
                             <button
                               onClick={() => {
                                 if (!confirm('删除此 prompt?')) return;
@@ -580,19 +546,14 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
                               list[idx] = { ...list[idx], content: e.target.value };
                               patchSettings({ prompts: list });
                             }}
-                            style={{
-                              width: '100%',
-                              minHeight: 80,
-                              padding: 6,
-                              fontFamily: 'monospace',
-                              fontSize: 12,
-                            }}
+                            className="st-w-full st-mono st-text-12"
+                            style={{ minHeight: 80, padding: 6 }}
                           />
                         </li>
                       ))}
                     </ul>
                     {((draft.settings.prompts ?? []) as CustomPromptItem[]).length === 0 && (
-                      <div style={{ color: '#888', padding: 16, fontSize: 13 }}>
+                      <div className="st-text-muted st-p-16 st-text-13">
                         无自定义 prompt
                       </div>
                     )}

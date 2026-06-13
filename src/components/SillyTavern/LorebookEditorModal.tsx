@@ -94,65 +94,37 @@ export function LorebookEditorModal({
             onChange={(e) =>
               setDraft((prev) => ({ ...prev, name: e.target.value, updatedAt: Date.now() }))
             }
-            style={{ flex: 1, padding: 6, fontSize: 14 }}
+            className="st-flex-1 st-p-6 st-text-14"
           />
           <button
             onClick={handleSave}
             disabled={!dirty}
-            className="ds-save"
-            style={{
-              padding: '6px 14px',
-              cursor: dirty ? 'pointer' : 'not-allowed',
-            }}
+            className="ds-save st-btn-sm"
           >
             保存
           </button>
           <button onClick={tryClose}>×</button>
         </header>
 
-        <div style={{ flex: 1, display: 'flex', overflow: 'hidden' }}>
-          <aside
-            style={{
-              width: 280,
-              borderRight: '1px solid var(--space-border-medium)',
-              overflowY: 'auto',
-              padding: 8,
-            }}
-          >
+        <div className="st-flex-1 st-flex st-overflow-hidden">
+          <aside className="st-sidebar-panel-wide">
             <button
               onClick={handleAddEntry}
-              style={{
-                width: '100%',
-                padding: '6px 10px',
-                marginBottom: 8,
-                cursor: 'pointer',
-              }}
+              className="st-w-full st-btn-sm st-mb-8"
             >
               + 新建条目
             </button>
-            <ul style={{ listStyle: 'none', padding: 0, margin: 0 }}>
+            <ul className="st-list-reset">
               {draft.entries.map((e) => (
                 <li
                   key={e.id}
                   onClick={() => setSelectedId(e.id)}
-                  className={e.id === selectedId ? 'ds-selected' : ''}
-                  style={{
-                    padding: '6px 8px',
-                    cursor: 'pointer',
-                    borderRadius: 4,
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: 6,
-                    fontSize: 13,
-                  }}
+                  className={`st-flex-row st-gap-6 st-text-13 ${e.id === selectedId ? 'ds-selected' : ''}`}
+                  style={{ padding: '6px 8px', cursor: 'pointer', borderRadius: 4 }}
                 >
                   <span
-                    style={{
-                      flex: 1,
-                      overflow: 'hidden',
-                      textOverflow: 'ellipsis',
-                      whiteSpace: 'nowrap',
-                    }}
+                    className="st-flex-1"
+                    style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}
                   >
                     {entryLabel(e)}
                   </span>
@@ -161,13 +133,8 @@ export function LorebookEditorModal({
                       ev.stopPropagation();
                       handleDeleteEntry(e.id);
                     }}
-                    className="ds-danger"
-                    style={{
-                      border: 'none',
-                      background: 'transparent',
-                      cursor: 'pointer',
-                      fontSize: 16,
-                    }}
+                    className="ds-danger st-border-none st-bg-transparent"
+                    style={{ fontSize: 16 }}
                     title="删除"
                   >
                     ×
@@ -176,17 +143,17 @@ export function LorebookEditorModal({
               ))}
             </ul>
             {draft.entries.length === 0 && (
-              <div style={{ textAlign: 'center', color: '#888', padding: 24, fontSize: 13 }}>
+              <div className="st-empty-state st-text-13">
                 暂无条目,点上方按钮新建
               </div>
             )}
           </aside>
 
-          <main style={{ flex: 1, overflowY: 'auto' }}>
+          <main className="st-two-panel-main">
             {selected ? (
               <EntryForm value={selected} onChange={handleEntryChange} />
             ) : (
-              <div style={{ textAlign: 'center', color: '#888', padding: 60 }}>
+              <div className="st-empty-state-lg">
                 选择左侧条目或新建一条
               </div>
             )}
@@ -194,14 +161,8 @@ export function LorebookEditorModal({
         </div>
 
         <footer
-          style={{
-            padding: '8px 16px',
-            borderTop: '1px solid var(--space-border-medium)',
-            display: 'flex',
-            gap: 16,
-            fontSize: 12,
-            color: 'var(--color-text-secondary)',
-          }}
+          className="st-flex-row st-gap-16 st-text-12 st-text-secondary"
+          style={{ padding: '8px 16px', borderTop: '1px solid var(--space-border-medium)' }}
         >
           <label>
             <input

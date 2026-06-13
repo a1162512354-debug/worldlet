@@ -42,24 +42,15 @@ function ChipInput({
   };
   return (
     <div
-      style={{
-        border: '1px solid var(--space-border-medium)',
-        borderRadius: 4,
-        padding: 4,
-        minHeight: 32,
-        display: 'flex',
-        flexWrap: 'wrap',
-        gap: 4,
-      }}
+      className="st-border st-rounded st-flex-wrap st-gap-4"
+      style={{ padding: 4, minHeight: 32 }}
     >
       {value.map((v, i) => (
         <span
           key={i}
-          className="modal-chip"
+          className="modal-chip st-rounded-3 st-text-12"
           style={{
-            borderRadius: 3,
             padding: '2px 6px',
-            fontSize: 12,
             display: 'inline-flex',
             alignItems: 'center',
             gap: 4,
@@ -68,13 +59,8 @@ function ChipInput({
           {v}
           <button
             onClick={() => onChange(value.filter((_, j) => j !== i))}
-            style={{
-              border: 'none',
-              background: 'transparent',
-              cursor: 'pointer',
-              color: 'var(--color-text-secondary)',
-              padding: 0,
-            }}
+            className="st-border-none st-bg-transparent st-text-secondary"
+            style={{ padding: 0 }}
             title="移除"
           >
             ×
@@ -93,13 +79,8 @@ function ChipInput({
           }
         }}
         onBlur={add}
-        style={{
-          border: 'none',
-          outline: 'none',
-          flex: 1,
-          minWidth: 80,
-          fontSize: 13,
-        }}
+        className="st-flex-1 st-text-13"
+        style={{ border: 'none', outline: 'none', minWidth: 80 }}
       />
     </div>
   );
@@ -107,8 +88,8 @@ function ChipInput({
 
 function Row({ label, children }: { label: string; children: React.ReactNode }) {
   return (
-    <label style={{ display: 'block', marginBottom: 12 }}>
-      <span style={{ display: 'block', fontSize: 12, color: 'var(--color-text-secondary)', marginBottom: 4 }}>
+    <label className="st-mb-12">
+      <span className="st-text-12 st-text-secondary st-mb-4" style={{ display: 'block' }}>
         {label}
       </span>
       {children}
@@ -126,7 +107,7 @@ export function EntryForm({
   const isAtDepth = value.position === 'at_depth';
 
   return (
-    <div style={{ padding: 12 }}>
+    <div className="st-p-12">
       <Row label="关键词 (主)">
         <ChipInput value={value.keys} onChange={(keys) => onChange({ keys })} />
       </Row>
@@ -142,29 +123,25 @@ export function EntryForm({
           value={value.comment ?? ''}
           onChange={(e) => onChange({ comment: e.target.value })}
           placeholder="留空时使用内容前 30 字"
-          style={{ width: '100%', padding: 6 }}
+          className="st-w-full st-p-6"
         />
       </Row>
       <Row label="内容 (content)">
         <textarea
           value={value.content}
           onChange={(e) => onChange({ content: e.target.value })}
-          style={{
-            width: '100%',
-            height: 200,
-            padding: 8,
-            fontFamily: 'monospace',
-            fontSize: 13,
-          }}
+          className="st-w-full st-mono st-text-13"
+          style={{ height: 200, padding: 8 }}
         />
       </Row>
 
-      <div style={{ display: 'flex', gap: 8, marginBottom: 12 }}>
+      <div className="st-flex-row st-gap-8 st-mb-12">
         <Row label="位置 (position)">
           <select
             value={value.position}
             onChange={(e) => onChange({ position: e.target.value as LorebookEntry['position'] })}
-            style={{ padding: 6, width: 220 }}
+            className="st-p-6"
+            style={{ width: 220 }}
           >
             {POSITIONS.map((p) => (
               <option key={p.value} value={p.value}>
@@ -182,14 +159,16 @@ export function EntryForm({
                 onChange={(e) =>
                   onChange({ depth: clampNumber(e.target.value, 0, 999, 4) })
                 }
-                style={{ padding: 6, width: 80 }}
+                className="st-p-6"
+                style={{ width: 80 }}
               />
             </Row>
             <Row label="角色 (role)">
               <select
                 value={value.role ?? 0}
                 onChange={(e) => onChange({ role: Number(e.target.value) })}
-                style={{ padding: 6, width: 120 }}
+                className="st-p-6"
+                style={{ width: 120 }}
               >
                 <option value={0}>system</option>
                 <option value={1}>user</option>
@@ -203,13 +182,14 @@ export function EntryForm({
             type="number"
             value={value.order}
             onChange={(e) => onChange({ order: clampNumber(e.target.value, 0, 9999, 100) })}
-            style={{ padding: 6, width: 80 }}
+            className="st-p-6"
+            style={{ width: 80 }}
           />
         </Row>
       </div>
 
-      <div style={{ display: 'flex', flexWrap: 'wrap', gap: 16, marginBottom: 12 }}>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+      <div className="st-flex-wrap st-gap-16 st-mb-12">
+        <label className="st-flex-row st-gap-6">
           <input
             type="checkbox"
             checked={value.constant}
@@ -217,7 +197,7 @@ export function EntryForm({
           />
           常驻 (constant)
         </label>
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <label className="st-flex-row st-gap-6">
           <input
             type="checkbox"
             checked={value.selective}
@@ -231,7 +211,7 @@ export function EntryForm({
             onChange={(e) =>
               onChange({ selectiveLogic: e.target.value as LorebookEntry['selectiveLogic'] })
             }
-            style={{ padding: 4 }}
+            className="st-p-4"
           >
             {LOGICS.map((l) => (
               <option key={l.value} value={l.value}>
@@ -240,7 +220,7 @@ export function EntryForm({
             ))}
           </select>
         )}
-        <label style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+        <label className="st-flex-row st-gap-6">
           <input
             type="checkbox"
             checked={value.useProbability ?? false}
@@ -255,7 +235,8 @@ export function EntryForm({
             onChange={(e) =>
               onChange({ probability: clampNumber(e.target.value, 0, 100, 100) })
             }
-            style={{ padding: 4, width: 70 }}
+            className="st-p-4"
+            style={{ width: 70 }}
             min={0}
             max={100}
           />
@@ -263,19 +244,20 @@ export function EntryForm({
       </div>
 
       <details style={{ borderTop: '1px solid var(--space-border-medium)', paddingTop: 12 }}>
-        <summary style={{ cursor: 'pointer', fontSize: 13, color: 'var(--color-text-secondary)' }}>
+        <summary className="st-text-13 st-text-secondary" style={{ cursor: 'pointer' }}>
           高级设置
         </summary>
-        <div style={{ paddingTop: 12 }}>
+        <div className="st-pt-12">
           <Row label="扫描深度 (scanDepth)">
             <input
               type="number"
               value={value.scanDepth ?? 0}
               onChange={(e) => onChange({ scanDepth: clampNumber(e.target.value, 0, 999, 0) })}
-              style={{ padding: 6, width: 100 }}
+              className="st-p-6"
+              style={{ width: 100 }}
             />
           </Row>
-          <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12, marginBottom: 12 }}>
+          <div className="st-flex-wrap st-gap-12 st-mb-12">
             <label>
               <input
                 type="checkbox"
@@ -318,13 +300,14 @@ export function EntryForm({
             </label>
           </div>
 
-          <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginBottom: 12 }}>
+          <div className="st-flex-wrap st-gap-8 st-mb-12">
             <Row label="sticky">
               <input
                 type="number"
                 value={value.sticky ?? 0}
                 onChange={(e) => onChange({ sticky: clampNumber(e.target.value, 0, 9999, 0) })}
-                style={{ padding: 6, width: 90 }}
+                className="st-p-6"
+                style={{ width: 90 }}
               />
             </Row>
             <Row label="cooldown">
@@ -332,7 +315,8 @@ export function EntryForm({
                 type="number"
                 value={value.cooldown ?? 0}
                 onChange={(e) => onChange({ cooldown: clampNumber(e.target.value, 0, 9999, 0) })}
-                style={{ padding: 6, width: 90 }}
+                className="st-p-6"
+                style={{ width: 90 }}
               />
             </Row>
             <Row label="delay">
@@ -340,7 +324,8 @@ export function EntryForm({
                 type="number"
                 value={value.delay ?? 0}
                 onChange={(e) => onChange({ delay: clampNumber(e.target.value, 0, 9999, 0) })}
-                style={{ padding: 6, width: 90 }}
+                className="st-p-6"
+                style={{ width: 90 }}
               />
             </Row>
             <Row label="weight">
@@ -348,7 +333,8 @@ export function EntryForm({
                 type="number"
                 value={value.weight ?? 100}
                 onChange={(e) => onChange({ weight: clampNumber(e.target.value, 0, 9999, 100) })}
-                style={{ padding: 6, width: 90 }}
+                className="st-p-6"
+                style={{ width: 90 }}
               />
             </Row>
           </div>
@@ -358,10 +344,10 @@ export function EntryForm({
               type="text"
               value={value.group ?? ''}
               onChange={(e) => onChange({ group: e.target.value })}
-              style={{ padding: 6, width: '100%' }}
+              className="st-p-6 st-w-full"
             />
           </Row>
-          <label style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 12 }}>
+          <label className="st-flex-row st-gap-6 st-mb-12">
             <input
               type="checkbox"
               checked={value.useGroupScoring ?? false}
@@ -370,9 +356,9 @@ export function EntryForm({
             分组评分
           </label>
 
-          <fieldset style={{ marginBottom: 12, border: '1px solid var(--space-border-medium)', padding: 8 }}>
-            <legend style={{ fontSize: 12, color: 'var(--color-text-secondary)' }}>字符卡匹配</legend>
-            <div style={{ display: 'flex', flexWrap: 'wrap', gap: 12 }}>
+          <fieldset className="st-mb-12 st-fieldset">
+            <legend className="st-text-12 st-text-secondary">字符卡匹配</legend>
+            <div className="st-flex-wrap st-gap-12">
               {(
                 [
                   ['matchPersonaDescription', '人设描述'],
@@ -383,7 +369,7 @@ export function EntryForm({
                   ['matchCreatorNotes', '创建者备注'],
                 ] as const
               ).map(([k, label]) => (
-                <label key={k} style={{ fontSize: 12 }}>
+                <label key={k} className="st-text-12">
                   <input
                     type="checkbox"
                     checked={(value as any)[k] ?? false}
@@ -407,7 +393,7 @@ export function EntryForm({
                     .filter(Boolean),
                 })
               }
-              style={{ padding: 6, width: '100%' }}
+              className="st-p-6 st-w-full"
             />
           </Row>
 
@@ -426,13 +412,8 @@ export function EntryForm({
                   // silently ignore parse errors while typing
                 }
               }}
-              style={{
-                width: '100%',
-                height: 80,
-                padding: 6,
-                fontFamily: 'monospace',
-                fontSize: 12,
-              }}
+              className="st-w-full st-mono st-text-12"
+              style={{ height: 80, padding: 6 }}
             />
           </Row>
         </div>
