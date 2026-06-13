@@ -459,7 +459,7 @@ function useSillytavernState() {
       // 3. 合并物品/属性 MOD 的变量注入
       for (const mod of selectedMods) {
         if (mod.content.type === 'item' || mod.content.type === 'attribute') {
-          variables = { ...variables, ...mod.content.variableInjections };
+          variables = { ...variables, ...mod.content.values };
         }
       }
 

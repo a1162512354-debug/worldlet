@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import type { Mod, ModType, ModContent } from '../../sillytavern/types';
+import type { Mod, ModType, ModContent, ModVariableField, ModVariableFieldType } from '../../sillytavern/types';
 import { useSillytavern } from '../../hooks/useSillytavern';
 
 // ---- helpers ----
@@ -23,7 +23,15 @@ function createEmptyMod(): Mod {
     description: '',
     icon: '📦',
     type: 'item',
-    content: { type: 'item', variableInjections: {} },
+    content: {
+      type: 'item',
+      fields: [
+        { key: 'name', label: '名称', type: 'text', defaultValue: '' },
+        { key: 'description', label: '描述', type: 'text', defaultValue: '' },
+        { key: 'quantity', label: '数量', type: 'number', defaultValue: 1, min: 0 },
+      ],
+      values: { name: '', description: '', quantity: 1 },
+    },
     tags: [],
     openingDescription: '',
     createdAt: now,
@@ -34,11 +42,34 @@ function createEmptyMod(): Mod {
 function createContentForType(type: ModType): ModContent {
   switch (type) {
     case 'worldbook': return { type: 'worldbook', lorebookIds: [] };
-    case 'item': return { type: 'item', variableInjections: {} };
-    case 'attribute': return { type: 'attribute', variableInjections: {} };
+    case 'item': return {
+      type: 'item',
+      fields: [
+        { key: 'name', label: '名称', type: 'text', defaultValue: '' },
+        { key: 'description', label: '描述', type: 'text', defaultValue: '' },
+        { key: 'quantity', label: '数量', type: 'number', defaultValue: 1, min: 0 },
+      ],
+      values: { name: '', description: '', quantity: 1 },
+    };
+    case 'attribute': return {
+      type: 'attribute',
+      fields: [
+        { key: 'name', label: '属性名', type: 'text', defaultValue: '' },
+        { key: 'value', label: '数值', type: 'number', defaultValue: 0 },
+        { key: 'description', label: '描述', type: 'text', defaultValue: '' },
+      ],
+      values: { name: '', value: 0, description: '' },
+    };
     case 'plot': return { type: 'plot', openingText: '' };
   }
 }
+
+const FIELD_TYPE_LABELS: Record<ModVariableFieldType, string> = {
+  number: '数值',
+  text: '文本',
+  boolean: '布尔',
+  select: '选择',
+};
 
 // ---- main component ----
 export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
@@ -127,19 +158,52 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
     [selectedId],
   );
 
-  // ---- variable injection editor ----
-  const handleVarChange = useCallback(
-    (key: string, value: string) => {
+  // ---- field definition editor ----
+  const handleFieldAdd = useCallback(() => {
+    if (!selectedId) return;
+    const key = prompt('输入字段键名 (如 "attack", "quantity"):');
+    if (!key?.trim()) return;
+    setDrafts((prev) =>
+      prev.map((m) => {
+        if (m.id !== selectedId) return m;
+        if (m.content.type !== 'item' && m.content.type !== 'attribute') return m;
+        if (m.content.fields.some((f) => f.key === key)) {
+          alert('字段名已存在');
+          return m;
+        }
+        const newField: ModVariableField = {
+          key,
+          label: key,
+          type: 'text',
+          defaultValue: '',
+        };
+        return {
+          ...m,
+          content: {
+            ...m.content,
+            fields: [...m.content.fields, newField],
+            values: { ...m.content.values, [key]: '' },
+          },
+          updatedAt: Date.now(),
+        };
+      }),
+    );
+  }, [selectedId]);
+
+  const handleFieldRemove = useCallback(
+    (fieldKey: string) => {
       if (!selectedId) return;
       setDrafts((prev) =>
         prev.map((m) => {
           if (m.id !== selectedId) return m;
           if (m.content.type !== 'item' && m.content.type !== 'attribute') return m;
+          const { [fieldKey]: _, ...restValues } = m.content.values;
           return {
             ...m,
             content: {
               ...m.content,
-              variableInjections: { ...m.content.variableInjections, [key]: value },
+              fields: m.content.fields.filter((f) => f.key !== fieldKey),
+              values: restValues,
             },
             updatedAt: Date.now(),
           };
@@ -149,39 +213,45 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
     [selectedId],
   );
 
-  const handleVarAdd = useCallback(() => {
-    if (!selectedId) return;
-    const key = prompt('输入变量名:');
-    if (!key?.trim()) return;
-    setDrafts((prev) =>
-      prev.map((m) => {
-        if (m.id !== selectedId) return m;
-        if (m.content.type !== 'item' && m.content.type !== 'attribute') return m;
-        if (key in m.content.variableInjections) {
-          alert('变量名已存在');
-          return m;
-        }
-        return {
-          ...m,
-          content: {
-            ...m.content,
-            variableInjections: { ...m.content.variableInjections, [key]: '' },
-          },
-          updatedAt: Date.now(),
-        };
-      }),
-    );
-  }, [selectedId]);
-
-  const handleVarRemove = useCallback(
-    (key: string) => {
+  const handleFieldChange = useCallback(
+    (fieldKey: string, patch: Partial<ModVariableField>) => {
       if (!selectedId) return;
       setDrafts((prev) =>
         prev.map((m) => {
           if (m.id !== selectedId) return m;
           if (m.content.type !== 'item' && m.content.type !== 'attribute') return m;
-          const { [key]: _, ...rest } = m.content.variableInjections;
-          return { ...m, content: { ...m.content, variableInjections: rest }, updatedAt: Date.now() };
+          return {
+            ...m,
+            content: {
+              ...m.content,
+              fields: m.content.fields.map((f) =>
+                f.key === fieldKey ? { ...f, ...patch } : f
+              ),
+            },
+            updatedAt: Date.now(),
+          };
+        }),
+      );
+    },
+    [selectedId],
+  );
+
+  // ---- value editor ----
+  const handleValueChange = useCallback(
+    (fieldKey: string, value: any) => {
+      if (!selectedId) return;
+      setDrafts((prev) =>
+        prev.map((m) => {
+          if (m.id !== selectedId) return m;
+          if (m.content.type !== 'item' && m.content.type !== 'attribute') return m;
+          return {
+            ...m,
+            content: {
+              ...m.content,
+              values: { ...m.content.values, [fieldKey]: value },
+            },
+            updatedAt: Date.now(),
+          };
         }),
       );
     },
@@ -326,38 +396,152 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
 
       case 'item':
       case 'attribute':
-        const vars = content.variableInjections;
-        const varKeys = Object.keys(vars);
         return (
-          <div className="st-fieldset">
-            <div className="st-flex st-items-center st-justify-between st-mb-4">
-              <span className="st-text-12 st-text-secondary">
-                {content.type === 'item' ? '物品变量注入' : '属性变量注入'}
-              </span>
-              <button className="st-btn-xs st-btn-save" onClick={handleVarAdd}>+ 添加</button>
-            </div>
-            {varKeys.length === 0 ? (
-              <span className="st-text-12 st-text-muted">无变量</span>
-            ) : (
-              <div className="st-flex-col st-gap-4">
-                {varKeys.map((key) => (
-                  <div key={key} className="st-flex st-items-center st-gap-4">
-                    <span className="st-text-12 st-mono st-text-secondary" style={{ minWidth: 80 }}>{key}</span>
-                    <input
-                      className="st-input st-flex-1"
-                      value={String(vars[key] ?? '')}
-                      onChange={(e) => handleVarChange(key, e.target.value)}
-                    />
-                    <button
-                      className="st-btn-xxs st-btn-danger-text"
-                      onClick={() => handleVarRemove(key)}
-                    >
-                      删除
-                    </button>
-                  </div>
-                ))}
+          <div className="st-flex-col st-gap-12">
+            {/* 字段定义 */}
+            <div className="st-fieldset">
+              <div className="st-flex st-items-center st-justify-between st-mb-4">
+                <span className="st-text-12 st-text-secondary">
+                  {content.type === 'item' ? '物品字段定义' : '属性字段定义'}
+                </span>
+                <button className="st-btn-xs" onClick={handleFieldAdd}>+ 添加字段</button>
               </div>
-            )}
+              {content.fields.length === 0 ? (
+                <span className="st-text-12 st-text-muted">无字段定义</span>
+              ) : (
+                <div className="st-flex-col st-gap-4">
+                  {content.fields.map((field) => (
+                    <div key={field.key} className="st-border st-rounded st-p-8" style={{ background: 'rgba(110,207,207,0.04)' }}>
+                      <div className="st-flex-row st-gap-8 st-items-center st-mb-4">
+                        <span className="st-mono st-text-12 st-flex-1">{field.key}</span>
+                        <select
+                          className="st-input st-text-12"
+                          style={{ width: 80 }}
+                          value={field.type}
+                          onChange={(e) => handleFieldChange(field.key, { type: e.target.value as ModVariableFieldType })}
+                        >
+                          {Object.entries(FIELD_TYPE_LABELS).map(([v, l]) => (
+                            <option key={v} value={v}>{l}</option>
+                          ))}
+                        </select>
+                        <button
+                          className="st-btn-xxs st-btn-danger-text"
+                          onClick={() => handleFieldRemove(field.key)}
+                        >
+                          删除
+                        </button>
+                      </div>
+                      <div className="st-flex-row st-gap-8">
+                        <label className="st-flex-col st-gap-2 st-flex-1">
+                          <span className="st-text-11 st-text-muted">显示名称</span>
+                          <input
+                            className="st-input st-text-12"
+                            value={field.label}
+                            onChange={(e) => handleFieldChange(field.key, { label: e.target.value })}
+                          />
+                        </label>
+                        <label className="st-flex-col st-gap-2 st-flex-1">
+                          <span className="st-text-11 st-text-muted">描述</span>
+                          <input
+                            className="st-input st-text-12"
+                            value={field.description ?? ''}
+                            onChange={(e) => handleFieldChange(field.key, { description: e.target.value })}
+                            placeholder="可选"
+                          />
+                        </label>
+                      </div>
+                      {field.type === 'number' && (
+                        <div className="st-flex-row st-gap-8 st-mt-4">
+                          <label className="st-flex-col st-gap-2">
+                            <span className="st-text-11 st-text-muted">最小值</span>
+                            <input
+                              type="number"
+                              className="st-input st-text-12"
+                              style={{ width: 70 }}
+                              value={field.min ?? ''}
+                              onChange={(e) => handleFieldChange(field.key, { min: e.target.value ? Number(e.target.value) : undefined })}
+                            />
+                          </label>
+                          <label className="st-flex-col st-gap-2">
+                            <span className="st-text-11 st-text-muted">最大值</span>
+                            <input
+                              type="number"
+                              className="st-input st-text-12"
+                              style={{ width: 70 }}
+                              value={field.max ?? ''}
+                              onChange={(e) => handleFieldChange(field.key, { max: e.target.value ? Number(e.target.value) : undefined })}
+                            />
+                          </label>
+                        </div>
+                      )}
+                      {field.type === 'select' && (
+                        <div className="st-mt-4">
+                          <span className="st-text-11 st-text-muted">选项（逗号分隔）</span>
+                          <input
+                            className="st-input st-text-12 st-mt-2"
+                            value={(field.options ?? []).join(', ')}
+                            onChange={(e) => handleFieldChange(field.key, { options: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })}
+                            placeholder="选项1, 选项2, 选项3"
+                          />
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* 字段值预览 */}
+            <div className="st-fieldset">
+              <span className="st-text-12 st-text-secondary">默认值设置</span>
+              {content.fields.length === 0 ? (
+                <span className="st-text-12 st-text-muted">请先添加字段</span>
+              ) : (
+                <div className="st-flex-col st-gap-4 st-mt-4">
+                  {content.fields.map((field) => (
+                    <div key={field.key} className="st-flex-row st-gap-8 st-items-center">
+                      <span className="st-text-12 st-text-secondary" style={{ minWidth: 80 }}>{field.label}</span>
+                      {field.type === 'number' ? (
+                        <input
+                          type="number"
+                          className="st-input st-text-12 st-flex-1"
+                          value={content.values[field.key] ?? field.defaultValue ?? 0}
+                          onChange={(e) => handleValueChange(field.key, Number(e.target.value))}
+                          min={field.min}
+                          max={field.max}
+                        />
+                      ) : field.type === 'boolean' ? (
+                        <label className="st-flex-row st-gap-4 st-items-center">
+                          <input
+                            type="checkbox"
+                            checked={content.values[field.key] ?? field.defaultValue ?? false}
+                            onChange={(e) => handleValueChange(field.key, e.target.checked)}
+                          />
+                          <span className="st-text-12">{content.values[field.key] ? '是' : '否'}</span>
+                        </label>
+                      ) : field.type === 'select' ? (
+                        <select
+                          className="st-input st-text-12 st-flex-1"
+                          value={content.values[field.key] ?? field.defaultValue ?? ''}
+                          onChange={(e) => handleValueChange(field.key, e.target.value)}
+                        >
+                          <option value="">请选择</option>
+                          {(field.options ?? []).map((opt) => (
+                            <option key={opt} value={opt}>{opt}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <input
+                          className="st-input st-text-12 st-flex-1"
+                          value={String(content.values[field.key] ?? field.defaultValue ?? '')}
+                          onChange={(e) => handleValueChange(field.key, e.target.value)}
+                        />
+                      )}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         );
 

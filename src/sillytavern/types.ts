@@ -433,6 +433,21 @@ export interface PanelTemplate {
 /** MOD 类型 */
 export type ModType = 'worldbook' | 'item' | 'attribute' | 'plot';
 
+/** MOD 变量字段类型 */
+export type ModVariableFieldType = 'number' | 'text' | 'boolean' | 'select';
+
+/** MOD 变量字段定义 */
+export interface ModVariableField {
+  key: string;                    // 变量键名（如 "attack", "quantity"）
+  label: string;                  // 显示名称（如 "攻击力", "数量"）
+  type: ModVariableFieldType;     // 字段类型
+  defaultValue: any;              // 默认值
+  description?: string;           // 字段描述
+  options?: string[];             // type='select' 时的选项
+  min?: number;                   // type='number' 时的最小值
+  max?: number;                   // type='number' 时的最大值
+}
+
 /** MOD 内容 — 歧义联合类型 */
 export type ModContent =
   | ModContentWorldbook
@@ -448,14 +463,18 @@ export interface ModContentWorldbook {
 
 export interface ModContentItem {
   type: 'item';
-  /** 注入的变量键值对，如 { gold: 100, potion: 5 } */
-  variableInjections: Record<string, any>;
+  /** 自定义字段定义 */
+  fields: ModVariableField[];
+  /** 字段值，如 { name: "铁剑", description: "一把铁剑", quantity: 1, attack: 10 } */
+  values: Record<string, any>;
 }
 
 export interface ModContentAttribute {
   type: 'attribute';
-  /** 注入的属性键值对，如 { strength: 15, sword_skill: 10 } */
-  variableInjections: Record<string, any>;
+  /** 自定义字段定义 */
+  fields: ModVariableField[];
+  /** 字段值 */
+  values: Record<string, any>;
 }
 
 export interface ModContentPlot {
