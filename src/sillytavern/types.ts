@@ -463,16 +463,16 @@ export interface ModContentWorldbook {
 
 export interface ModContentItem {
   type: 'item';
-  /** 自定义字段定义 */
-  fields: ModVariableField[];
+  /** 引用的变量结构 ID */
+  schemaId: string | null;
   /** 字段值，如 { name: "铁剑", description: "一把铁剑", quantity: 1, attack: 10 } */
   values: Record<string, any>;
 }
 
 export interface ModContentSkill {
   type: 'skill';
-  /** 自定义字段定义 */
-  fields: ModVariableField[];
+  /** 引用的变量结构 ID */
+  schemaId: string | null;
   /** 字段值 */
   values: Record<string, any>;
 }

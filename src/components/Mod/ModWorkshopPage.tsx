@@ -1,5 +1,5 @@
 import { useState, useMemo, useCallback } from 'react';
-import type { Mod, ModType, ModContent, ModVariableField, ModVariableFieldType } from '../../sillytavern/types';
+import type { Mod, ModType, ModContent } from '../../sillytavern/types';
 import { useSillytavern } from '../../hooks/useSillytavern';
 
 // ---- helpers ----
@@ -25,12 +25,8 @@ function createEmptyMod(): Mod {
     type: 'item',
     content: {
       type: 'item',
-      fields: [
-        { key: 'name', label: '名称', type: 'text', defaultValue: '' },
-        { key: 'description', label: '描述', type: 'text', defaultValue: '' },
-        { key: 'quantity', label: '数量', type: 'number', defaultValue: 1, min: 0 },
-      ],
-      values: { name: '', description: '', quantity: 1 },
+      schemaId: null,
+      values: {},
     },
     tags: [],
     openingDescription: '',
@@ -44,36 +40,21 @@ function createContentForType(type: ModType): ModContent {
     case 'worldbook': return { type: 'worldbook', lorebookIds: [] };
     case 'item': return {
       type: 'item',
-      fields: [
-        { key: 'name', label: '名称', type: 'text', defaultValue: '' },
-        { key: 'description', label: '描述', type: 'text', defaultValue: '' },
-        { key: 'quantity', label: '数量', type: 'number', defaultValue: 1, min: 0 },
-      ],
-      values: { name: '', description: '', quantity: 1 },
+      schemaId: null,
+      values: {},
     };
     case 'skill': return {
       type: 'skill',
-      fields: [
-        { key: 'name', label: '技能名', type: 'text', defaultValue: '' },
-        { key: 'level', label: '等级', type: 'number', defaultValue: 1, min: 1, max: 100 },
-        { key: 'description', label: '描述', type: 'text', defaultValue: '' },
-      ],
-      values: { name: '', level: 1, description: '' },
+      schemaId: null,
+      values: {},
     };
     case 'plot': return { type: 'plot', openingText: '' };
   }
 }
 
-const FIELD_TYPE_LABELS: Record<ModVariableFieldType, string> = {
-  number: '数值',
-  text: '文本',
-  boolean: '布尔',
-  select: '选择',
-};
-
 // ---- main component ----
 export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
-  const { mods, addMod, updateMod, deleteMod, lorebooks, showToast } = useSillytavern();
+  const { mods, addMod, updateMod, deleteMod, lorebooks, variableSchemas, showToast } = useSillytavern();
 
   const [drafts, setDrafts] = useState<Mod[]>(() => mods.map((m) => structuredClone(m)));
   const [selectedId, setSelectedId] = useState<string | null>(drafts[0]?.id ?? null);
@@ -150,84 +131,6 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
           return {
             ...m,
             content: { ...m.content, [key]: value },
-            updatedAt: Date.now(),
-          };
-        }),
-      );
-    },
-    [selectedId],
-  );
-
-  // ---- field definition editor ----
-  const handleFieldAdd = useCallback(() => {
-    if (!selectedId) return;
-    const key = prompt('输入字段键名 (如 "attack", "quantity"):');
-    if (!key?.trim()) return;
-    setDrafts((prev) =>
-      prev.map((m) => {
-        if (m.id !== selectedId) return m;
-        if (m.content.type !== 'item' && m.content.type !== 'skill') return m;
-        if (m.content.fields.some((f) => f.key === key)) {
-          alert('字段名已存在');
-          return m;
-        }
-        const newField: ModVariableField = {
-          key,
-          label: key,
-          type: 'text',
-          defaultValue: '',
-        };
-        return {
-          ...m,
-          content: {
-            ...m.content,
-            fields: [...m.content.fields, newField],
-            values: { ...m.content.values, [key]: '' },
-          },
-          updatedAt: Date.now(),
-        };
-      }),
-    );
-  }, [selectedId]);
-
-  const handleFieldRemove = useCallback(
-    (fieldKey: string) => {
-      if (!selectedId) return;
-      setDrafts((prev) =>
-        prev.map((m) => {
-          if (m.id !== selectedId) return m;
-          if (m.content.type !== 'item' && m.content.type !== 'skill') return m;
-          const { [fieldKey]: _, ...restValues } = m.content.values;
-          return {
-            ...m,
-            content: {
-              ...m.content,
-              fields: m.content.fields.filter((f) => f.key !== fieldKey),
-              values: restValues,
-            },
-            updatedAt: Date.now(),
-          };
-        }),
-      );
-    },
-    [selectedId],
-  );
-
-  const handleFieldChange = useCallback(
-    (fieldKey: string, patch: Partial<ModVariableField>) => {
-      if (!selectedId) return;
-      setDrafts((prev) =>
-        prev.map((m) => {
-          if (m.id !== selectedId) return m;
-          if (m.content.type !== 'item' && m.content.type !== 'skill') return m;
-          return {
-            ...m,
-            content: {
-              ...m.content,
-              fields: m.content.fields.map((f) =>
-                f.key === fieldKey ? { ...f, ...patch } : f
-              ),
-            },
             updatedAt: Date.now(),
           };
         }),
@@ -400,154 +303,106 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
 
       case 'item':
       case 'skill':
-        const fields = content.fields ?? [];
+        // 获取当前绑定的变量结构
+        const boundSchema = content.schemaId
+          ? variableSchemas.find((s) => s.id === content.schemaId)
+          : null;
+        const schemaFields = boundSchema?.definitions ?? [];
         const values = content.values ?? {};
+
         return (
           <div className="st-flex-col st-gap-12">
-            {/* 字段定义 */}
+            {/* 变量结构选择 */}
             <div className="st-fieldset">
-              <div className="st-flex st-items-center st-justify-between st-mb-4">
-                <span className="st-text-12 st-text-secondary">
-                  {content.type === 'item' ? '物品字段定义' : '技能字段定义'}
+              <div className="st-flex-row st-gap-8 st-items-center">
+                <span className="st-text-12 st-font-bold">
+                  {content.type === 'item' ? '物品变量结构' : '技能变量结构'}
                 </span>
-                <button className="st-btn-xs" onClick={handleFieldAdd}>+ 添加字段</button>
-              </div>
-              {fields.length === 0 ? (
-                <span className="st-text-12 st-text-muted">无字段定义</span>
-              ) : (
-                <div className="st-flex-col st-gap-4">
-                  {fields.map((field) => (
-                    <div key={field.key} className="st-border st-rounded st-p-8" style={{ background: 'rgba(110,207,207,0.04)' }}>
-                      <div className="st-flex-row st-gap-8 st-items-center st-mb-4">
-                        <span className="st-mono st-text-12 st-flex-1">{field.key}</span>
-                        <select
-                          className="st-input st-text-12"
-                          style={{ width: 80 }}
-                          value={field.type}
-                          onChange={(e) => handleFieldChange(field.key, { type: e.target.value as ModVariableFieldType })}
-                        >
-                          {Object.entries(FIELD_TYPE_LABELS).map(([v, l]) => (
-                            <option key={v} value={v}>{l}</option>
-                          ))}
-                        </select>
-                        <button
-                          className="st-btn-xxs st-btn-danger-text"
-                          onClick={() => handleFieldRemove(field.key)}
-                        >
-                          删除
-                        </button>
-                      </div>
-                      <div className="st-flex-row st-gap-8">
-                        <label className="st-flex-col st-gap-2 st-flex-1">
-                          <span className="st-text-11 st-text-muted">显示名称</span>
-                          <input
-                            className="st-input st-text-12"
-                            value={field.label}
-                            onChange={(e) => handleFieldChange(field.key, { label: e.target.value })}
-                          />
-                        </label>
-                        <label className="st-flex-col st-gap-2 st-flex-1">
-                          <span className="st-text-11 st-text-muted">描述</span>
-                          <input
-                            className="st-input st-text-12"
-                            value={field.description ?? ''}
-                            onChange={(e) => handleFieldChange(field.key, { description: e.target.value })}
-                            placeholder="可选"
-                          />
-                        </label>
-                      </div>
-                      {field.type === 'number' && (
-                        <div className="st-flex-row st-gap-8 st-mt-4">
-                          <label className="st-flex-col st-gap-2">
-                            <span className="st-text-11 st-text-muted">最小值</span>
-                            <input
-                              type="number"
-                              className="st-input st-text-12"
-                              style={{ width: 70 }}
-                              value={field.min ?? ''}
-                              onChange={(e) => handleFieldChange(field.key, { min: e.target.value ? Number(e.target.value) : undefined })}
-                            />
-                          </label>
-                          <label className="st-flex-col st-gap-2">
-                            <span className="st-text-11 st-text-muted">最大值</span>
-                            <input
-                              type="number"
-                              className="st-input st-text-12"
-                              style={{ width: 70 }}
-                              value={field.max ?? ''}
-                              onChange={(e) => handleFieldChange(field.key, { max: e.target.value ? Number(e.target.value) : undefined })}
-                            />
-                          </label>
-                        </div>
-                      )}
-                      {field.type === 'select' && (
-                        <div className="st-mt-4">
-                          <span className="st-text-11 st-text-muted">选项（逗号分隔）</span>
-                          <input
-                            className="st-input st-text-12 st-mt-2"
-                            value={(field.options ?? []).join(', ')}
-                            onChange={(e) => handleFieldChange(field.key, { options: e.target.value.split(',').map((s) => s.trim()).filter(Boolean) })}
-                            placeholder="选项1, 选项2, 选项3"
-                          />
-                        </div>
-                      )}
-                    </div>
+                <select
+                  className="st-input st-flex-1 st-text-12"
+                  value={content.schemaId ?? ''}
+                  onChange={(e) => {
+                    const schemaId = e.target.value || null;
+                    handleContentField('schemaId', schemaId);
+                    // 切换结构时清空值
+                    if (schemaId !== content.schemaId) {
+                      handleContentField('values', {});
+                    }
+                  }}
+                >
+                  <option value="">-- 选择变量结构 --</option>
+                  {variableSchemas.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name} ({s.definitions.length} 个字段)
+                    </option>
                   ))}
+                </select>
+              </div>
+              {!boundSchema && (
+                <div className="st-text-11 st-text-muted st-mt-4">
+                  请先在「变量结构」中创建结构，然后在此处选择
                 </div>
               )}
             </div>
 
-            {/* 字段值预览 */}
-            <div className="st-fieldset">
-              <span className="st-text-12 st-text-secondary">默认值设置</span>
-              {fields.length === 0 ? (
-                <span className="st-text-12 st-text-muted">请先添加字段</span>
-              ) : (
-                <div className="st-flex-col st-gap-4 st-mt-4">
-                  {fields.map((field) => (
-                    <div key={field.key} className="st-flex-row st-gap-8 st-items-center">
-                      <span className="st-text-12 st-text-secondary" style={{ minWidth: 80 }}>{field.label}</span>
-                      {field.type === 'number' ? (
-                        <input
-                          type="number"
-                          className="st-input st-text-12 st-flex-1"
-                          value={values[field.key] ?? field.defaultValue ?? 0}
-                          onChange={(e) => handleValueChange(field.key, Number(e.target.value))}
-                          min={field.min}
-                          max={field.max}
-                        />
-                      ) : field.type === 'boolean' ? (
-                        <label className="st-flex-row st-gap-4 st-items-center">
-                          <input
-                            type="checkbox"
-                            checked={values[field.key] ?? field.defaultValue ?? false}
-                            onChange={(e) => handleValueChange(field.key, e.target.checked)}
-                          />
-                          <span className="st-text-12">{values[field.key] ? '是' : '否'}</span>
-                        </label>
-                      ) : field.type === 'select' ? (
-                        <select
-                          className="st-input st-text-12 st-flex-1"
-                          value={values[field.key] ?? field.defaultValue ?? ''}
-                          onChange={(e) => handleValueChange(field.key, e.target.value)}
-                        >
-                          <option value="">请选择</option>
-                          {(field.options ?? []).map((opt) => (
-                            <option key={opt} value={opt}>{opt}</option>
-                          ))}
-                        </select>
-                      ) : (
-                        <input
-                          className="st-input st-text-12 st-flex-1"
-                          value={String(values[field.key] ?? field.defaultValue ?? '')}
-                          onChange={(e) => handleValueChange(field.key, e.target.value)}
-                        />
-                      )}
-                    </div>
-                  ))}
+            {/* 字段值设置 */}
+            {boundSchema && (
+              <div className="st-fieldset">
+                <span className="st-text-12 st-text-secondary">默认值设置</span>
+                <div className="st-text-11 st-text-muted st-mb-8">
+                  使用「{boundSchema.name}」结构的字段
                 </div>
-              )}
-            </div>
+                {schemaFields.length === 0 ? (
+                  <span className="st-text-12 st-text-muted">该结构无字段定义</span>
+                ) : (
+                  <div className="st-flex-col st-gap-4">
+                    {schemaFields.map((field) => (
+                      <div key={field.id} className="st-flex-row st-gap-8 st-items-center">
+                        <span className="st-text-12 st-text-secondary" style={{ minWidth: 80 }}>
+                          {field.displayName || field.id}
+                        </span>
+                        {field.type === 'number' || field.type === 'bar' ? (
+                          <input
+                            type="number"
+                            className="st-input st-text-12 st-flex-1"
+                            value={values[field.id] ?? field.defaultValue ?? 0}
+                            onChange={(e) => handleValueChange(field.id, Number(e.target.value))}
+                            min={field.config?.min}
+                            max={field.config?.max}
+                          />
+                        ) : field.type === 'boolean' ? (
+                          <label className="st-flex-row st-gap-4 st-items-center">
+                            <input
+                              type="checkbox"
+                              checked={values[field.id] ?? field.defaultValue ?? false}
+                              onChange={(e) => handleValueChange(field.id, e.target.checked)}
+                            />
+                            <span className="st-text-12">{values[field.id] ? '是' : '否'}</span>
+                          </label>
+                        ) : field.type === 'enum' ? (
+                          <select
+                            className="st-input st-text-12 st-flex-1"
+                            value={values[field.id] ?? field.defaultValue ?? ''}
+                            onChange={(e) => handleValueChange(field.id, e.target.value)}
+                          >
+                            <option value="">请选择</option>
+                            {(field.config?.options ?? []).map((opt) => (
+                              <option key={opt} value={opt}>{opt}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <input
+                            className="st-input st-text-12 st-flex-1"
+                            value={String(values[field.id] ?? field.defaultValue ?? '')}
+                            onChange={(e) => handleValueChange(field.id, e.target.value)}
+                          />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         );
 
