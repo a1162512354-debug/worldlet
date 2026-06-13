@@ -96,11 +96,11 @@ Phase 3 — CSS 迁移 + MOD 工坊 + 主题系统（Phase 2 已完成：API 验
 #### 3.2 MOD 工坊系统 `in_progress`
 
 ##### 3.2.1 变量结构系统（基础）
-- [ ] 新增 `VariableDefinition` 类型（type/description/default/displayFormat/aiDescription/aiUpdateRules）
-- [ ] 新增 `variableSchemas` IndexedDB 表
-- [ ] 新增 schema CRUD 函数（database.ts）
-- [ ] useSillytavern 暴露 schema 管理接口
-- [ ] VariableSchemaEditorModal 组件（定义变量类型/描述/默认值）
+- [x] 新增 `VariableDefinition` 类型（type/description/default/displayFormat/aiDescription/aiUpdateRules）
+- [x] 新增 `variableSchemas` IndexedDB 表
+- [x] 新增 schema CRUD 函数（database.ts）
+- [x] useSillytavern 暴露 schema 管理接口
+- [x] VariableSchemaEditorModal 组件（定义变量类型/描述/默认值）
 
 ##### 3.2.2 开局模板系统
 - [x] 新增 `ScenarioTemplate` 类型（name/description/lorebookIds/presetId/variableSchemaId/initialVariables/systemPrompt）
@@ -110,16 +110,16 @@ Phase 3 — CSS 迁移 + MOD 工坊 + 主题系统（Phase 2 已完成：API 验
 - [x] 集成到 createChat：选择模板自动设置世界书+变量+预设
 
 ##### 3.2.3 变量展示组件
-- [ ] VariableBadge 组件（数值/枚举/列表/布尔/文本的可视化展示）
-- [ ] VariablePanel 组件（游戏中实时变量面板，替代原始 key-value 显示）
-- [ ] 集成到 GameView
+- [x] VariableBadge 组件（数值/枚举/列表/布尔/文本的可视化展示）
+- [x] VariablePanel 组件（游戏中实时变量面板，替代原始 key-value 显示）
+- [x] 集成到 SpacePortal（变量面板切换按钮）
 
 ##### 3.2.4 导入/导出
-- [ ] ScenarioTemplate JSON 导出/导入格式
-- [ ] 批量导入支持
-- [ ] 推送到 Git
+- [x] ScenarioTemplate JSON 导出/导入格式
+- [x] 批量导入支持（通过 FullBackup 系统）
+- [x] 推送到 Git
 
-- **Status:** `in_progress`（3.2.1 变量结构系统优先）
+- **Status:** `complete`
 - **依赖**: Phase 2 完成
 
 ### Phase 4: 测试与质量保证 `pending`
