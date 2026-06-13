@@ -477,7 +477,9 @@ export function PanelLayoutEditorModal({ onClose }: { onClose: () => void }) {
   );
 
   const dirty = useMemo(() => {
-    if (!draft || !original) return false;
+    if (!draft) return false;
+    // 新建布局（original 不存在）时 dirty 为 true
+    if (!original) return true;
     return JSON.stringify(draft) !== JSON.stringify(original);
   }, [draft, original]);
 
