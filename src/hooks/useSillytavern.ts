@@ -15,6 +15,7 @@ import {
   type VariableSchema,
   type ScenarioTemplate,
   type PanelLayout,
+  type Mod,
 } from '../sillytavern/types';
 import {
   getDatabase,
@@ -39,6 +40,9 @@ import {
   getPanelLayouts,
   savePanelLayout,
   deletePanelLayout as deletePanelLayoutDb,
+  getMods,
+  saveMod,
+  deleteMod as deleteModDb,
 } from '../sillytavern/database';
 import { createDefaultLorebook } from '../sillytavern/editor-utils';
 import { parseVarsBlock } from '../sillytavern/vars-merger';
@@ -67,6 +71,7 @@ function useSillytavernState() {
   const [variableSchemas, setVariableSchemas] = useState<VariableSchema[]>([]);
   const [scenarios, setScenarios] = useState<ScenarioTemplate[]>([]);
   const [panelLayouts, setPanelLayouts] = useState<PanelLayout[]>([]);
+  const [mods, setMods] = useState<Mod[]>([]);
 
   // ---- modal toggles ----
   const [showSettings, setShowSettings] = useState(false);
@@ -76,6 +81,8 @@ function useSillytavernState() {
   const [showSchemaEditor, setShowSchemaEditor] = useState(false);
   const [showScenarioManager, setShowScenarioManager] = useState(false);
   const [showPanelEditor, setShowPanelEditor] = useState(false);
+  const [showModWorkshop, setShowModWorkshop] = useState(false);
+  const [showCharacterCreation, setShowCharacterCreation] = useState(false);
 
   // ---- toast ----
   const [toast, setToast] = useState<string | null>(null);
@@ -99,7 +106,7 @@ function useSillytavernState() {
     let cancelled = false;
     (async () => {
       await initializeDatabase();
-      const [l, p, s, c, vs, sc, pl] = await Promise.all([
+      const [l, p, s, c, vs, sc, pl, m] = await Promise.all([
         getLorebooks(),
         getPresets(),
         getSettings(),
@@ -107,6 +114,7 @@ function useSillytavernState() {
         getVariableSchemas().catch(() => []),
         getScenarios().catch(() => []),
         getPanelLayouts().catch(() => []),
+        getMods().catch(() => []),
       ]);
       if (cancelled) return;
       setLorebooks(l);
@@ -116,6 +124,7 @@ function useSillytavernState() {
       setVariableSchemas(vs);
       setScenarios(sc);
       setPanelLayouts(pl);
+      setMods(m);
       if (c.length > 0) setActiveChatId(c[0].id);
       setInitialized(true);
     })();
@@ -402,6 +411,105 @@ function useSillytavernState() {
     setPanelLayouts((prev) => prev.filter((l) => l.id !== id));
   }, []);
 
+  // ---- MOD 系统: Mod CRUD ----
+  const addMod = useCallback(async (mod: Mod) => {
+    await saveMod(mod);
+    setMods((prev) => [...prev, mod]);
+  }, []);
+
+  const updateMod = useCallback(async (mod: Mod) => {
+    const next: Mod = { ...mod, updatedAt: Date.now() };
+    await saveMod(next);
+    setMods((prev) => prev.map((m) => (m.id === next.id ? next : m)));
+  }, []);
+
+  const deleteMod = useCallback(async (id: string) => {
+    await deleteModDb(id);
+    setMods((prev) => prev.filter((m) => m.id !== id));
+  }, []);
+
+  // ---- MOD 系统: 使用 MOD 创建会话 ----
+  const createChatWithMods = useCallback(
+    async (
+      name: string,
+      selectedModIds: string[],
+      options?: { scenarioId?: string; presetId?: string }
+    ): Promise<string> => {
+      let variables: Record<string, any> = {};
+      let presetId = options?.presetId ?? settings?.activePresetId ?? null;
+      let lorebookIds: string[] = settings?.activeLorebookIds ?? [];
+      let characterName = settings?.characterName ?? DEFAULT_SETTINGS.characterName;
+      let userName = settings?.userName ?? DEFAULT_SETTINGS.userName;
+
+      // 1. 应用场景模板（如果有）
+      if (options?.scenarioId) {
+        const scenario = scenarios.find((s) => s.id === options.scenarioId);
+        if (scenario) {
+          variables = { ...scenario.initialVariables };
+          if (scenario.presetId) presetId = scenario.presetId;
+          if (scenario.lorebookIds.length > 0) lorebookIds = scenario.lorebookIds;
+          if (scenario.characterName) characterName = scenario.characterName;
+          if (scenario.userName) userName = scenario.userName;
+        }
+      }
+
+      // 2. 解析选中的 MOD
+      const selectedMods = mods.filter((m) => selectedModIds.includes(m.id));
+
+      // 3. 合并物品/属性 MOD 的变量注入
+      for (const mod of selectedMods) {
+        if (mod.content.type === 'item' || mod.content.type === 'attribute') {
+          variables = { ...variables, ...mod.content.variableInjections };
+        }
+      }
+
+      // 4. 合并世界书 MOD 的世界书引用
+      for (const mod of selectedMods) {
+        if (mod.content.type === 'worldbook') {
+          lorebookIds = [...new Set([...lorebookIds, ...mod.content.lorebookIds])];
+        }
+      }
+
+      // 5. 构建开局描述
+      const openingParts: string[] = [];
+      for (const mod of selectedMods) {
+        if (mod.openingDescription) openingParts.push(mod.openingDescription);
+        if (mod.content.type === 'plot') openingParts.push(mod.content.openingText);
+      }
+      const openingBlock = openingParts.join('\n\n');
+
+      // 6. 创建会话
+      const chat: ChatSession = {
+        id: crypto.randomUUID(),
+        name,
+        messages: [],
+        characterName,
+        userName,
+        presetId,
+        lorebookIds,
+        variables,
+        createdAt: Date.now(),
+        updatedAt: Date.now(),
+      };
+
+      // 7. 如果有开局描述，注入为系统消息
+      if (openingBlock) {
+        chat.messages.push({
+          id: crypto.randomUUID(),
+          role: 'system',
+          content: openingBlock,
+          timestamp: Date.now(),
+        });
+      }
+
+      await saveChat(chat);
+      setChats((prev) => [...prev, chat]);
+      setActiveChatId(chat.id);
+      return chat.id;
+    },
+    [settings, scenarios, mods]
+  );
+
   // ---- v3 game mode: streaming + parser + variables ----
   const parser = useStreamParser(
     settings?.customTags ?? [...DEFAULT_TAGS],
@@ -640,15 +748,30 @@ function useSillytavernState() {
     addPanelLayout,
     updatePanelLayout,
     deletePanelLayout,
+
+    // MOD 系统
+    mods,
+    addMod,
+    updateMod,
+    deleteMod,
+    createChatWithMods,
+
+    // 模态框状态
     showSchemaEditor,
     setShowSchemaEditor,
     showScenarioManager,
     setShowScenarioManager,
     showPanelEditor,
     setShowPanelEditor,
+    showModWorkshop,
+    setShowModWorkshop,
+    showCharacterCreation,
+    setShowCharacterCreation,
     openSchemaEditor: () => setShowSchemaEditor(true),
     openScenarioManager: () => setShowScenarioManager(true),
     openPanelEditor: () => setShowPanelEditor(true),
+    openModWorkshop: () => setShowModWorkshop(true),
+    openCharacterCreation: () => setShowCharacterCreation(true),
 
     // toast
     toast,

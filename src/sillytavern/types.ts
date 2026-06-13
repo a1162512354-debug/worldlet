@@ -427,3 +427,64 @@ export interface PanelTemplate {
   columns: number;
   widgets: Omit<PanelWidget, 'id'>[];
 }
+
+// ========== MOD 系统类型 ==========
+
+/** MOD 类型 */
+export type ModType = 'worldbook' | 'item' | 'attribute' | 'plot';
+
+/** MOD 内容 — 歧义联合类型 */
+export type ModContent =
+  | ModContentWorldbook
+  | ModContentItem
+  | ModContentAttribute
+  | ModContentPlot;
+
+export interface ModContentWorldbook {
+  type: 'worldbook';
+  /** 引用的世界书 ID */
+  lorebookIds: string[];
+}
+
+export interface ModContentItem {
+  type: 'item';
+  /** 注入的变量键值对，如 { gold: 100, potion: 5 } */
+  variableInjections: Record<string, any>;
+}
+
+export interface ModContentAttribute {
+  type: 'attribute';
+  /** 注入的属性键值对，如 { strength: 15, sword_skill: 10 } */
+  variableInjections: Record<string, any>;
+}
+
+export interface ModContentPlot {
+  type: 'plot';
+  /** 开局剧情/背景文本 */
+  openingText: string;
+}
+
+/** MOD 实体 */
+export interface Mod {
+  id: string;
+  name: string;
+  description: string;
+  icon: string; // emoji 或图标标识
+  type: ModType;
+  content: ModContent;
+  tags: string[]; // 分类标签
+  /** 开局描述，注入到第一层消息 */
+  openingDescription: string;
+  author?: string;
+  version?: string;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/** MOD 导出包 */
+export interface ModExportPackage {
+  format: 'worldlet-mod-v1';
+  mod: Omit<Mod, 'id' | 'createdAt' | 'updatedAt'>;
+  /** 世界书 MOD 内嵌的世界书数据 */
+  embeddedLorebooks?: Lorebook[];
+}

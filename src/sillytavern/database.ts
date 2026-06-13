@@ -3,11 +3,11 @@
  */
 
 import Dexie, { Table } from 'dexie';
-import type { Lorebook, ChatPreset, AppSettings, ChatSession, VariableSchema, ScenarioTemplate, PanelLayout } from './types';
+import type { Lorebook, ChatPreset, AppSettings, ChatSession, VariableSchema, ScenarioTemplate, PanelLayout, Mod } from './types';
 import { DEFAULT_SETTINGS } from './types';
 
 const DB_NAME = 'SillyTavernWebDB';
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 
 class AppDatabase extends Dexie {
   lorebooks!: Table<Lorebook>;
@@ -17,6 +17,7 @@ class AppDatabase extends Dexie {
   variableSchemas!: Table<VariableSchema>;
   scenarios!: Table<ScenarioTemplate>;
   panelLayouts!: Table<PanelLayout>;
+  mods!: Table<Mod>;
 
   constructor() {
     super(DB_NAME);
@@ -67,6 +68,16 @@ class AppDatabase extends Dexie {
       scenarios: 'id, name, updatedAt',
       panelLayouts: 'id, name, updatedAt',
     });
+    this.version(6).stores({
+      lorebooks: 'id, name, updatedAt',
+      presets: 'id, name, updatedAt',
+      settings: 'key',
+      chats: 'id, name, updatedAt',
+      variableSchemas: 'id, name, updatedAt',
+      scenarios: 'id, name, updatedAt',
+      panelLayouts: 'id, name, updatedAt',
+      mods: 'id, name, type, updatedAt, *tags',
+    });
   }
 }
 
@@ -116,17 +127,19 @@ export interface FullBackup {
   variableSchemas?: VariableSchema[];
   scenarios?: ScenarioTemplate[];
   panelLayouts?: PanelLayout[];
+  mods?: Mod[];
 }
 
 export async function exportAllData(): Promise<FullBackup> {
   const db = getDatabase();
-  const [lorebooks, presets, settings, chats, variableSchemas, scenarios] = await Promise.all([
+  const [lorebooks, presets, settings, chats, variableSchemas, scenarios, mods] = await Promise.all([
     db.lorebooks.toArray(),
     db.presets.toArray(),
     db.settings.toArray(),
     db.chats.toArray(),
     db.variableSchemas?.toArray() ?? [],
     db.scenarios?.toArray() ?? [],
+    db.mods?.toArray() ?? [],
   ]);
   return {
     version: DB_VERSION,
@@ -137,6 +150,7 @@ export async function exportAllData(): Promise<FullBackup> {
     chats,
     variableSchemas,
     scenarios,
+    mods,
   };
 }
 
@@ -163,6 +177,10 @@ export async function importAllData(backup: FullBackup): Promise<void> {
   if (db.scenarios && Array.isArray(backup.scenarios)) {
     await db.scenarios.clear();
     await db.scenarios.bulkPut(backup.scenarios);
+  }
+  if (db.mods && Array.isArray(backup.mods)) {
+    await db.mods.clear();
+    await db.mods.bulkPut(backup.mods);
   }
 }
 
@@ -266,4 +284,19 @@ export async function savePanelLayout(layout: PanelLayout): Promise<string> {
 
 export async function deletePanelLayout(id: string): Promise<void> {
   await getDatabase().panelLayouts.delete(id);
+}
+
+// ========== MOD CRUD ==========
+
+export async function getMods(): Promise<Mod[]> {
+  return getDatabase().mods.toArray();
+}
+
+export async function saveMod(mod: Mod): Promise<string> {
+  await getDatabase().mods.put(mod);
+  return mod.id;
+}
+
+export async function deleteMod(id: string): Promise<void> {
+  await getDatabase().mods.delete(id);
 }
