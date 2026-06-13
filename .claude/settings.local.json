@@ -44,7 +44,10 @@
       "Bash(npx tsc *)",
       "Bash(python3 -c ' *)",
       "Bash(node -e ' *)",
-      "Bash(npx vite *)"
+      "Bash(npx vite *)",
+      "Bash(taskkill //F //PID 23652)",
+      "Bash(PATH='/c/Program Files/nodejs:__TRACKED_VAR__' npm run dev -- --host 127.0.0.1)",
+      "Bash(curl -s http://127.0.0.1:5173/)"
     ]
   }
 }

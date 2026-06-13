@@ -119,7 +119,14 @@ Phase 3 — CSS 迁移 + MOD 工坊 + 主题系统（Phase 2 已完成：API 验
 - [x] 批量导入支持（通过 FullBackup 系统）
 - [x] 推送到 Git
 
-- **Status:** `complete`
+##### 3.2.5 自定义展示面板
+- [ ] 面板布局配置存储（PanelLayout 类型 + IndexedDB 表）
+- [ ] 可视化布局编辑器（选择变量 → 选择展示模式 → 排列位置）
+- [ ] 预设面板模板（RPG 状态栏、背包网格、好感度列表等）
+- [ ] 实时预览
+- [ ] 推送到 Git
+
+- **Status:** `in_progress`（3.2.5 自定义展示面板待完成）
 - **依赖**: Phase 2 完成
 
 ### Phase 4: 测试与质量保证 `pending`
