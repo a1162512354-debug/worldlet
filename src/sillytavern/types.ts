@@ -382,3 +382,48 @@ export interface ScenarioTemplate {
   createdAt: number;
   updatedAt: number;
 }
+
+// ========== Panel Layout Types (自定义展示面板) ==========
+
+/** 面板组件类型 */
+export type WidgetType = 'progress' | 'badge' | 'list' | 'grid' | 'text' | 'separator';
+
+/** 单个面板组件 */
+export interface PanelWidget {
+  id: string;
+  widgetType: WidgetType;
+  variableKey: string;            // 对应的变量名
+  label?: string;                 // 自定义标签（覆盖 displayName）
+  displayMode?: VariableDisplayMode;
+  sortOrder: number;
+
+  // 布局
+  row: number;                    // 所在行（0-based）
+  col: number;                    // 所在列（0-based）
+  colSpan?: number;               // 跨列数（默认1）
+
+  // 样式覆盖
+  color?: string;                 // 自定义颜色
+  icon?: string;                  // 图标标识
+}
+
+/** 面板布局配置 */
+export interface PanelLayout {
+  id: string;
+  name: string;
+  description?: string;
+  columns: number;                // 列数（1-4）
+  widgets: PanelWidget[];
+  isDefault?: boolean;            // 是否为默认面板
+  createdAt: number;
+  updatedAt: number;
+}
+
+/** 预设面板模板 */
+export interface PanelTemplate {
+  name: string;
+  description: string;
+  icon: string;
+  columns: number;
+  widgets: Omit<PanelWidget, 'id'>[];
+}

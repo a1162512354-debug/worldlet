@@ -14,6 +14,7 @@ import {
   type Lorebook,
   type VariableSchema,
   type ScenarioTemplate,
+  type PanelLayout,
 } from '../sillytavern/types';
 import {
   getDatabase,
@@ -35,6 +36,9 @@ import {
   getScenarios,
   saveScenario,
   deleteScenario as deleteScenarioDb,
+  getPanelLayouts,
+  savePanelLayout,
+  deletePanelLayout as deletePanelLayoutDb,
 } from '../sillytavern/database';
 import { createDefaultLorebook } from '../sillytavern/editor-utils';
 import { parseVarsBlock } from '../sillytavern/vars-merger';
@@ -62,6 +66,7 @@ function useSillytavernState() {
   // ---- MOD 工坊 state ----
   const [variableSchemas, setVariableSchemas] = useState<VariableSchema[]>([]);
   const [scenarios, setScenarios] = useState<ScenarioTemplate[]>([]);
+  const [panelLayouts, setPanelLayouts] = useState<PanelLayout[]>([]);
 
   // ---- modal toggles ----
   const [showSettings, setShowSettings] = useState(false);
@@ -70,6 +75,7 @@ function useSillytavernState() {
   const [showVariables, setShowVariables] = useState(false);
   const [showSchemaEditor, setShowSchemaEditor] = useState(false);
   const [showScenarioManager, setShowScenarioManager] = useState(false);
+  const [showPanelEditor, setShowPanelEditor] = useState(false);
 
   // ---- toast ----
   const [toast, setToast] = useState<string | null>(null);
@@ -93,13 +99,14 @@ function useSillytavernState() {
     let cancelled = false;
     (async () => {
       await initializeDatabase();
-      const [l, p, s, c, vs, sc] = await Promise.all([
+      const [l, p, s, c, vs, sc, pl] = await Promise.all([
         getLorebooks(),
         getPresets(),
         getSettings(),
         getChats(),
         getVariableSchemas().catch(() => []),
         getScenarios().catch(() => []),
+        getPanelLayouts().catch(() => []),
       ]);
       if (cancelled) return;
       setLorebooks(l);
@@ -108,6 +115,7 @@ function useSillytavernState() {
       setChats(c);
       setVariableSchemas(vs);
       setScenarios(sc);
+      setPanelLayouts(pl);
       if (c.length > 0) setActiveChatId(c[0].id);
       setInitialized(true);
     })();
@@ -377,6 +385,23 @@ function useSillytavernState() {
     setScenarios((prev) => prev.filter((s) => s.id !== id));
   }, []);
 
+  // ---- MOD 工坊: Panel Layout CRUD ----
+  const addPanelLayout = useCallback(async (layout: PanelLayout) => {
+    await savePanelLayout(layout);
+    setPanelLayouts((prev) => [...prev, layout]);
+  }, []);
+
+  const updatePanelLayout = useCallback(async (layout: PanelLayout) => {
+    const next: PanelLayout = { ...layout, updatedAt: Date.now() };
+    await savePanelLayout(next);
+    setPanelLayouts((prev) => prev.map((l) => (l.id === next.id ? next : l)));
+  }, []);
+
+  const deletePanelLayout = useCallback(async (id: string) => {
+    await deletePanelLayoutDb(id);
+    setPanelLayouts((prev) => prev.filter((l) => l.id !== id));
+  }, []);
+
   // ---- v3 game mode: streaming + parser + variables ----
   const parser = useStreamParser(
     settings?.customTags ?? [...DEFAULT_TAGS],
@@ -611,12 +636,19 @@ function useSillytavernState() {
     addScenario,
     updateScenario,
     deleteScenario,
+    panelLayouts,
+    addPanelLayout,
+    updatePanelLayout,
+    deletePanelLayout,
     showSchemaEditor,
     setShowSchemaEditor,
     showScenarioManager,
     setShowScenarioManager,
+    showPanelEditor,
+    setShowPanelEditor,
     openSchemaEditor: () => setShowSchemaEditor(true),
     openScenarioManager: () => setShowScenarioManager(true),
+    openPanelEditor: () => setShowPanelEditor(true),
 
     // toast
     toast,

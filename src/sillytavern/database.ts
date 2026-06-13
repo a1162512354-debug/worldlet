@@ -3,11 +3,11 @@
  */
 
 import Dexie, { Table } from 'dexie';
-import type { Lorebook, ChatPreset, AppSettings, ChatSession, VariableSchema, ScenarioTemplate } from './types';
+import type { Lorebook, ChatPreset, AppSettings, ChatSession, VariableSchema, ScenarioTemplate, PanelLayout } from './types';
 import { DEFAULT_SETTINGS } from './types';
 
 const DB_NAME = 'SillyTavernWebDB';
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 
 class AppDatabase extends Dexie {
   lorebooks!: Table<Lorebook>;
@@ -16,6 +16,7 @@ class AppDatabase extends Dexie {
   chats!: Table<ChatSession>;
   variableSchemas!: Table<VariableSchema>;
   scenarios!: Table<ScenarioTemplate>;
+  panelLayouts!: Table<PanelLayout>;
 
   constructor() {
     super(DB_NAME);
@@ -56,6 +57,15 @@ class AppDatabase extends Dexie {
       chats: 'id, name, updatedAt',
       variableSchemas: 'id, name, updatedAt',
       scenarios: 'id, name, updatedAt',
+    });
+    this.version(5).stores({
+      lorebooks: 'id, name, updatedAt',
+      presets: 'id, name, updatedAt',
+      settings: 'key',
+      chats: 'id, name, updatedAt',
+      variableSchemas: 'id, name, updatedAt',
+      scenarios: 'id, name, updatedAt',
+      panelLayouts: 'id, name, updatedAt',
     });
   }
 }
@@ -105,6 +115,7 @@ export interface FullBackup {
   chats: ChatSession[];
   variableSchemas?: VariableSchema[];
   scenarios?: ScenarioTemplate[];
+  panelLayouts?: PanelLayout[];
 }
 
 export async function exportAllData(): Promise<FullBackup> {
@@ -240,4 +251,19 @@ export async function saveScenario(scenario: ScenarioTemplate): Promise<string> 
 
 export async function deleteScenario(id: string): Promise<void> {
   await getDatabase().scenarios.delete(id);
+}
+
+// ========== Panel Layout CRUD ==========
+
+export async function getPanelLayouts(): Promise<PanelLayout[]> {
+  return getDatabase().panelLayouts.toArray();
+}
+
+export async function savePanelLayout(layout: PanelLayout): Promise<string> {
+  await getDatabase().panelLayouts.put(layout);
+  return layout.id;
+}
+
+export async function deletePanelLayout(id: string): Promise<void> {
+  await getDatabase().panelLayouts.delete(id);
 }
