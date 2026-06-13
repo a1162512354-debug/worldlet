@@ -306,3 +306,79 @@ export interface VarsPatch {
 
 export type Task = 'story' | 'summary' | 'vars';
 export type ApiTarget = 'primary' | 'secondary';
+
+// ========== Variable Schema Types (MOD 工坊) ==========
+
+/** 变量类型枚举 */
+export type VariableType = 'number' | 'enum' | 'list' | 'boolean' | 'text' | 'bar';
+
+/** 变量展示方式 */
+export type VariableDisplayMode = 'progress' | 'badge' | 'text' | 'icon' | 'grid';
+
+/** 单个变量定义（Schema） */
+export interface VariableDefinition {
+  id: string;
+  type: VariableType;
+
+  // 给玩家看的
+  displayName: string;
+  displayFormat?: string;        // e.g. "{value}/{max}"
+  description?: string;
+  displayMode?: VariableDisplayMode;
+
+  // 给 AI 看的
+  aiDescription: string;
+  aiUpdateRules?: string;        // e.g. "物理攻击: -10~-30, 治疗: +20~+50"
+  aiValidValues?: string;        // e.g. "0-100的整数"
+
+  // 类型相关配置
+  config?: VariableTypeConfig;
+
+  // 默认值
+  defaultValue?: any;
+
+  sortOrder: number;
+  createdAt: number;
+  updatedAt: number;
+}
+
+/** 变量类型配置 */
+export interface VariableTypeConfig {
+  // number / bar 类型
+  min?: number;
+  max?: number;
+  step?: number;
+
+  // enum 类型
+  options?: string[];            // e.g. ["练气期", "筑基期", "金丹期"]
+
+  // list 类型
+  allowDuplicates?: boolean;
+  maxItems?: number;
+}
+
+/** 变量 Schema 集合（一个场景模板的变量定义集） */
+export interface VariableSchema {
+  id: string;
+  name: string;
+  description?: string;
+  definitions: VariableDefinition[];
+  createdAt: number;
+  updatedAt: number;
+}
+
+/** 开局模板 */
+export interface ScenarioTemplate {
+  id: string;
+  name: string;
+  description?: string;
+  lorebookIds: string[];
+  presetId: string | null;
+  variableSchemaId: string | null;
+  initialVariables: Record<string, any>;
+  systemPrompt?: string;         // 开局系统提示词
+  userName?: string;
+  characterName?: string;
+  createdAt: number;
+  updatedAt: number;
+}

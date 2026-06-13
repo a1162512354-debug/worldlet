@@ -93,25 +93,33 @@ Phase 3 — CSS 迁移 + MOD 工坊 + 主题系统（Phase 2 已完成：API 验
 - [x] 新增第二套主题（古典羊皮纸风格），验证主题切换
 - [x] 移动端初步适配（响应式布局）
 
-#### 3.2 MOD 工坊系统
-- [ ] 变量结构编辑器（Variable Schema Editor）
-  - 定义变量类型：数值、等级、列表、开关、文本
-  - 定义展示方式：进度条、阶梯、网格、图标、文字
-  - **双描述系统**：玩家描述 + AI 描述 + 更新规则 + 有效值
-  - 可视化拖拽设计
-- [ ] 开局模板系统（Scenario Template）
-  - 创建模板：世界书 + 初始变量 + 角色设定 + 起始道具/技能
-  - 模板选择界面
-  - 一键应用开局
-- [ ] 自定义展示面板（Display Panel）
-  - 可视化布局编辑器
-  - 预设面板模板（RPG 状态、背包、技能树等）
-  - 实时预览
-- [ ] 导入/导出
-  - 模板分享格式
-  - 兼容 SillyTavern 格式
+#### 3.2 MOD 工坊系统 `in_progress`
+
+##### 3.2.1 变量结构系统（基础）
+- [ ] 新增 `VariableDefinition` 类型（type/description/default/displayFormat/aiDescription/aiUpdateRules）
+- [ ] 新增 `variableSchemas` IndexedDB 表
+- [ ] 新增 schema CRUD 函数（database.ts）
+- [ ] useSillytavern 暴露 schema 管理接口
+- [ ] VariableSchemaEditorModal 组件（定义变量类型/描述/默认值）
+
+##### 3.2.2 开局模板系统
+- [ ] 新增 `ScenarioTemplate` 类型（name/description/lorebookIds/presetId/variableSchemaId/initialVariables/systemPrompt）
+- [ ] 新增 `scenarios` IndexedDB 表
+- [ ] 新增 scenario CRUD 函数
+- [ ] ScenarioTemplateModal 组件（创建/编辑/选择模板）
+- [ ] 集成到 createChat：选择模板自动设置世界书+变量+预设
+
+##### 3.2.3 变量展示组件
+- [ ] VariableBadge 组件（数值/枚举/列表/布尔/文本的可视化展示）
+- [ ] VariablePanel 组件（游戏中实时变量面板，替代原始 key-value 显示）
+- [ ] 集成到 GameView
+
+##### 3.2.4 导入/导出
+- [ ] ScenarioTemplate JSON 导出/导入格式
+- [ ] 批量导入支持
 - [ ] 推送到 Git
-- **Status:** `in_progress`（3.1 已完成，3.2 MOD 工坊待开发）
+
+- **Status:** `in_progress`（3.2.1 变量结构系统优先）
 - **依赖**: Phase 2 完成
 
 ### Phase 4: 测试与质量保证 `pending`

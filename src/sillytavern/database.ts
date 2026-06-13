@@ -3,17 +3,19 @@
  */
 
 import Dexie, { Table } from 'dexie';
-import type { Lorebook, ChatPreset, AppSettings, ChatSession } from './types';
+import type { Lorebook, ChatPreset, AppSettings, ChatSession, VariableSchema, ScenarioTemplate } from './types';
 import { DEFAULT_SETTINGS } from './types';
 
 const DB_NAME = 'SillyTavernWebDB';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 class AppDatabase extends Dexie {
   lorebooks!: Table<Lorebook>;
   presets!: Table<ChatPreset>;
   settings!: Table<AppSettings>;
   chats!: Table<ChatSession>;
+  variableSchemas!: Table<VariableSchema>;
+  scenarios!: Table<ScenarioTemplate>;
 
   constructor() {
     super(DB_NAME);
@@ -46,6 +48,14 @@ class AppDatabase extends Dexie {
         }
         await tx.table('settings').put(s);
       }
+    });
+    this.version(4).stores({
+      lorebooks: 'id, name, updatedAt',
+      presets: 'id, name, updatedAt',
+      settings: 'key',
+      chats: 'id, name, updatedAt',
+      variableSchemas: 'id, name, updatedAt',
+      scenarios: 'id, name, updatedAt',
     });
   }
 }
@@ -93,15 +103,19 @@ export interface FullBackup {
   presets: ChatPreset[];
   settings: AppSettings[];
   chats: ChatSession[];
+  variableSchemas?: VariableSchema[];
+  scenarios?: ScenarioTemplate[];
 }
 
 export async function exportAllData(): Promise<FullBackup> {
   const db = getDatabase();
-  const [lorebooks, presets, settings, chats] = await Promise.all([
+  const [lorebooks, presets, settings, chats, variableSchemas, scenarios] = await Promise.all([
     db.lorebooks.toArray(),
     db.presets.toArray(),
     db.settings.toArray(),
     db.chats.toArray(),
+    db.variableSchemas?.toArray() ?? [],
+    db.scenarios?.toArray() ?? [],
   ]);
   return {
     version: DB_VERSION,
@@ -110,6 +124,8 @@ export async function exportAllData(): Promise<FullBackup> {
     presets,
     settings,
     chats,
+    variableSchemas,
+    scenarios,
   };
 }
 
@@ -128,6 +144,15 @@ export async function importAllData(backup: FullBackup): Promise<void> {
     if (Array.isArray(backup.settings)) await db.settings.bulkPut(backup.settings);
     if (Array.isArray(backup.chats)) await db.chats.bulkPut(backup.chats);
   });
+  // Import new tables separately (may not exist in older backups)
+  if (db.variableSchemas && Array.isArray(backup.variableSchemas)) {
+    await db.variableSchemas.clear();
+    await db.variableSchemas.bulkPut(backup.variableSchemas);
+  }
+  if (db.scenarios && Array.isArray(backup.scenarios)) {
+    await db.scenarios.clear();
+    await db.scenarios.bulkPut(backup.scenarios);
+  }
 }
 
 export async function getLorebooks(): Promise<Lorebook[]> {
@@ -185,4 +210,34 @@ export async function setVariables(chatId: string, variables: Record<string, any
   chat.variables = variables;
   chat.updatedAt = Date.now();
   await db.chats.put(chat);
+}
+
+// ========== Variable Schema CRUD ==========
+
+export async function getVariableSchemas(): Promise<VariableSchema[]> {
+  return getDatabase().variableSchemas.toArray();
+}
+
+export async function saveVariableSchema(schema: VariableSchema): Promise<string> {
+  await getDatabase().variableSchemas.put(schema);
+  return schema.id;
+}
+
+export async function deleteVariableSchema(id: string): Promise<void> {
+  await getDatabase().variableSchemas.delete(id);
+}
+
+// ========== Scenario Template CRUD ==========
+
+export async function getScenarios(): Promise<ScenarioTemplate[]> {
+  return getDatabase().scenarios.toArray();
+}
+
+export async function saveScenario(scenario: ScenarioTemplate): Promise<string> {
+  await getDatabase().scenarios.put(scenario);
+  return scenario.id;
+}
+
+export async function deleteScenario(id: string): Promise<void> {
+  await getDatabase().scenarios.delete(id);
 }

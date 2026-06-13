@@ -4,6 +4,7 @@ import { SettingsModal } from '../SillyTavern/SettingsModal'
 import { LorebookModal } from '../SillyTavern/LorebookModal'
 import { PresetModal } from '../SillyTavern/PresetModal'
 import { VariablesModal } from '../SillyTavern/VariablesModal'
+import { VariableSchemaEditorModal } from '../SillyTavern/VariableSchemaEditorModal'
 import { HistoryDrawer } from '../SillyTavern/HistoryDrawer'
 import { Toast } from '../SillyTavern/Toast'
 import { useSillytavern } from '../../hooks/useSillytavern'
@@ -254,6 +255,7 @@ export function SpacePortal() {
       {st.showLorebooks && <LorebookModal onClose={() => st.setShowLorebooks(false)} />}
       {st.showPresets && <PresetModal onClose={() => st.setShowPresets(false)} />}
       {st.showVariables && <VariablesModal onClose={() => st.setShowVariables(false)} />}
+      {st.showSchemaEditor && <VariableSchemaEditorModal onClose={() => st.setShowSchemaEditor(false)} />}
       {historyOpen && <HistoryDrawer onClose={() => setHistoryOpen(false)} />}
       <Toast message={st.toast} />
     </div>

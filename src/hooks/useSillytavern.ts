@@ -12,6 +12,8 @@ import {
   type ChatSession,
   type ChatMessage,
   type Lorebook,
+  type VariableSchema,
+  type ScenarioTemplate,
 } from '../sillytavern/types';
 import {
   getDatabase,
@@ -27,6 +29,12 @@ import {
   deleteChat,
   deleteLorebook as deleteLorebookDb,
   deletePreset as deletePresetDb,
+  getVariableSchemas,
+  saveVariableSchema,
+  deleteVariableSchema as deleteVariableSchemaDb,
+  getScenarios,
+  saveScenario,
+  deleteScenario as deleteScenarioDb,
 } from '../sillytavern/database';
 import { createDefaultLorebook } from '../sillytavern/editor-utils';
 import { parseVarsBlock } from '../sillytavern/vars-merger';
@@ -51,11 +59,17 @@ function useSillytavernState() {
   const [activeChatId, setActiveChatId] = useState<string | null>(null);
   const [initialized, setInitialized] = useState(false);
 
+  // ---- MOD 工坊 state ----
+  const [variableSchemas, setVariableSchemas] = useState<VariableSchema[]>([]);
+  const [scenarios, setScenarios] = useState<ScenarioTemplate[]>([]);
+
   // ---- modal toggles ----
   const [showSettings, setShowSettings] = useState(false);
   const [showLorebooks, setShowLorebooks] = useState(false);
   const [showPresets, setShowPresets] = useState(false);
   const [showVariables, setShowVariables] = useState(false);
+  const [showSchemaEditor, setShowSchemaEditor] = useState(false);
+  const [showScenarioManager, setShowScenarioManager] = useState(false);
 
   // ---- toast ----
   const [toast, setToast] = useState<string | null>(null);
@@ -79,17 +93,21 @@ function useSillytavernState() {
     let cancelled = false;
     (async () => {
       await initializeDatabase();
-      const [l, p, s, c] = await Promise.all([
+      const [l, p, s, c, vs, sc] = await Promise.all([
         getLorebooks(),
         getPresets(),
         getSettings(),
         getChats(),
+        getVariableSchemas().catch(() => []),
+        getScenarios().catch(() => []),
       ]);
       if (cancelled) return;
       setLorebooks(l);
       setPresets(p);
       setSettings(s ? { ...DEFAULT_SETTINGS, ...s } : { ...DEFAULT_SETTINGS });
       setChats(c);
+      setVariableSchemas(vs);
+      setScenarios(sc);
       if (c.length > 0) setActiveChatId(c[0].id);
       setInitialized(true);
     })();
@@ -306,6 +324,40 @@ function useSillytavernState() {
     },
     []
   );
+
+  // ---- MOD 工坊: Variable Schema CRUD ----
+  const addVariableSchema = useCallback(async (schema: VariableSchema) => {
+    await saveVariableSchema(schema);
+    setVariableSchemas((prev) => [...prev, schema]);
+  }, []);
+
+  const updateVariableSchema = useCallback(async (schema: VariableSchema) => {
+    const next: VariableSchema = { ...schema, updatedAt: Date.now() };
+    await saveVariableSchema(next);
+    setVariableSchemas((prev) => prev.map((s) => (s.id === next.id ? next : s)));
+  }, []);
+
+  const deleteVariableSchema = useCallback(async (id: string) => {
+    await deleteVariableSchemaDb(id);
+    setVariableSchemas((prev) => prev.filter((s) => s.id !== id));
+  }, []);
+
+  // ---- MOD 工坊: Scenario Template CRUD ----
+  const addScenario = useCallback(async (scenario: ScenarioTemplate) => {
+    await saveScenario(scenario);
+    setScenarios((prev) => [...prev, scenario]);
+  }, []);
+
+  const updateScenario = useCallback(async (scenario: ScenarioTemplate) => {
+    const next: ScenarioTemplate = { ...scenario, updatedAt: Date.now() };
+    await saveScenario(next);
+    setScenarios((prev) => prev.map((s) => (s.id === next.id ? next : s)));
+  }, []);
+
+  const deleteScenario = useCallback(async (id: string) => {
+    await deleteScenarioDb(id);
+    setScenarios((prev) => prev.filter((s) => s.id !== id));
+  }, []);
 
   // ---- v3 game mode: streaming + parser + variables ----
   const parser = useStreamParser(
@@ -531,6 +583,22 @@ function useSillytavernState() {
 
     // variables
     setChatVariables,
+
+    // MOD 工坊
+    variableSchemas,
+    addVariableSchema,
+    updateVariableSchema,
+    deleteVariableSchema,
+    scenarios,
+    addScenario,
+    updateScenario,
+    deleteScenario,
+    showSchemaEditor,
+    setShowSchemaEditor,
+    showScenarioManager,
+    setShowScenarioManager,
+    openSchemaEditor: () => setShowSchemaEditor(true),
+    openScenarioManager: () => setShowScenarioManager(true),
 
     // toast
     toast,
