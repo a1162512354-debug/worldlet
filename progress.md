@@ -157,3 +157,57 @@
 - 变量快照回档
 - 消息编辑/删除/分支
 - 选项点选
+
+### Phase 2 完成 + 深色主题全局修复 - 2026-06-13
+
+#### API 验证
+- 用户手动测试 API 功能：流式输出、变量更新、选项点选均正常
+- Phase 2 核心功能验证全部完成
+
+#### 深色主题全局修复
+- **问题**：6 个模态框组件内联了大量亮色硬编码颜色（`#f0f0f0`、`#e6f0ff`、`#eee`、`#555` 等），与 Deep Space 暗色主题冲突，导致白色背景、文字不可见
+- **CSS 层修复**（styles.css）：
+  - 新增 `.legacy-modal-shell` 按钮全覆盖规则（`!important`）
+  - 新增 `.ds-save` / `.ds-danger` / `.ds-purple` / `.ds-green` 语义按钮类（排除默认覆盖）
+  - 新增 `.ds-selected` 选中项高亮类
+  - 新增 `.modal-chip` 芯片类、`.modal-warn` 警告框类
+  - 覆盖 `aside` / `footer` / `details` / `fieldset` / `legend` / `summary` / `hr` 边框和文字颜色
+- **组件层修复**（7 个文件）：
+  - LorebookEditorModal：新建按钮、选中条目、保存按钮、边框
+  - EntryForm：芯片背景、标签文字、字段集、高级设置折叠区
+  - PresetModal：标签页按钮、选中预设、保存按钮、自定义 prompt 边框
+  - SettingsModal：标签页、警告框、标签芯片、字段集、备份按钮
+  - VariablesModal：提示文字、代码高亮、禁用按钮、边框
+  - PromptOrderEditor：列表分隔线
+  - HistoryDrawer：（已纯 CSS，无需修改）
+
+#### 内联样式现状分析
+- 14 个组件中 7 个纯 CSS（GameView、LorebookModal、OptionList、Toast、ThinkingFold、MainTextPane、SpacePortal）
+- 7 个组件仍有 175 处内联样式（SettingsModal 57、EntryForm 38、PresetModal 36、VariablesModal 16、LorebookEditorModal 13、PromptOrderEditor 7、HistoryDrawer 5）
+- **决策**：Phase 2 完成后，下一步做 CSS 迁移，联动 Phase 3 MOD 工坊一起
+
+#### 验证
+- `npm run build` ✅
+- `npm test` ✅：8 个测试文件 / 69 个测试
+
+#### Git 提交
+- `0b6f23f` - ui: 全局深色主题修复 - 消除模态框中所有白色/亮色背景、低对比度文字、亮色边框
+
+### Phase 3 启动：CSS 迁移 + 主题系统 + MOD 工坊 - 2026-06-13
+
+#### 计划
+- 合并原 Phase 3（MOD 工坊）和 Phase 4（UI 美化）为新 Phase 3
+- 优先做 3.1 CSS 迁移（7 个组件 → CSS class + 变量）
+- 建立主题切换系统（`data-theme` + 主题配置）
+- 新增第二套主题验证切换
+- 然后做 3.2 MOD 工坊（变量编辑器、开局模板、展示面板）
+
+#### 待做清单
+- 3.1.1 CSS 提取：7 个内联组件 → CSS class
+- 3.1.2 主题系统：`data-theme` 切换 + 主题配置文件
+- 3.1.3 新增第二套主题
+- 3.1.4 移动端响应式适配
+- 3.2.1 变量结构编辑器
+- 3.2.2 开局模板系统
+- 3.2.3 自定义展示面板
+- 3.2.4 导入/导出

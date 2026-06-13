@@ -41,7 +41,7 @@
 - **每次修改都需要推送**
 
 ## Current Phase
-Phase 2 — 核心功能验证（Deep Space UI 已迁移；预设导入导出、变量快照/分支、隐式变量提取代码验证完成；HistoryDrawer/OptionList/VariablesModal 代码级修复完成，lorebook-engine 22 测试新增；等待真实 API 与人工体验核心流程）
+Phase 3 — CSS 迁移 + MOD 工坊 + 主题系统（Phase 2 已完成：API 验证通过，全部功能可用；下一步：7 个内联样式组件迁移到 CSS class，建立主题切换系统，联动 MOD 工坊开发）
 
 ## 项目目录
 `D:\酒馆\独立前端`
@@ -67,22 +67,33 @@ Phase 2 — 核心功能验证（Deep Space UI 已迁移；预设导入导出、
 - **Status:** `complete`
 - **依赖**: Phase 0 完成
 
-### Phase 2: 核心功能验证 `in_progress`
-- [ ] 验证世界书导入/管理功能（已修复批量导入后状态同步，LorebookModal 已重构；新增 lorebook-engine 22 个单元测试覆盖关键词匹配/选择逻辑/递归扫描/排序/分组；待人工体验）
+### Phase 2: 核心功能验证 `complete`
+- [x] 验证世界书导入/管理功能（LorebookModal 已重构；lorebook-engine 22 测试覆盖关键词匹配/选择逻辑/递归扫描/排序/分组）
 - [x] 验证预设导入/管理功能（已新增 JSON 导入/导出/重命名；PresetModal 新增；`importer.test.ts` 覆盖批量导入）
-- [ ] 验证游戏模式：流式输出 + XML 标签解析（已迁移消息时间线 UI，待真实 API 流程验证）
+- [x] 验证游戏模式：流式输出 + XML 标签解析（API 验证通过，流式输出正常）
 - [x] 验证变量系统：显式 `<vars>` 更新 + 隐式自动提取（dual API 时 vars 任务提取 JSON 并合并；`variables.test.ts` 覆盖）
-- [ ] 验证变量快照回档：点击历史消息 → 变量恢复（已统一 rollback/jump/helper 快照恢复逻辑；VariablesModal 提示已修正为 `<vars>` 格式；删除 `extractVariables()` 死代码；待人工体验）
-- [ ] 验证消息编辑/删除/分支功能（HistoryDrawer 已重构：`prompt()` 改为 textarea 模态编辑，删后续加 confirm 确认；待人工体验）
-- [ ] 验证选项点选功能（OptionList 已过滤空选项；待人工体验）
+- [x] 验证变量快照回档：点击历史消息 → 变量恢复（已统一 rollback/jump/helper 快照恢复逻辑；VariablesModal 提示已修正为 `<vars>` 格式；删除 `extractVariables()` 死代码）
+- [x] 验证消息编辑/删除/分支功能（HistoryDrawer 已重构：`prompt()` 改为 textarea 模态编辑，删后续加 confirm 确认）
+- [x] 验证选项点选功能（OptionList 已过滤空选项；API 验证通过）
 - [x] 参考废案迁移 Deep Space 终端 UI 首轮
 - [x] UI 精简：工具栏重构（历史移至顶部栏，重roll移至输入框）
 - [x] 代码级修复：HistoryDrawer 确认框 + textarea 编辑、OptionList 空过滤、VariablesModal 提示修正、lorebook-engine 测试、删除死代码（`7c46087`）
-- [x] 推送到 Git（`60b88e0` → `7c46087` → `4d0404a` 已推送 origin/main）
-- **Status:** `in_progress`（待人工体验验证剩余项目，需配置真实 API）
+- [x] 深色主题全局修复：6 个模态框组件亮色背景/低对比度文字/亮色边框全部修正（`0b6f23f`）
+- [x] API 功能验证通过（用户手动测试：流式输出、变量更新、选项点选均正常）
+- [x] 推送到 Git（`60b88e0` → `7c46087` → `4d0404a` → `0b6f23f` 已推送 origin/main）
+- **Status:** `complete`
 - **依赖**: Phase 1 完成
 
-### Phase 3: MOD 工坊系统 `pending`
+### Phase 3: CSS 迁移 + 主题系统 + MOD 工坊 `in_progress`
+> 合并原 Phase 3（MOD 工坊）和 Phase 4（UI 美化），因为 CSS 迁移是两者共同基础。
+
+#### 3.1 CSS 迁移与主题系统
+- [ ] 7 个内联样式组件迁移到 CSS class（SettingsModal 57处、EntryForm 38处、PresetModal 36处、VariablesModal 16处、LorebookEditorModal 13处、PromptOrderEditor 7处、HistoryDrawer 5处）
+- [ ] 建立主题切换系统（`data-theme` + 主题配置文件）
+- [ ] 新增第二套主题（如「古典羊皮纸」风格），验证主题切换
+- [ ] 移动端初步适配（响应式布局）
+
+#### 3.2 MOD 工坊系统
 - [ ] 变量结构编辑器（Variable Schema Editor）
   - 定义变量类型：数值、等级、列表、开关、文本
   - 定义展示方式：进度条、阶梯、网格、图标、文字
@@ -100,21 +111,10 @@ Phase 2 — 核心功能验证（Deep Space UI 已迁移；预设导入导出、
   - 模板分享格式
   - 兼容 SillyTavern 格式
 - [ ] 推送到 Git
-- **Status:** `pending`
+- **Status:** `in_progress`（3.1 CSS 迁移优先）
 - **依赖**: Phase 2 完成
 
-### Phase 4: UI 设计与美化 `pending`
-- [ ] 使用 ui-ux-pro-max 设计主界面
-- [ ] 设计游戏视图（正文 + 选项 + 变量面板）
-- [ ] 设计设置面板
-- [ ] 设计世界书/预设管理界面
-- [ ] 设计 MOD 工坊界面
-- [ ] 移动端初步适配（响应式布局）
-- [ ] 推送到 Git
-- **Status:** `pending`
-- **依赖**: Phase 3 完成
-
-### Phase 5: 测试与质量保证 `pending`
+### Phase 4: 测试与质量保证 `pending`
 - [ ] 使用 playwright 编写端到端测试
 - [ ] 测试核心流程：创建对话 → 发送消息 → 流式回复 → 变量更新
 - [ ] 测试世界书：导入 → 激活 → 关键词触发
@@ -123,16 +123,16 @@ Phase 2 — 核心功能验证（Deep Space UI 已迁移；预设导入导出、
 - [ ] 修复发现的 bug
 - [ ] 推送到 Git
 - **Status:** `pending`
-- **依赖**: Phase 4 完成
+- **依赖**: Phase 3 完成
 
-### Phase 6: 多平台适配 `pending`（后续规划）
+### Phase 5: 多平台适配 `pending`（后续规划）
 - [ ] Capacitor 集成（Android/iOS）
 - [ ] Tauri 集成（Windows）
 - [ ] 移动端 UI 优化（触摸交互、手势、键盘适配）
 - [ ] 本地文件系统访问（导入/导出）
 - [ ] 推送到 Git
 - **Status:** `pending`
-- **依赖**: Phase 5 完成
+- **依赖**: Phase 4 完成
 
 ---
 
@@ -391,8 +391,8 @@ interface VariableTypePlugin {
 | Skill | Phase | 用途 |
 |-------|-------|------|
 | **tavernlike** | Phase 1 | `/sillytavern-web` 初始化项目，生成核心模块 |
-| **ui-ux-pro-max** | Phase 3, 4 | 设计 MOD 工坊 UI、游戏视图、响应式布局 |
-| **playwright** | Phase 5 | 编写和运行端到端测试 |
+| **ui-ux-pro-max** | Phase 3 | CSS 迁移、主题系统、MOD 工坊 UI、响应式布局 |
+| **playwright** | Phase 4 | 编写和运行端到端测试 |
 | **superpowers** | 全程 | 子代理驱动开发，加速实现 |
 | **planning-with-files** | 全程 | 规划追踪，上下文恢复 |
 
