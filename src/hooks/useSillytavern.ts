@@ -124,7 +124,21 @@ function useSillytavernState() {
       setVariableSchemas(vs);
       setScenarios(sc);
       setPanelLayouts(pl);
-      setMods(m);
+      // 清洗 MOD 数据，确保 fields/values 存在
+      const cleanedMods = m.map((mod) => {
+        if (mod.content.type === 'item' || mod.content.type === 'attribute') {
+          return {
+            ...mod,
+            content: {
+              ...mod.content,
+              fields: mod.content.fields ?? [],
+              values: mod.content.values ?? {},
+            },
+          };
+        }
+        return mod;
+      });
+      setMods(cleanedMods);
       if (c.length > 0) setActiveChatId(c[0].id);
       setInitialized(true);
     })();
