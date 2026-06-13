@@ -52,8 +52,11 @@ export function LorebookModal({ onClose }: { onClose: () => void }) {
       const { successes, failures } = importMultipleLorebooks(inputs);
 
       for (const item of successes) {
+        // 使用文件名（去掉扩展名）作为世界书名称
+        const nameFromFile = item.fileName.replace(/\.json$/i, '');
         const lorebook: Lorebook = {
           ...item.lorebook,
+          name: nameFromFile || item.lorebook.name,
           id: crypto.randomUUID(),
           createdAt: Date.now(),
           updatedAt: Date.now(),

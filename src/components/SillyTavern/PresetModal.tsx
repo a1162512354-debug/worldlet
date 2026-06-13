@@ -213,8 +213,11 @@ export function PresetModal({ onClose }: { onClose: () => void }) {
       const { successes, failures } = importMultiplePresets(inputs);
       let lastImported: ChatPreset | null = null;
       for (const item of successes) {
+        // 使用文件名（去掉扩展名）作为预设名称
+        const nameFromFile = item.fileName.replace(/\.json$/i, '');
         const preset: ChatPreset = {
           ...item.preset,
+          name: nameFromFile || item.preset.name,
           id: crypto.randomUUID(),
           createdAt: Date.now(),
           updatedAt: Date.now(),
