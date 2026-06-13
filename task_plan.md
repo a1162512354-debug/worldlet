@@ -41,7 +41,7 @@
 - **每次修改都需要推送**
 
 ## Current Phase
-Phase 3 — CSS 迁移 + MOD 工坊 + 主题系统（Phase 2 已完成：API 验证通过，全部功能可用；下一步：7 个内联样式组件迁移到 CSS class，建立主题切换系统，联动 MOD 工坊开发）
+Phase 4 — 测试与质量保证（Phase 3 已完成：CSS迁移+主题系统+MOD工坊+背包系统+嵌套布局；下一步：编写端到端测试，修复发现的bug）
 
 ## 项目目录
 `D:\酒馆\独立前端`
@@ -84,7 +84,7 @@ Phase 3 — CSS 迁移 + MOD 工坊 + 主题系统（Phase 2 已完成：API 验
 - **Status:** `complete`
 - **依赖**: Phase 1 完成
 
-### Phase 3: CSS 迁移 + 主题系统 + MOD 工坊 `in_progress`
+### Phase 3: CSS 迁移 + 主题系统 + MOD 工坊 `complete`
 > 合并原 Phase 3（MOD 工坊）和 Phase 4（UI 美化），因为 CSS 迁移是两者共同基础。
 
 #### 3.1 CSS 迁移与主题系统
@@ -93,7 +93,7 @@ Phase 3 — CSS 迁移 + MOD 工坊 + 主题系统（Phase 2 已完成：API 验
 - [x] 新增第二套主题（古典羊皮纸风格），验证主题切换
 - [x] 移动端初步适配（响应式布局）
 
-#### 3.2 MOD 工坊系统 `in_progress`
+#### 3.2 MOD 工坊系统
 
 ##### 3.2.1 变量结构系统（基础）
 - [x] 新增 `VariableDefinition` 类型（type/description/default/displayFormat/aiDescription/aiUpdateRules）
@@ -101,43 +101,50 @@ Phase 3 — CSS 迁移 + MOD 工坊 + 主题系统（Phase 2 已完成：API 验
 - [x] 新增 schema CRUD 函数（database.ts）
 - [x] useSillytavern 暴露 schema 管理接口
 - [x] VariableSchemaEditorModal 组件（定义变量类型/描述/默认值）
+- [x] 预设模板（武器、防具、消耗品、技能、角色属性）
 
-##### 3.2.2 开局模板系统
-- [x] 新增 `ScenarioTemplate` 类型（name/description/lorebookIds/presetId/variableSchemaId/initialVariables/systemPrompt）
-- [x] 新增 `scenarios` IndexedDB 表
-- [x] 新增 scenario CRUD 函数
-- [x] ScenarioTemplateModal 组件（创建/编辑/选择模板）
-- [x] 集成到 createChat：选择模板自动设置世界书+变量+预设
+##### 3.2.2 MOD 系统重构
+- [x] MOD 类型定义（ModType: worldbook/item/skill/plot）
+- [x] MOD 数据结构（Mod 接口，支持 4 种内容类型）
+- [x] mods IndexedDB 表（Dexie v6，索引：id, name, type, updatedAt, *tags）
+- [x] MOD CRUD 函数（database.ts）
+- [x] ModWorkshopPage 组件（MOD 创作页面）
+- [x] CharacterCreationPage 组件（开局页面/车卡页面）
+- [x] createChatWithMods 函数（MOD 注入机制）
 
-##### 3.2.3 变量展示组件
-- [x] VariableBadge 组件（数值/枚举/列表/布尔/文本的可视化展示）
-- [x] VariablePanel 组件（游戏中实时变量面板，替代原始 key-value 显示）
-- [x] 集成到 SpacePortal（变量面板切换按钮）
+##### 3.2.3 背包系统
+- [x] Inventory/InventoryItem 类型定义
+- [x] ChatSession 添加 inventory 字段
+- [x] 物品 MOD 支持背包分类（weapons/armor/consumables/materials/other）
+- [x] 物品 MOD 引用变量结构（schemaId）
+- [x] 物品 MOD 支持物品名称、描述、数量、分类
+- [x] 选择变量结构时自动填充默认值
 
-##### 3.2.4 导入/导出
-- [x] ScenarioTemplate JSON 导出/导入格式
-- [x] 批量导入支持（通过 FullBackup 系统）
-- [x] 推送到 Git
+##### 3.2.4 变量面板优化
+- [x] VariablesModal 分组折叠搜索（按变量结构分组）
+- [x] VariablePanel 嵌套菜单设计（主菜单 → 背包/变量/布局详情）
+- [x] VariablePanel 使用保存的布局展示变量
 
-##### 3.2.5 自定义展示面板
-- [x] 面板布局配置存储（PanelLayout 类型 + IndexedDB 表）
-- [x] 可视化布局编辑器（选择变量 → 选择展示模式 → 排列位置）
-- [x] 预设面板模板（RPG 状态栏、背包网格、好感度列表等）
-- [x] 实时预览
-- [x] 推送到 Git
+##### 3.2.5 展示面板编辑器增强
+- [x] 面板编辑器支持背包组件（inventory-category/inventory-item）
+- [x] 面板编辑器支持嵌套布局（nested-layout）
+- [x] 预览支持点击展开背包分类和物品详情
+- [x] 新建布局时保存按钮可点击
 
 - **Status:** `complete`
 - **依赖**: Phase 2 完成
 
-### Phase 4: 测试与质量保证 `pending`
+### Phase 4: 测试与质量保证 `in_progress`
 - [ ] 使用 playwright 编写端到端测试
 - [ ] 测试核心流程：创建对话 → 发送消息 → 流式回复 → 变量更新
 - [ ] 测试世界书：导入 → 激活 → 关键词触发
 - [ ] 测试预设：导入 → 切换 → 参数生效
-- [ ] 测试 MOD 工坊：创建模板 → 应用开局 → 变量显示
+- [ ] 测试 MOD 工坊：创建 MOD → 开局选择 → 变量/背包注入
+- [ ] 测试背包系统：物品添加 → 分类展示 → 变量面板查看
+- [ ] 测试展示面板：创建布局 → 嵌套布局 → 预览交互
 - [ ] 修复发现的 bug
 - [ ] 推送到 Git
-- **Status:** `pending`
+- **Status:** `in_progress`
 - **依赖**: Phase 3 完成
 
 ### Phase 5: 多平台适配 `pending`（后续规划）

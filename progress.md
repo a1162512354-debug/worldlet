@@ -290,4 +290,60 @@
 
 | 3.2.5 自定义展示面板 | ✅ | `c7fba27` |
 
+---
+
+### MOD 系统重构 - 2026-06-14
+
+**Phase 3 全部完成：MOD 系统 + 背包系统 + 嵌套布局**
+
+#### MOD 系统重构
+- MOD 类型：worldbook（世界书）、item（物品）、skill（技能）、plot（剧情）
+- Mod 类型定义（types.ts）
+- Dexie v6 迁移，mods 表（索引：id, name, type, updatedAt, *tags）
+- MOD CRUD 函数（database.ts）
+- ModWorkshopPage 组件（MOD 创作页面）
+- CharacterCreationPage 组件（开局页面/车卡页面）
+- createChatWithMods 函数（MOD 注入机制）
+
+#### 背包系统
+- Inventory/InventoryItem 类型定义
+- ChatSession 添加 inventory 字段
+- 物品 MOD 支持背包分类（weapons/armor/consumables/materials/other）
+- 物品 MOD 引用变量结构（schemaId）
+- 选择变量结构时自动填充默认值
+
+#### 变量面板优化
+- VariablesModal 分组折叠搜索
+- VariablePanel 嵌套菜单设计（主菜单 → 背包/变量/布局详情）
+- VariablePanel 使用保存的布局展示变量
+
+#### 展示面板编辑器增强
+- 支持背包组件（inventory-category/inventory-item）
+- 支持嵌套布局（nested-layout）
+- 预览支持点击展开背包分类和物品详情
+
+#### 关键提交
+- `545eb0b` - Phase 1: MOD系统类型+数据库+Hook基础
+- `25554ab` - Phase 2+3: MOD工坊创作页面 + 开局页面
+- `ab8a39b` - Phase 4: MOD系统集成到SpacePortal
+- `a38e171` - MOD类型重命名：属性→技能
+- `7a85ac0` - MOD物品/技能改为引用变量结构
+- `c56ddff` - 变量结构预设模板
+- `5b6a5e9` - 选择变量结构时自动填充默认值
+- `27b5872` - 变量面板优化：分组折叠搜索
+- `a26b26e` - 背包系统实现
+- `83933ff` - MOD工坊dirty检查忽略updatedAt
+- `ca1b389` - VariablePanel支持背包展示
+- `f3d0b75` - 展示面板编辑器支持背包组件
+- `5e903c4` - 展示面板编辑器新建布局时保存按钮可点击
+- `81f3d5d` - VariablePanel使用保存的布局展示变量
+- `c5d729c` - VariablePanel嵌套菜单设计
+- `2e16791` - 面板编辑器预览支持点击展开背包分类
+- `25bd8c7` - 面板编辑器支持嵌套布局
+
+#### 当前状态
+- Phase 0-3: 全部完成
+- Phase 4: 测试与质量保证（in_progress）
+- 测试：8 文件 / 69 测试全通过
+
 **下一步**：Phase 4 测试与质量保证
