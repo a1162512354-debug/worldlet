@@ -111,7 +111,7 @@ Phase 3 — CSS 迁移 + MOD 工坊 + 主题系统（Phase 2 已完成：API 验
   - 模板分享格式
   - 兼容 SillyTavern 格式
 - [ ] 推送到 Git
-- **Status:** `in_progress`（3.1 CSS 迁移优先）
+- **Status:** `in_progress`（3.1 已完成，3.2 MOD 工坊待开发）
 - **依赖**: Phase 2 完成
 
 ### Phase 4: 测试与质量保证 `pending`
