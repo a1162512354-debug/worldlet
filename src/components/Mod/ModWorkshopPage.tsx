@@ -396,8 +396,6 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
 
       case 'item':
       case 'attribute':
-        const fields = content.fields ?? [];
-        const values = content.values ?? {};
         return (
           <div className="st-flex-col st-gap-12">
             {/* 字段定义 */}
@@ -408,11 +406,11 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
                 </span>
                 <button className="st-btn-xs" onClick={handleFieldAdd}>+ 添加字段</button>
               </div>
-              {fields.length === 0 ? (
+              {content.fields.length === 0 ? (
                 <span className="st-text-12 st-text-muted">无字段定义</span>
               ) : (
                 <div className="st-flex-col st-gap-4">
-                  {fields.map((field) => (
+                  {content.fields.map((field) => (
                     <div key={field.key} className="st-border st-rounded st-p-8" style={{ background: 'rgba(110,207,207,0.04)' }}>
                       <div className="st-flex-row st-gap-8 st-items-center st-mb-4">
                         <span className="st-mono st-text-12 st-flex-1">{field.key}</span>
@@ -496,18 +494,18 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
             {/* 字段值预览 */}
             <div className="st-fieldset">
               <span className="st-text-12 st-text-secondary">默认值设置</span>
-              {fields.length === 0 ? (
+              {content.fields.length === 0 ? (
                 <span className="st-text-12 st-text-muted">请先添加字段</span>
               ) : (
                 <div className="st-flex-col st-gap-4 st-mt-4">
-                  {fields.map((field) => (
+                  {content.fields.map((field) => (
                     <div key={field.key} className="st-flex-row st-gap-8 st-items-center">
                       <span className="st-text-12 st-text-secondary" style={{ minWidth: 80 }}>{field.label}</span>
                       {field.type === 'number' ? (
                         <input
                           type="number"
                           className="st-input st-text-12 st-flex-1"
-                          value={values[field.key] ?? field.defaultValue ?? 0}
+                          value={content.values[field.key] ?? field.defaultValue ?? 0}
                           onChange={(e) => handleValueChange(field.key, Number(e.target.value))}
                           min={field.min}
                           max={field.max}
@@ -516,15 +514,15 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
                         <label className="st-flex-row st-gap-4 st-items-center">
                           <input
                             type="checkbox"
-                            checked={values[field.key] ?? field.defaultValue ?? false}
+                            checked={content.values[field.key] ?? field.defaultValue ?? false}
                             onChange={(e) => handleValueChange(field.key, e.target.checked)}
                           />
-                          <span className="st-text-12">{values[field.key] ? '是' : '否'}</span>
+                          <span className="st-text-12">{content.values[field.key] ? '是' : '否'}</span>
                         </label>
                       ) : field.type === 'select' ? (
                         <select
                           className="st-input st-text-12 st-flex-1"
-                          value={values[field.key] ?? field.defaultValue ?? ''}
+                          value={content.values[field.key] ?? field.defaultValue ?? ''}
                           onChange={(e) => handleValueChange(field.key, e.target.value)}
                         >
                           <option value="">请选择</option>
@@ -535,7 +533,7 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
                       ) : (
                         <input
                           className="st-input st-text-12 st-flex-1"
-                          value={String(values[field.key] ?? field.defaultValue ?? '')}
+                          value={String(content.values[field.key] ?? field.defaultValue ?? '')}
                           onChange={(e) => handleValueChange(field.key, e.target.value)}
                         />
                       )}
