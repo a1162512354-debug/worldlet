@@ -247,6 +247,52 @@ export function ScenarioTemplateModal({ onClose }: { onClose: () => void }) {
         <header className="legacy-modal-header">
           <strong>场景模板管理</strong>
           <div className="st-flex st-items-center st-gap-8">
+            <label className="st-btn-sm" style={{ cursor: 'pointer' }}>
+              <input
+                type="file"
+                accept=".json,application/json"
+                className="st-hidden"
+                onChange={(e) => {
+                  const file = e.target.files?.[0];
+                  if (file) {
+                    void file.text().then((text) => {
+                      try {
+                        const imported = JSON.parse(text) as ScenarioTemplate;
+                        if (!imported.name || !imported.id) throw new Error('格式无效');
+                        imported.id = newId();
+                        imported.createdAt = Date.now();
+                        imported.updatedAt = Date.now();
+                        setDrafts((prev) => [...prev, imported]);
+                        setSelectedId(imported.id);
+                      } catch (err) {
+                        alert('导入失败: ' + (err as Error).message);
+                      }
+                    });
+                    e.target.value = '';
+                  }
+                }}
+              />
+              导入
+            </label>
+            {selected && (
+              <button
+                className="st-btn-sm"
+                onClick={() => {
+                  const json = JSON.stringify(selected, null, 2);
+                  const blob = new Blob([json], { type: 'application/json' });
+                  const url = URL.createObjectURL(blob);
+                  const a = document.createElement('a');
+                  a.href = url;
+                  a.download = `${selected.name || 'scenario'}.json`;
+                  document.body.appendChild(a);
+                  a.click();
+                  document.body.removeChild(a);
+                  URL.revokeObjectURL(url);
+                }}
+              >
+                导出
+              </button>
+            )}
             {dirty && <span className="st-text-12 st-text-muted">未保存</span>}
             <button className="st-btn-save st-btn-sm" onClick={handleSave}>保存</button>
             <button onClick={tryClose}>&times;</button>
