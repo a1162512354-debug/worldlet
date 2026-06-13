@@ -1,4 +1,4 @@
-import { useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import type { VariableSchema, VariableDefinition, Inventory, InventoryItem, PanelLayout, PanelWidget } from '../../sillytavern/types';
 import { useSillytavern } from '../../hooks/useSillytavern';
 import { VariableBadge } from './VariableBadge';
@@ -24,21 +24,22 @@ function buildDefMap(schemas: VariableSchema[]): Map<string, VariableDefinition>
   return map;
 }
 
-/** Find the best matching layout for current variables/inventory */
-function findMatchingLayout(
-  layouts: PanelLayout[],
-  variables: Record<string, any>,
-  inventory: Inventory,
-): PanelLayout | null {
-  if (layouts.length === 0) return null;
-
-  // Find default layout first
-  const defaultLayout = layouts.find((l) => l.isDefault);
-  if (defaultLayout) return defaultLayout;
-
-  // Otherwise find the first layout
-  return layouts[0] ?? null;
+/** Find layout by name or default */
+function findLayout(layouts: PanelLayout[], name?: string): PanelLayout | null {
+  if (name) {
+    const found = layouts.find((l) => l.name === name);
+    if (found) return found;
+  }
+  return layouts.find((l) => l.isDefault) ?? layouts[0] ?? null;
 }
+
+// ---- types ----
+
+type DetailView =
+  | { type: 'main' }
+  | { type: 'inventory'; category: keyof Inventory }
+  | { type: 'variables' }
+  | { type: 'layout'; layoutName: string };
 
 // ---- component ----
 
@@ -50,43 +51,103 @@ export function VariablePanel({ onClose }: VariablePanelProps) {
   const { activeChat, variableSchemas, panelLayouts } = useSillytavern();
   const variables = activeChat?.variables ?? {};
   const inventory = activeChat?.inventory ?? { weapons: [], armor: [], consumables: [], materials: [], other: [] };
+  const [view, setView] = useState<DetailView>({ type: 'main' });
 
   const defMap = useMemo(() => buildDefMap(variableSchemas), [variableSchemas]);
 
-  // Find matching layout
-  const activeLayout = useMemo(
-    () => findMatchingLayout(panelLayouts, variables, inventory),
-    [panelLayouts, variables, inventory],
-  );
-
   const isEmpty = Object.keys(variables).length === 0 && Object.values(inventory).flat().length === 0;
+
+  // Count items in each category
+  const categoryCounts = useMemo(() => {
+    const counts: Record<keyof Inventory, number> = {
+      weapons: 0,
+      armor: 0,
+      consumables: 0,
+      materials: 0,
+      other: 0,
+    };
+    for (const [key, items] of Object.entries(inventory)) {
+      counts[key as keyof Inventory] = (items as InventoryItem[]).length;
+    }
+    return counts;
+  }, [inventory]);
+
+  const totalItems = Object.values(categoryCounts).reduce((a, b) => a + b, 0);
+  const totalVars = Object.keys(variables).length;
 
   // ---- render ----
 
-  const content = (
-    <main className="st-flex-1 st-overflow-y-auto" style={{ padding: 16 }}>
-      {!activeChat ? (
-        <div className="st-empty-state-lg">请先创建或选择一个对话</div>
-      ) : isEmpty ? (
+  const renderContent = () => {
+    if (!activeChat) {
+      return <div className="st-empty-state-lg">请先创建或选择一个对话</div>;
+    }
+
+    if (isEmpty) {
+      return (
         <div className="st-empty-state st-text-13">
           暂无变量。AI 回复中包含 <code>{'<vars>{"hp": 100}</vars>'}</code> 时会自动提取。
         </div>
-      ) : activeLayout ? (
-        <LayoutRenderer
-          layout={activeLayout}
-          variables={variables}
-          inventory={inventory}
-          defMap={defMap}
-        />
-      ) : (
-        <DefaultRenderer
-          variables={variables}
-          inventory={inventory}
-          defMap={defMap}
-        />
-      )}
-    </main>
-  );
+      );
+    }
+
+    switch (view.type) {
+      case 'main':
+        return (
+          <MainMenu
+            inventory={inventory}
+            variables={variables}
+            categoryCounts={categoryCounts}
+            totalItems={totalItems}
+            totalVars={totalVars}
+            layouts={panelLayouts}
+            onSelect={(v) => setView(v)}
+          />
+        );
+      case 'inventory':
+        return (
+          <InventoryDetail
+            category={view.category}
+            items={inventory[view.category]}
+            defMap={defMap}
+            onBack={() => setView({ type: 'main' })}
+          />
+        );
+      case 'variables':
+        return (
+          <VariablesDetail
+            variables={variables}
+            defMap={defMap}
+            onBack={() => setView({ type: 'main' })}
+          />
+        );
+      case 'layout':
+        return (
+          <LayoutDetail
+            layoutName={view.layoutName}
+            layouts={panelLayouts}
+            variables={variables}
+            inventory={inventory}
+            defMap={defMap}
+            onBack={() => setView({ type: 'main' })}
+          />
+        );
+    }
+  };
+
+  const getTitle = () => {
+    switch (view.type) {
+      case 'main':
+        return '📊 变量面板';
+      case 'inventory':
+        return `${CATEGORY_LABELS[view.category].icon} ${CATEGORY_LABELS[view.category].label}`;
+      case 'variables':
+        return '📊 变量详情';
+      case 'layout':
+        return `📊 ${view.layoutName}`;
+    }
+  };
+
+  const content = <main className="st-flex-1 st-overflow-y-auto" style={{ padding: 16 }}>{renderContent()}</main>;
 
   // If onClose is provided, render as modal overlay
   if (onClose) {
@@ -94,9 +155,13 @@ export function VariablePanel({ onClose }: VariablePanelProps) {
       <div className="legacy-modal-overlay" onClick={onClose}>
         <div className="legacy-modal-shell" onClick={(e) => e.stopPropagation()}>
           <header className="legacy-modal-header">
-            <strong>
-              {activeLayout ? `📊 ${activeLayout.name}` : '📊 变量面板'}
-            </strong>
+            <strong>{getTitle()}</strong>
+            {view.type !== 'main' && (
+              <button onClick={() => setView({ type: 'main' })} className="st-btn-xs">
+                ← 返回
+              </button>
+            )}
+            <span className="st-flex-1" />
             <button onClick={onClose}>×</button>
           </header>
           {content}
@@ -108,24 +173,272 @@ export function VariablePanel({ onClose }: VariablePanelProps) {
   // Otherwise, render as embedded panel
   return (
     <div className="st-flex-col" style={{ height: '100%' }}>
+      {view.type !== 'main' && (
+        <div className="st-p-8 st-border-bottom">
+          <button onClick={() => setView({ type: 'main' })} className="st-btn-xs">
+            ← 返回主菜单
+          </button>
+        </div>
+      )}
       {content}
     </div>
   );
 }
 
-// ---- layout renderer ----
+// ---- main menu ----
 
-function LayoutRenderer({
-  layout,
+function MainMenu({
+  inventory,
+  variables,
+  categoryCounts,
+  totalItems,
+  totalVars,
+  layouts,
+  onSelect,
+}: {
+  inventory: Inventory;
+  variables: Record<string, any>;
+  categoryCounts: Record<keyof Inventory, number>;
+  totalItems: number;
+  totalVars: number;
+  layouts: PanelLayout[];
+  onSelect: (view: DetailView) => void;
+}) {
+  return (
+    <div className="st-flex-col st-gap-16">
+      {/* 背包分类 */}
+      <div>
+        <div className="st-text-13 st-font-bold st-mb-8">
+          🎒 背包 ({totalItems})
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 }}>
+          {Object.entries(CATEGORY_LABELS).map(([key, { label, icon }]) => {
+            const count = categoryCounts[key as keyof Inventory];
+            return (
+              <button
+                key={key}
+                onClick={() => onSelect({ type: 'inventory', category: key as keyof Inventory })}
+                className="st-border st-rounded st-p-12 st-text-left"
+                style={{
+                  background: count > 0 ? 'var(--space-surface-deep)' : 'transparent',
+                  opacity: count > 0 ? 1 : 0.5,
+                  cursor: count > 0 ? 'pointer' : 'default',
+                }}
+                disabled={count === 0}
+              >
+                <div className="st-text-16">{icon}</div>
+                <div className="st-text-13 st-font-bold">{label}</div>
+                <div className="st-text-11 st-text-muted">{count} 个物品</div>
+              </button>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* 变量 */}
+      {totalVars > 0 && (
+        <div>
+          <div className="st-text-13 st-font-bold st-mb-8">
+            📊 变量 ({totalVars})
+          </div>
+          <button
+            onClick={() => onSelect({ type: 'variables' })}
+            className="st-border st-rounded st-p-12 st-w-full st-text-left"
+            style={{ background: 'var(--space-surface-deep)', cursor: 'pointer' }}
+          >
+            <div className="st-text-13 st-font-bold">查看所有变量</div>
+            <div className="st-text-11 st-text-muted">
+              {Object.entries(variables).slice(0, 3).map(([k, v]) => `${k}: ${v}`).join(', ')}
+              {totalVars > 3 && `... 共 ${totalVars} 个`}
+            </div>
+          </button>
+        </div>
+      )}
+
+      {/* 自定义布局 */}
+      {layouts.length > 0 && (
+        <div>
+          <div className="st-text-13 st-font-bold st-mb-8">
+            🎨 自定义布局 ({layouts.length})
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(140px, 1fr))', gap: 8 }}>
+            {layouts.map((layout) => (
+              <button
+                key={layout.id}
+                onClick={() => onSelect({ type: 'layout', layoutName: layout.name })}
+                className="st-border st-rounded st-p-12 st-text-left"
+                style={{ background: 'var(--space-surface-deep)', cursor: 'pointer' }}
+              >
+                <div className="st-text-13 st-font-bold">
+                  {layout.name}
+                  {layout.isDefault && <span className="st-text-11 st-text-muted"> ★</span>}
+                </div>
+                <div className="st-text-11 st-text-muted">{layout.widgets.length} 个组件</div>
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---- inventory detail ----
+
+function InventoryDetail({
+  category,
+  items,
+  defMap,
+  onBack,
+}: {
+  category: keyof Inventory;
+  items: InventoryItem[];
+  defMap: Map<string, VariableDefinition>;
+  onBack: () => void;
+}) {
+  const { icon, label } = CATEGORY_LABELS[category];
+
+  if (items.length === 0) {
+    return (
+      <div className="st-empty-state st-text-13">
+        {icon} {label}为空
+      </div>
+    );
+  }
+
+  return (
+    <div className="st-flex-col st-gap-12">
+      <div className="st-text-12 st-text-muted">
+        {icon} {label} - {items.length} 个物品
+      </div>
+      {items.map((item) => (
+        <InventoryItemDetail key={item.id} item={item} defMap={defMap} />
+      ))}
+    </div>
+  );
+}
+
+function InventoryItemDetail({
+  item,
+  defMap,
+}: {
+  item: InventoryItem;
+  defMap: Map<string, VariableDefinition>;
+}) {
+  const [expanded, setExpanded] = useState(false);
+
+  return (
+    <div className="st-border st-rounded" style={{ borderColor: 'var(--space-border-medium)' }}>
+      <button
+        onClick={() => setExpanded(!expanded)}
+        className="st-flex-row st-items-center st-justify-between st-w-full st-p-12"
+        style={{
+          background: 'var(--space-surface-deep)',
+          cursor: 'pointer',
+        }}
+      >
+        <div className="st-flex-col">
+          <span className="st-text-14 st-font-bold">{item.name}</span>
+          {item.description && (
+            <span className="st-text-12 st-text-muted">{item.description}</span>
+          )}
+        </div>
+        <div className="st-flex-row st-gap-8 st-items-center">
+          {item.quantity > 1 && (
+            <span className="st-text-12 st-text-secondary">×{item.quantity}</span>
+          )}
+          <span className="st-text-12 st-text-muted">{expanded ? '▼' : '▶'}</span>
+        </div>
+      </button>
+
+      {expanded && (
+        <div className="st-p-12 st-border-top" style={{ borderColor: 'var(--space-border-medium)' }}>
+          <div className="st-flex-col st-gap-8">
+            {Object.entries(item.values).map(([key, value]) => {
+              const def = defMap.get(key);
+              return (
+                <div key={key} className="st-flex-row st-gap-8 st-items-center">
+                  <span className="st-text-12 st-text-secondary" style={{ minWidth: 80 }}>
+                    {def?.displayName || key}
+                  </span>
+                  <span className="st-mono st-text-13">{String(value)}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ---- variables detail ----
+
+function VariablesDetail({
+  variables,
+  defMap,
+  onBack,
+}: {
+  variables: Record<string, any>;
+  defMap: Map<string, VariableDefinition>;
+  onBack: () => void;
+}) {
+  return (
+    <div className="st-flex-col st-gap-8">
+      <div className="st-text-12 st-text-muted">
+        📊 共 {Object.keys(variables).length} 个变量
+      </div>
+      {Object.entries(variables).map(([key, value]) => {
+        const def = defMap.get(key);
+        return (
+          <div
+            key={key}
+            className="st-border st-rounded st-p-12"
+            style={{ borderColor: 'var(--space-border-medium)', background: 'var(--space-surface-deep)' }}
+          >
+            <div className="st-flex-row st-items-center st-justify-between">
+              <span className="st-text-13 st-font-bold">
+                {def?.displayName || key}
+              </span>
+              <span className="st-mono st-text-14">{String(value)}</span>
+            </div>
+            {def?.description && (
+              <div className="st-text-11 st-text-muted st-mt-4">{def.description}</div>
+            )}
+          </div>
+        );
+      })}
+    </div>
+  );
+}
+
+// ---- layout detail ----
+
+function LayoutDetail({
+  layoutName,
+  layouts,
   variables,
   inventory,
   defMap,
+  onBack,
 }: {
-  layout: PanelLayout;
+  layoutName: string;
+  layouts: PanelLayout[];
   variables: Record<string, any>;
   inventory: Inventory;
   defMap: Map<string, VariableDefinition>;
+  onBack: () => void;
 }) {
+  const layout = findLayout(layouts, layoutName);
+
+  if (!layout) {
+    return (
+      <div className="st-empty-state st-text-13">
+        布局 "{layoutName}" 未找到
+      </div>
+    );
+  }
+
   // Group widgets by row
   const rowMap = new Map<number, PanelWidget[]>();
   for (const w of layout.widgets) {
@@ -138,12 +451,7 @@ function LayoutRenderer({
   const renderWidget = (w: PanelWidget) => {
     if (w.widgetType === 'separator') {
       return (
-        <div
-          style={{
-            borderTop: '1px solid var(--space-border-medium)',
-            margin: '8px 0',
-          }}
-        />
+        <div style={{ borderTop: '1px solid var(--space-border-medium)', margin: '8px 0' }} />
       );
     }
 
@@ -181,9 +489,7 @@ function LayoutRenderer({
       return (
         <div className="st-border st-rounded st-p-8" style={{ background: 'var(--space-surface-deep)' }}>
           <div className="st-text-12 st-font-bold">{item.name}</div>
-          {item.quantity > 1 && (
-            <span className="st-text-11 st-text-muted">×{item.quantity}</span>
-          )}
+          {item.quantity > 1 && <span className="st-text-11 st-text-muted">×{item.quantity}</span>}
         </div>
       );
     }
@@ -225,133 +531,9 @@ function LayoutRenderer({
           className="st-text-muted st-text-13 st-text-center"
           style={{ gridColumn: `1 / -1`, padding: 24 }}
         >
-          布局为空，请在编辑器中添加组件
+          布局为空
         </div>
       )}
-    </div>
-  );
-}
-
-// ---- default renderer (no layout) ----
-
-function DefaultRenderer({
-  variables,
-  inventory,
-  defMap,
-}: {
-  variables: Record<string, any>;
-  inventory: Inventory;
-  defMap: Map<string, VariableDefinition>;
-}) {
-  return (
-    <div className="st-flex-col st-gap-16">
-      {/* 背包物品 */}
-      {Object.entries(inventory).map(([category, items]) => {
-        if ((items as InventoryItem[]).length === 0) return null;
-        const { label, icon } = CATEGORY_LABELS[category as keyof Inventory];
-        return (
-          <div key={category}>
-            <div className="st-text-12 st-font-bold st-mb-8">
-              {icon} {label} ({(items as InventoryItem[]).length})
-            </div>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
-                gap: 8,
-              }}
-            >
-              {(items as InventoryItem[]).map((item) => (
-                <InventoryItemCard
-                  key={item.id}
-                  item={item}
-                  schemaId={item.schemaId}
-                  defMap={defMap}
-                />
-              ))}
-            </div>
-          </div>
-        );
-      })}
-
-      {/* 普通变量 */}
-      {Object.keys(variables).length > 0 && (
-        <div>
-          <div className="st-text-12 st-font-bold st-mb-8">
-            📊 变量 ({Object.keys(variables).length})
-          </div>
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))',
-              gap: 8,
-            }}
-          >
-            {Object.entries(variables).map(([key, value]) => (
-              <div
-                key={key}
-                className="st-border st-border-light st-rounded"
-                style={{
-                  padding: '8px 10px',
-                  background: 'var(--space-surface-deep)',
-                }}
-              >
-                <VariableBadge
-                  varKey={key}
-                  value={value}
-                  definition={defMap.get(key)}
-                />
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-    </div>
-  );
-}
-
-function InventoryItemCard({
-  item,
-  schemaId,
-  defMap,
-}: {
-  item: InventoryItem;
-  schemaId: string;
-  defMap: Map<string, VariableDefinition>;
-}) {
-  return (
-    <div
-      className="st-border st-border-light st-rounded"
-      style={{
-        padding: '8px 10px',
-        background: 'var(--space-surface-deep)',
-      }}
-    >
-      <div className="st-flex-row st-items-center st-justify-between st-mb-4">
-        <span className="st-text-13 st-font-bold">{item.name}</span>
-        {item.quantity > 1 && (
-          <span className="st-text-11 st-text-muted">×{item.quantity}</span>
-        )}
-      </div>
-      {item.description && (
-        <div className="st-text-11 st-text-muted st-mb-4">{item.description}</div>
-      )}
-      <div className="st-flex-col st-gap-2">
-        {Object.entries(item.values).slice(0, 3).map(([key, value]) => {
-          const def = defMap.get(key);
-          return (
-            <div key={key} className="st-flex-row st-gap-4 st-text-11">
-              <span className="st-text-muted">{def?.displayName || key}:</span>
-              <span className="st-mono">{String(value)}</span>
-            </div>
-          );
-        })}
-        {Object.keys(item.values).length > 3 && (
-          <div className="st-text-11 st-text-muted">
-            +{Object.keys(item.values).length - 3} 更多属性
-          </div>
-        )}
-      </div>
     </div>
   );
 }
