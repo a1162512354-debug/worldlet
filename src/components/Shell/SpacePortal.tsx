@@ -241,6 +241,7 @@ export function SpacePortal() {
                     <button onClick={() => setHistoryOpen(true)}>历史</button>
                     <button onClick={() => { setVarViewMode('simple'); st.openVariables(); }}>变量</button>
                     <button onClick={() => { setVarViewMode('rich'); st.openVariables(); }}>变量面板</button>
+                    <button onClick={() => st.openPanelEditor()}>布局</button>
                     <button onClick={() => st.openLorebooks()}>世界书</button>
                     <button onClick={() => st.openPresets()}>预设</button>
                     <button onClick={() => st.openSettings()}>设置</button>
