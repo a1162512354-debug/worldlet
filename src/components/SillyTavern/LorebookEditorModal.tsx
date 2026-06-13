@@ -22,7 +22,7 @@ export function LorebookEditorModal({
   lorebook: Lorebook;
   onClose: () => void;
 }) {
-  const { updateLorebook } = useSillytavern();
+  const { updateLorebook, showToast } = useSillytavern();
   const [draft, setDraft] = useState<Lorebook>(lorebook);
   const [selectedId, setSelectedId] = useState<string | null>(
     lorebook.entries[0]?.id ?? null,
@@ -53,7 +53,7 @@ export function LorebookEditorModal({
   const handleSave = async () => {
     try {
       await updateLorebook(draft);
-      onClose();
+      showToast('已保存');
     } catch (e) {
       alert('保存失败: ' + (e as Error).message);
     }

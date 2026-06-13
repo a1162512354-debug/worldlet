@@ -408,6 +408,8 @@ export function PanelLayoutEditorModal({ onClose }: { onClose: () => void }) {
       } else {
         await addPanelLayout(draft);
       }
+      // 保存后同步 draft
+      setDraft((prev) => prev ? { ...prev, updatedAt: Date.now() } : prev);
     } catch (e) {
       alert('保存失败: ' + (e as Error).message);
     }
