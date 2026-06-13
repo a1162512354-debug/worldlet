@@ -125,3 +125,35 @@
 - `npm run typecheck` ✅
 - `npm run build` ✅
 - 开发服务器 `http://localhost:5173/` 正常运行
+
+### Phase 2 代码级修复 - 2026-06-13
+
+#### 完成
+- **VariablesModal 提示修正**：第 85 行旧格式 `<var name="hp" value="100" />` 改为正确的 `<vars>{"hp": 100}</vars>`
+- **删除死代码**：`variables.ts` 中 `extractVariables()` 函数（解析旧 `<var>` 格式）从未被调用，已删除
+- **HistoryDrawer 重构**：
+  - `prompt('编辑内容')` 替换为 textarea 模态编辑器（支持多行内容）
+  - "删后续" 按钮增加 `confirm()` 确认对话框（显示楼层号，提示不可撤销）
+- **OptionList 空选项过滤**：`options.filter(opt => opt.trim().length > 0)` 过滤 AI 输出中的空行
+- **lorebook-engine 单元测试**：新增 22 个测试，覆盖：
+  - 基本关键词匹配（单/多关键词、大小写、全词匹配）
+  - 常量条目（constant entries 始终匹配）
+  - 选择逻辑（and_any、not_all、not_any、and_all + secondary keys）
+  - 排序（order 升序）
+  - 递归扫描（递归发现、深度限制）
+  - 分组和格式化
+
+#### 验证
+- `npm run build` ✅
+- `npm test` ✅：8 个测试文件 / 69 个测试（+22 新增）
+- 开发服务器 `http://localhost:5173/` 正常运行
+
+#### Git 提交
+- `7c46087` - fix: Phase 2 代码级修复 - HistoryDrawer 确认框+textarea 编辑、OptionList 空过滤、VariablesModal 提示修正、lorebook-engine 测试、删除死代码
+
+#### 待人工体验验证（需真实 API）
+- 世界书导入/管理体验
+- 游戏模式流式输出 + XML 解析
+- 变量快照回档
+- 消息编辑/删除/分支
+- 选项点选

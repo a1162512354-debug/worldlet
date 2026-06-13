@@ -68,17 +68,18 @@ Phase 2 — 核心功能验证（Deep Space UI 已迁移；预设导入导出、
 - **依赖**: Phase 0 完成
 
 ### Phase 2: 核心功能验证 `in_progress`
-- [ ] 验证世界书导入/管理功能（已修复批量导入后状态同步，LorebookModal 已重构，待人工体验）
+- [ ] 验证世界书导入/管理功能（已修复批量导入后状态同步，LorebookModal 已重构；新增 lorebook-engine 22 个单元测试覆盖关键词匹配/选择逻辑/递归扫描/排序/分组；待人工体验）
 - [x] 验证预设导入/管理功能（已新增 JSON 导入/导出/重命名；PresetModal 新增；`importer.test.ts` 覆盖批量导入）
 - [ ] 验证游戏模式：流式输出 + XML 标签解析（已迁移消息时间线 UI，待真实 API 流程验证）
 - [x] 验证变量系统：显式 `<vars>` 更新 + 隐式自动提取（dual API 时 vars 任务提取 JSON 并合并；`variables.test.ts` 覆盖）
-- [ ] 验证变量快照回档：点击历史消息 → 变量恢复（已统一 rollback/jump/helper 快照恢复逻辑，待人工体验）
-- [ ] 验证消息编辑/删除/分支功能（已修复重 roll 旧闭包问题，并在历史抽屉新增分支入口；待人工体验）
-- [ ] 验证选项点选功能
+- [ ] 验证变量快照回档：点击历史消息 → 变量恢复（已统一 rollback/jump/helper 快照恢复逻辑；VariablesModal 提示已修正为 `<vars>` 格式；删除 `extractVariables()` 死代码；待人工体验）
+- [ ] 验证消息编辑/删除/分支功能（HistoryDrawer 已重构：`prompt()` 改为 textarea 模态编辑，删后续加 confirm 确认；待人工体验）
+- [ ] 验证选项点选功能（OptionList 已过滤空选项；待人工体验）
 - [x] 参考废案迁移 Deep Space 终端 UI 首轮
 - [x] UI 精简：工具栏重构（历史移至顶部栏，重roll移至输入框）
+- [x] 代码级修复：HistoryDrawer 确认框 + textarea 编辑、OptionList 空过滤、lorebook-engine 测试（`7c46087`）
 - [x] 推送到 Git（`60b88e0` 已推送 origin/main）
-- **Status:** `in_progress`（待人工体验验证剩余项目）
+- **Status:** `in_progress`（待人工体验验证剩余项目，需配置真实 API）
 - **依赖**: Phase 1 完成
 
 ### Phase 3: MOD 工坊系统 `pending`
