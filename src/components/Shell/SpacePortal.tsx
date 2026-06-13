@@ -72,7 +72,7 @@ const CARDS: Array<{
     cut: 'cut-bl',
     rows: [
       { label: 'API', value: 'ROUTED', accent: true },
-      { label: 'Theme', value: 'DEEP' },
+      { label: 'Theme', value: 'CSS' },
       { label: 'Mode', value: 'GAME' },
     ],
   },
@@ -87,10 +87,11 @@ export function SpacePortal() {
   const [clock, setClock] = useState(() => new Date().toTimeString().slice(0, 8))
 
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', 'deep-space')
+    const theme = st.settings?.theme ?? 'deep-space';
+    document.documentElement.setAttribute('data-theme', theme);
     const id = window.setInterval(() => setClock(new Date().toTimeString().slice(0, 8)), 1000)
     return () => window.clearInterval(id)
-  }, [])
+  }, [st.settings?.theme])
 
   const particles = useMemo(
     () => Array.from({ length: 26 }, (_, index) => ({

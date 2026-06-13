@@ -416,6 +416,27 @@ export function SettingsModal({
         {tab === 'display' && (
           <div className="st-flex-col st-gap-16">
             <fieldset className="st-fieldset" style={{ padding: 12 }}>
+              <legend className="st-text-14 st-font-bold">主题</legend>
+              <div className="st-flex-col st-gap-8 st-mt-4">
+                <label className="st-flex-row st-gap-8" style={{ cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    checked={settings.theme === 'deep-space'}
+                    onChange={() => updateSettings({ theme: 'deep-space' })}
+                  />
+                  🌌 Deep Space（深色科技风）
+                </label>
+                <label className="st-flex-row st-gap-8" style={{ cursor: 'pointer' }}>
+                  <input
+                    type="radio"
+                    checked={settings.theme === 'parchment'}
+                    onChange={() => updateSettings({ theme: 'parchment' })}
+                  />
+                  📜 古典羊皮纸（暖色复古风）
+                </label>
+              </div>
+            </fieldset>
+            <fieldset className="st-fieldset" style={{ padding: 12 }}>
               <legend className="st-text-14 st-font-bold">思考过程显示</legend>
               <div className="st-flex-col st-gap-8 st-mt-4">
                 {(['fold', 'hide', 'inline'] as const).map((m) => (

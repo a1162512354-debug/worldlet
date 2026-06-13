@@ -89,8 +89,8 @@ Phase 3 — CSS 迁移 + MOD 工坊 + 主题系统（Phase 2 已完成：API 验
 
 #### 3.1 CSS 迁移与主题系统
 - [x] 7 个内联样式组件迁移到 CSS class（SettingsModal 57处、EntryForm 38处、PresetModal 36处、VariablesModal 16处、LorebookEditorModal 13处、PromptOrderEditor 7处、HistoryDrawer 5处）→ 全部迁移到 `.st-*` 工具类 + CSS 变量
-- [ ] 建立主题切换系统（`data-theme` + 主题配置文件）
-- [ ] 新增第二套主题（如「古典羊皮纸」风格），验证主题切换
+- [x] 建立主题切换系统（`data-theme` + 主题配置文件）
+- [x] 新增第二套主题（古典羊皮纸风格），验证主题切换
 - [ ] 移动端初步适配（响应式布局）
 
 #### 3.2 MOD 工坊系统

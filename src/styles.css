@@ -1,4 +1,18 @@
-:root,
+/* === 主题变量 === */
+
+:root {
+  --border-radius: 8px;
+  --border-radius-sm: 4px;
+  --font-main: "Microsoft YaHei", "PingFang SC", Inter, system-ui, sans-serif;
+  --font-mono: "Cascadia Code", "JetBrains Mono", "Fira Code", Consolas, monospace;
+  --clip-corner: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
+  font-family: var(--font-main);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
 [data-theme="deep-space"] {
   color-scheme: dark;
   --color-bg: #0d0f12;
@@ -17,11 +31,6 @@
   --color-warning: #fbbf24;
   --color-error: #f87171;
   --border-color: rgba(255, 255, 255, 0.08);
-  --border-radius: 8px;
-  --border-radius-sm: 4px;
-  --font-main: "Microsoft YaHei", "PingFang SC", Inter, system-ui, sans-serif;
-  --font-mono: "Cascadia Code", "JetBrains Mono", "Fira Code", Consolas, monospace;
-  --clip-corner: polygon(0 0, calc(100% - 12px) 0, 100% 12px, 100% 100%, 12px 100%, 0 calc(100% - 12px));
   --space-surface-deep: rgba(8, 10, 14, 0.72);
   --space-surface: rgba(15, 20, 25, 0.78);
   --space-surface-raised: rgba(22, 24, 29, 0.96);
@@ -45,13 +54,53 @@
   --space-error-border: rgba(248, 113, 113, 0.36);
   --space-error-bg: rgba(248, 113, 113, 0.08);
   --space-shadow: rgba(0, 0, 0, 0.34);
-  font-family: var(--font-main);
   color: var(--color-text);
   background: var(--color-bg);
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+}
+
+[data-theme="parchment"] {
+  color-scheme: light;
+  --color-bg: #f5f0e6;
+  --color-bg-secondary: #ebe5d6;
+  --color-bg-tertiary: #e0d8c6;
+  --color-surface: rgba(245, 240, 230, 0.92);
+  --color-surface-hover: rgba(235, 229, 214, 0.95);
+  --color-text: #2c1810;
+  --color-text-secondary: #6b5744;
+  --color-text-muted: #9a8672;
+  --color-accent: #b8860b;
+  --color-accent-dim: rgba(184, 134, 11, 0.12);
+  --color-accent-glow: rgba(184, 134, 11, 0.25);
+  --color-accent-alt: #cd853f;
+  --color-success: #5a9e3c;
+  --color-warning: #c4841d;
+  --color-error: #c0392b;
+  --border-color: rgba(107, 87, 68, 0.15);
+  --space-surface-deep: rgba(245, 240, 230, 0.85);
+  --space-surface: rgba(235, 229, 214, 0.88);
+  --space-surface-raised: rgba(250, 246, 238, 0.96);
+  --space-surface-hover: rgba(228, 220, 204, 0.92);
+  --space-border-subtle: rgba(107, 87, 68, 0.1);
+  --space-border-light: rgba(107, 87, 68, 0.18);
+  --space-border-medium: rgba(107, 87, 68, 0.25);
+  --space-border-strong: rgba(107, 87, 68, 0.35);
+  --space-grid-line: rgba(107, 87, 68, 0.06);
+  --space-accent-glow-faint: rgba(184, 134, 11, 0.04);
+  --space-accent-scanline: rgba(184, 134, 11, 0.01);
+  --space-accent-border-subtle: rgba(184, 134, 11, 0.15);
+  --space-accent-border: rgba(184, 134, 11, 0.28);
+  --space-accent-border-strong: rgba(184, 134, 11, 0.42);
+  --space-accent-active: rgba(184, 134, 11, 0.55);
+  --space-accent-particle: rgba(184, 134, 11, 0.75);
+  --space-text: var(--color-text);
+  --space-text-secondary: var(--color-text-secondary);
+  --space-text-muted: var(--color-text-muted);
+  --space-text-placeholder: rgba(44, 24, 16, 0.3);
+  --space-error-border: rgba(192, 57, 43, 0.3);
+  --space-error-bg: rgba(192, 57, 43, 0.08);
+  --space-shadow: rgba(44, 24, 16, 0.15);
+  color: var(--color-text);
+  background: var(--color-bg);
 }
 
 * { box-sizing: border-box; }
@@ -248,10 +297,10 @@ input, textarea, select { color: var(--space-text); }
 
 /* Deep Space overrides: buttons, chips, selected items, borders, text inside modals */
 .legacy-modal-shell button { background: var(--color-accent-dim) !important; border-color: var(--space-accent-border) !important; color: var(--space-text) !important; }
-.legacy-modal-shell button.ds-save { background: #2c8 !important; color: #fff !important; }
+.legacy-modal-shell button.ds-save { background: var(--color-success) !important; color: #fff !important; }
 .legacy-modal-shell button.ds-danger { background: rgba(248, 113, 113, 0.15) !important; border-color: var(--space-error-border) !important; color: var(--color-error) !important; }
 .legacy-modal-shell button.ds-purple { background: #6464a8 !important; color: #fff !important; }
-.legacy-modal-shell button.ds-green { background: #2c8 !important; color: #fff !important; }
+.legacy-modal-shell button.ds-green { background: var(--color-success) !important; color: #fff !important; }
 .legacy-modal-shell button:disabled { opacity: 0.45; cursor: not-allowed; }
 .legacy-modal-shell .ds-selected { background: var(--space-accent-glow-faint) !important; }
 .legacy-modal-shell aside, .legacy-modal-shell footer, .legacy-modal-shell details { border-color: var(--space-border-medium) !important; }

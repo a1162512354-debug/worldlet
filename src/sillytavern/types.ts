@@ -158,7 +158,7 @@ export interface AppSettings {
   activeLorebookIds: string[];
   userName: string;
   characterName: string;
-  theme: 'dark' | 'light';
+  theme: 'deep-space' | 'parchment';
   language: 'zh' | 'en';
   autoSave: boolean;
   autoSaveInterval: number;
@@ -192,7 +192,7 @@ export const DEFAULT_SETTINGS: AppSettings = {
   activeLorebookIds: [],
   userName: '用户',
   characterName: 'AI',
-  theme: 'dark',
+  theme: 'deep-space',
   language: 'zh',
   autoSave: true,
   autoSaveInterval: 30,

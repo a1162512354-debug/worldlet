@@ -219,10 +219,23 @@
 - `npm run build` ✅
 - `npm test` ✅：8 文件 / 69 测试
 
+#### 3.1.2 主题切换系统完成 - 2026-06-13
+- **类型定义**：`types.ts` 中 `theme: 'dark' | 'light'` → `theme: 'deep-space' | 'parchment'`
+- **CSS 分离**：`:root` 仅保留非颜色默认值（font/radius/clip），主题变量移入 `[data-theme="..."]` 选择器
+- **新增羊皮纸主题**：`[data-theme="parchment"]` — 暖色系（米色背景 `#f5f0e6`、深棕文字 `#2c1810`、金色强调 `#b8860b`）
+- **主题应用**：SpacePortal.tsx 从 `settings.theme` 读取并设置 `data-theme` 属性，监听变化实时切换
+- **设置界面**：SettingsModal「显示」tab 新增主题选择器（Deep Space / 古典羊皮纸）
+- **CSS 变量化**：`ds-save`/`ds-green` 按钮从硬编码 `#2c8` 改为 `var(--color-success)`
+
+#### 验证
+- `npm run typecheck` ✅
+- `npm run build` ✅
+- `npm test` ✅：8 文件 / 69 测试
+
 #### 待做清单
 - ~~3.1.1 CSS 提取：7 个内联组件 → CSS class~~ ✅
-- 3.1.2 主题系统：`data-theme` 切换 + 主题配置文件
-- 3.1.3 新增第二套主题
+- ~~3.1.2 主题系统：`data-theme` 切换 + 主题配置文件~~ ✅
+- ~~3.1.3 新增第二套主题~~ ✅
 - 3.1.4 移动端响应式适配
 - 3.2.1 变量结构编辑器
 - 3.2.2 开局模板系统
