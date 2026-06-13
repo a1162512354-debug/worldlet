@@ -203,12 +203,14 @@ export function ScenarioTemplateModal({ onClose }: { onClose: () => void }) {
   // --- save ---
   const handleSave = async () => {
     try {
+      const now = Date.now();
       for (const d of drafts) {
         const orig = scenarios.find((s) => s.id === d.id);
+        const saved = { ...d, updatedAt: now };
         if (!orig) {
-          await addScenario(d);
+          await addScenario(saved);
         } else {
-          await updateScenario(d);
+          await updateScenario(saved);
         }
       }
       for (const orig of scenarios) {
@@ -216,8 +218,8 @@ export function ScenarioTemplateModal({ onClose }: { onClose: () => void }) {
           await deleteScenario(orig.id);
         }
       }
-      // 保存后同步 drafts 到最新状态
-      setDrafts((prev) => prev.map((d) => ({ ...d, updatedAt: Date.now() })));
+      // 保存后同步 drafts
+      setDrafts((prev) => prev.map((d) => ({ ...d, updatedAt: now })));
       showToast('已保存');
     } catch (e) {
       alert('保存失败: ' + (e as Error).message);

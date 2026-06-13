@@ -278,13 +278,15 @@ export function VariableSchemaEditorModal({ onClose }: { onClose: () => void }) 
   // --- save all ---
   const handleSave = async () => {
     try {
+      const now = Date.now();
       // Add new schemas (not in original list)
       for (const d of drafts) {
         const orig = variableSchemas.find((s) => s.id === d.id);
+        const saved = { ...d, updatedAt: now };
         if (!orig) {
-          await addVariableSchema(d);
+          await addVariableSchema(saved);
         } else {
-          await updateVariableSchema(d);
+          await updateVariableSchema(saved);
         }
       }
       // Delete removed schemas
@@ -293,8 +295,8 @@ export function VariableSchemaEditorModal({ onClose }: { onClose: () => void }) 
           await deleteVariableSchema(orig.id);
         }
       }
-      // 保存后同步 drafts 到最新状态
-      setDrafts((prev) => prev.map((d) => ({ ...d, updatedAt: Date.now() })));
+      // 保存后同步 drafts
+      setDrafts((prev) => prev.map((d) => ({ ...d, updatedAt: now })));
       showToast('已保存');
     } catch (e) {
       alert('保存失败: ' + (e as Error).message);

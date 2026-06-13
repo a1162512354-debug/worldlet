@@ -306,16 +306,18 @@ export function ModWorkshopPage({ onClose }: { onClose: () => void }) {
   // ---- save ----
   const handleSave = async () => {
     try {
+      const now = Date.now();
       for (const d of drafts) {
         const orig = mods.find((m) => m.id === d.id);
-        if (!orig) await addMod(d);
-        else await updateMod(d);
+        const saved = { ...d, updatedAt: now };
+        if (!orig) await addMod(saved);
+        else await updateMod(saved);
       }
       for (const orig of mods) {
         if (!drafts.find((d) => d.id === orig.id)) await deleteMod(orig.id);
       }
-      // 保存后同步 drafts 到最新状态
-      setDrafts((prev) => prev.map((d) => ({ ...d, updatedAt: Date.now() })));
+      // 保存后同步 drafts
+      setDrafts((prev) => prev.map((d) => ({ ...d, updatedAt: now })));
       showToast('已保存');
     } catch (e) {
       alert('保存失败: ' + (e as Error).message);
