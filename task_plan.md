@@ -41,7 +41,7 @@
 - **每次修改都需要推送**
 
 ## Current Phase
-Phase 4 — 测试与质量保证（Phase 3 已完成：CSS迁移+主题系统+MOD工坊+背包系统+嵌套布局；下一步：编写端到端测试，修复发现的bug）
+Phase 4 — 管线系统（Phase 3 已完成：CSS迁移+主题系统+MOD工坊+背包系统+嵌套布局；下一步：实现 FlowGroup 管线执行引擎）
 
 ## 项目目录
 `D:\酒馆\独立前端`
@@ -134,7 +134,51 @@ Phase 4 — 测试与质量保证（Phase 3 已完成：CSS迁移+主题系统+M
 - **Status:** `complete`
 - **依赖**: Phase 2 完成
 
-### Phase 4: 测试与质量保证 `in_progress`
+### Phase 4: 管线系统 `pending`
+> 实现 FlowGroup 管线执行引擎，支持多步骤 AI 调用和变量自动提取。
+
+#### 4.1 核心引擎
+- [ ] 新增 `FlowGroup` / `FlowStep` 类型定义
+- [ ] 新增 `flowExecutors` IndexedDB 表
+- [ ] 实现 flow-executor.ts（组间顺序、组内并发）
+- [ ] 支持模板变量：`{{chat_history}}`, `{{world_book}}`, `{{prev_result}}`, `{{variables}}`, `{{user_input}}`
+
+#### 4.2 默认管线
+- [ ] 实现默认管线配置（主剧情 → 变量提取 + 总结）
+- [ ] 第 1 组：主剧情（流式、高温度、大 token）
+- [ ] 第 2 组：变量提取 + 总结（并发非流式、低温度）
+
+#### 4.3 变量提取机制
+- [ ] 实现显式 `<vars>` 更新（已有）
+- [ ] 实现隐式变量提取（AI 读取正文 + 变量描述，提取变化）
+- [ ] 支持自定义变量结构（根据 Variable Schema 提取对应类型）
+- [ ] 合并显式 + 隐式更新 → 更新变量快照
+
+#### 4.4 管线变量选择
+- [ ] 实现管线步骤配置（选择发送哪些变量给 AI）
+- [ ] 支持发送模式：按选择 / 全部 / 不发送
+- [ ] 变量描述注入（aiDescription / aiUpdateRules）
+
+#### 4.5 管线管理 UI
+- [ ] 管线配置编辑器（简化版，非 DAG）
+- [ ] 管线导入/导出
+- [ ] 集成到 SpacePortal
+
+- **Status:** `pending`
+- **依赖**: Phase 3 完成
+
+### Phase 5: 多平台适配 `pending`（后续规划）
+- [ ] Capacitor 集成（Android/iOS）
+- [ ] Tauri 集成（Windows）
+- [ ] 移动端 UI 优化（触摸交互、手势、键盘适配）
+- [ ] 本地文件系统访问（导入/导出）
+- [ ] 推送到 Git
+- **Status:** `pending`
+- **依赖**: Phase 4 完成
+
+### Phase 6: 测试与质量保证 `pending`
+> 测试放在最后，在所有功能开发完成后进行。
+
 - [ ] 使用 playwright 编写端到端测试
 - [ ] 测试核心流程：创建对话 → 发送消息 → 流式回复 → 变量更新
 - [ ] 测试世界书：导入 → 激活 → 关键词触发
@@ -142,53 +186,11 @@ Phase 4 — 测试与质量保证（Phase 3 已完成：CSS迁移+主题系统+M
 - [ ] 测试 MOD 工坊：创建 MOD → 开局选择 → 变量/背包注入
 - [ ] 测试背包系统：物品添加 → 分类展示 → 变量面板查看
 - [ ] 测试展示面板：创建布局 → 嵌套布局 → 预览交互
+- [ ] 测试管线系统：配置管线 → 执行 → 变量提取
 - [ ] 修复发现的 bug
-- [ ] 推送到 Git
-- **Status:** `in_progress`
-- **依赖**: Phase 3 完成
-
-### Phase 5: 管线系统 `pending`
-> 实现 FlowGroup 管线执行引擎，支持多步骤 AI 调用和变量自动提取。
-
-#### 5.1 核心引擎
-- [ ] 新增 `FlowGroup` / `FlowStep` 类型定义
-- [ ] 新增 `flowExecutors` IndexedDB 表
-- [ ] 实现 flow-executor.ts（组间顺序、组内并发）
-- [ ] 支持模板变量：`{{chat_history}}`, `{{world_book}}`, `{{prev_result}}`, `{{variables}}`, `{{user_input}}`
-
-#### 5.2 默认管线
-- [ ] 实现默认管线配置（主剧情 → 变量提取 + 总结）
-- [ ] 第 1 组：主剧情（流式、高温度、大 token）
-- [ ] 第 2 组：变量提取 + 总结（并发非流式、低温度）
-
-#### 5.3 变量提取机制
-- [ ] 实现显式 `<vars>` 更新（已有）
-- [ ] 实现隐式变量提取（AI 读取正文 + 变量描述，提取变化）
-- [ ] 支持自定义变量结构（根据 Variable Schema 提取对应类型）
-- [ ] 合并显式 + 隐式更新 → 更新变量快照
-
-#### 5.4 管线变量选择
-- [ ] 实现管线步骤配置（选择发送哪些变量给 AI）
-- [ ] 支持发送模式：按选择 / 全部 / 不发送
-- [ ] 变量描述注入（aiDescription / aiUpdateRules）
-
-#### 5.5 管线管理 UI
-- [ ] 管线配置编辑器（简化版，非 DAG）
-- [ ] 管线导入/导出
-- [ ] 集成到 SpacePortal
-
-- **Status:** `pending`
-- **依赖**: Phase 4 完成
-
-### Phase 6: 多平台适配 `pending`（后续规划）
-- [ ] Capacitor 集成（Android/iOS）
-- [ ] Tauri 集成（Windows）
-- [ ] 移动端 UI 优化（触摸交互、手势、键盘适配）
-- [ ] 本地文件系统访问（导入/导出）
 - [ ] 推送到 Git
 - **Status:** `pending`
 - **依赖**: Phase 5 完成
-- **依赖**: Phase 4 完成
 
 ---
 
