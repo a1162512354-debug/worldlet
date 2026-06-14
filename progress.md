@@ -343,7 +343,33 @@
 
 #### 当前状态
 - Phase 0-3: 全部完成
-- Phase 4: 测试与质量保证（in_progress）
-- 测试：8 文件 / 69 测试全通过
+- Phase 4: 管线系统（pending）
+- 单元测试：8 文件 / 69 测试全通过
 
-**下一步**：Phase 4 测试与质量保证
+### 布局修复 - 2026-06-14
+
+#### 问题
+- 会话卡片超过 3 个时换行，卡片被压缩导致"进入会话"和"删除"按钮看不到
+- 主页导航卡片右边被滚动条挡住
+
+#### 修复
+- **会话卡片**：
+  - 移除 `overflow: hidden` 防止内容被裁剪
+  - 添加 `grid-auto-rows: min-content` 确保行高不被压缩
+  - 给 `session-actions` 添加 `flex-shrink: 0` 防止按钮被压缩
+  - 增大 grid 最小宽度：`240px` → `280px`
+- **其他组件**：
+  - 移除 `launcher-panel` 的 `overflow: hidden`
+  - 给 `lorebook-card-actions` 和 `history-floor-actions` 添加 `flex-shrink: 0`
+  - 响应式布局中 `space-card-column` 最小宽度从 `220px` 增加到 `260px`
+- **主页导航卡片**：
+  - 移除 `.space-card-column` 的 `overflow-x: hidden`
+  - 移除 `.space-nav-card` 的 `overflow: hidden`
+  - 添加 `padding-right: 16px` 给滚动条留出空间
+
+#### Git 提交
+- `484d762` - fix: 修复会话卡片在多行布局时被压缩的问题
+- `58e2f7e` - fix: 修复多处布局压缩问题
+- `b2e5ac1` - fix: 移除 overflow:hidden 防止内容被裁剪
+
+**下一步**：Phase 4 管线系统
